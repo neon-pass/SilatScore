@@ -438,16 +438,45 @@
 
     window.pantauLockGelanggang = function() {
         let gel = document.getElementById('lGelanggang').value;
-        if(unsubscribeLock) unsubscribeLock(); let lockRef = ref(database, `pertandingan/${gel}/locks`);
-        unsubscribeLock = onValue(lockRef, (snap) => {
-            let locks = snap.val() || {}; let optDewan = document.getElementById('optDewan');
-            if(locks['dewan']) { optDewan.disabled = true; optDewan.innerText = "Dewan Juri (Sedang Dipakai)"; if(document.getElementById('lPosisi').value === 'dewan') document.getElementById('lPosisi').value = ""; } 
-            else { optDewan.disabled = false; optDewan.innerText = "Dewan Juri (Tersedia)"; }
+        if(unsubscribeLock) unsubscribeLock(); 
+        let lockRef = ref(database, `pertandingan/${gel}/locks`);
 
+        unsubscribeLock = onValue(lockRef, (snap) => {
+            let locks = snap.val() || {}; 
+            
+            // 1. PANTAU STATUS KETUA 
+            let optKetua = document.getElementById('optKetua');
+            if(locks['ketua']) { 
+                optKetua.disabled = true; 
+                optKetua.innerText = "Ketua Pertandingan (Sedang Dipakai)"; 
+                if(document.getElementById('lPosisi').value === 'ketua') document.getElementById('lPosisi').value = ""; 
+            } else { 
+                optKetua.disabled = false; 
+                optKetua.innerText = "Ketua Pertandingan (Tersedia)"; 
+            }
+
+            // 2. PANTAU STATUS DEWAN
+            let optDewan = document.getElementById('optDewan');
+            if(locks['dewan']) { 
+                optDewan.disabled = true; 
+                optDewan.innerText = "Dewan Juri (Sedang Dipakai)"; 
+                if(document.getElementById('lPosisi').value === 'dewan') document.getElementById('lPosisi').value = ""; 
+            } else { 
+                optDewan.disabled = false; 
+                optDewan.innerText = "Dewan Juri (Tersedia)"; 
+            }
+
+            // 3. PANTAU STATUS JURI 1, 2, 3
             ['j1', 'j2', 'j3'].forEach(jId => {
                 let optJ = document.getElementById(`opt${jId.toUpperCase()}`); 
-                if(locks[jId]) { optJ.disabled = true; optJ.innerText = `Tablet Juri ${jId.replace('j','')} (Sedang Dipakai)`; if(document.getElementById('lJuri').value === jId) document.getElementById('lJuri').value = ""; } 
-                else { optJ.disabled = false; optJ.innerText = `Tablet Juri ${jId.replace('j','')} (Tersedia)`; }
+                if(locks[jId]) { 
+                    optJ.disabled = true; 
+                    optJ.innerText = `Tablet Juri ${jId.replace('j','')} (Sedang Dipakai)`; 
+                    if(document.getElementById('lJuri').value === jId) document.getElementById('lJuri').value = ""; 
+                } else { 
+                    optJ.disabled = false; 
+                    optJ.innerText = `Tablet Juri ${jId.replace('j','')} (Tersedia)`; 
+                }
             });
         });
     }
