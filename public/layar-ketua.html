@@ -623,7 +623,10 @@
 
     window.eksekusiLogout = function() {
         if(session.gel) set(ref(database, `pertandingan/${session.gel}/locks/ketua`), null);
-        setTimeout(() => { window.location.reload(); }, 200);
+        setTimeout(() => { 
+            // Kita paksa browser pulang ke nama file murni tanpa membawa buntut ?gel=...
+            window.location.href = 'layar-ketua.html'; 
+        }, 200);
     };
 </script>
 </body>
