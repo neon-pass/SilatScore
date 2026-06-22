@@ -15,6 +15,6 @@ jobs:
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_APK_SILAT }}'
+          firebaseServiceAccount: '${{ secrets.TEAPKSILAT99 }}'
           projectId: tesapksilat99
           channelId: live
