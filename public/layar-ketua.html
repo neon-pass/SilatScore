@@ -43,14 +43,13 @@
         .side-title-blue { background: linear-gradient(90deg, #003366, #004494) !important; color: white !important; }
         .side-title-red { background: linear-gradient(90deg, #8c0000, #660000) !important; color: white !important; }
         
-        /* 🔧 DIPERSEMPIT AGAR RUANG LOG LEBIH LUAS */
         .total-col { font-size: 22px; font-weight: bold; background-color: #111; width: 50px; }
         .label-row { font-weight: bold; text-align: left; padding-left: 8px !important; width: 80px; background: #1a1a1a; color: #bbb; font-size: 11px; }
         
         .score-row-highlight { background-color: #1f2937; font-weight: bold; }
         .score-row-highlight .label-row { color: #00f0ff; background-color: #111827; }
         
-        /* CONTAINER ALIRAN POIN HORIZONTAL (SCROLLABLE) */
+        /* CONTAINER ALIRAN POIN HORIZONTAL */
         .points-timeline-container { 
             display: flex; 
             gap: 6px; 
@@ -63,7 +62,6 @@
         .points-timeline-container::-webkit-scrollbar { height: 4px; }
         .points-timeline-container::-webkit-scrollbar-thumb { background: #444; border-radius: 10px; }
 
-        /* 🔥 INDIKATOR TEKS KECIL & RAMPING (MONOSPACE) 🔥 */
         .log-cell { 
             display: inline-flex; 
             align-items: center; 
@@ -77,8 +75,6 @@
         .tx-putih { color: #ffffff; font-size: 14px; }
         .tx-abu { color: #555; font-weight: normal; font-size: 14px; }
         .tx-kuning { color: #ffc107; font-size: 14px;}
-        
-        /* EFEK MENYALA BARIS SCORE */
         .tx-biru { color: #00e1ff; font-size: 15px; text-shadow: 0 0 6px rgba(0,225,255,0.6); }
         .tx-merah { color: #ff3c3c; font-size: 15px; text-shadow: 0 0 6px rgba(255,60,60,0.6); }
 
@@ -93,26 +89,6 @@
     </style>
 </head>
 <body>
-
-<!-- 🔐 LOGIN MODAL (Tanpa Password) -->
-<div class="modal" id="modalLogin" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content p-4 dark-theme text-center">
-            <h5 class="text-warning mb-3 fw-bold">👑 PILIH ARENA KETUA</h5>
-            <select id="lGelanggang" class="form-select mb-3 text-center">
-                <option value="g1" selected>Gelanggang 1</option>
-                <option value="g2">Gelanggang 2</option>
-                <option value="g3">Gelanggang 3</option>
-                <option value="g4">Gelanggang 4</option>
-                <option value="g5">Gelanggang 5</option>
-                <option value="g6">Gelanggang 6</option>
-                <option value="g7">Gelanggang 7</option>
-            </select>
-            <div id="loginError" class="text-danger fw-bold small mb-2" style="display: none;"></div>
-            <button class="btn btn-warning w-100 fw-bold text-dark" id="btnLoginApp" onclick="initAppKetua()">MASUK MONITOR</button>
-        </div>
-    </div>
-</div>
 
 <!-- 📊 DASHBOARD UTAMA MONITOR KETUA -->
 <div id="mainApp" style="display:none; flex-direction: column; min-height: 100vh;">
@@ -144,10 +120,9 @@
 
     <!-- MATRIKS Real-time -->
     <div class="container-fluid p-1 flex-grow-1">
-        <!-- 🔧 GRID CUSTOM: 46% - 8% - 46% -->
         <div class="row g-1 align-items-stretch justify-content-center mx-0">
             
-            <!-- MATRIKS KIRI: SUDUT BIRU (46%) -->
+            <!-- MATRIKS KIRI: SUDUT BIRU -->
             <div class="col" style="flex: 0 0 46%; max-width: 46%;">
                 <table class="matrix-table">
                     <thead>
@@ -194,7 +169,7 @@
                 </table>
             </div>
 
-            <!-- SEKTOR TENGAH: BABAK (8%) -->
+            <!-- SEKTOR TENGAH: BABAK -->
             <div class="col text-center px-0" style="flex: 0 0 8%; max-width: 8%;">
                 <div class="babak-divider">
                     <span class="text-secondary fw-bold" style="font-size: 10px; letter-spacing: 1px;">BABAK</span>
@@ -203,7 +178,7 @@
                 </div>
             </div>
 
-            <!-- MATRIKS KANAN: SUDUT MERAH (46%) -->
+            <!-- MATRIKS KANAN: SUDUT MERAH -->
             <div class="col" style="flex: 0 0 46%; max-width: 46%;">
                 <table class="matrix-table">
                     <thead>
@@ -317,8 +292,6 @@
     </div>
 </div>
 
-<!-- 🔥 KUMPULAN MODAL POPUP THEME DARK 🔥 -->
-
 <!-- MODAL KONFIRMASI RESET -->
 <div class="modal fade" id="modalKonfirmasiResetKetua" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
     <div class="modal-dialog modal-dialog-centered">
@@ -379,46 +352,34 @@
     let riwayatBiru = { 1: [], 2: [], 3: [] }; 
     let riwayatMerah = { 1: [], 2: [], 3: [] };
 
-    // 🔥 LOGIKA DETEKSI OTOMATIS DARI URL 🔥
+    // 🔥 LOGIKA PENJAGA PINTU: JIKA POLOSAN TANPA URL PARAM, TENDANG KE JURI 🔥
     document.addEventListener("DOMContentLoaded", () => {
         const urlParams = new URLSearchParams(window.location.search);
         const gelDariURL = urlParams.get('gel');
 
         if (gelDariURL) {
-            let selectEl = document.getElementById('lGelanggang');
-            if (selectEl) selectEl.value = gelDariURL;
-            initAppKetua();
+            initAppKetua(gelDariURL);
         } else {
-            new bootstrap.Modal(document.getElementById('modalLogin')).show();
+            window.location.href = 'layar-juri.html';
         }
     });
 
-    window.initAppKetua = async function() {
-        const errorEl = document.getElementById('loginError');
-        const btnLogin = document.getElementById('btnLoginApp');
-        let gel = document.getElementById('lGelanggang').value;
-
-        btnLogin.innerText = "LOADING..."; btnLogin.disabled = true;
+    window.initAppKetua = async function(gel) {
         let lockRef = ref(database, `pertandingan/${gel}/locks/ketua`);
         let snap = await get(lockRef);
 
         if(snap.exists() && snap.val() === true) {
-            errorEl.innerText = `❌ Sesi Ketua di arena ini sedang terbuka!`;
-            errorEl.style.display = "block";
-            btnLogin.innerText = "MASUK MONITOR"; btnLogin.disabled = false;
+            alert(`❌ Sesi Ketua di arena ${gel.toUpperCase()} sedang terbuka di perangkat lain!`);
+            window.location.href = 'layar-juri.html';
             return;
         }
 
-        errorEl.style.display = "none";
         await set(lockRef, true);
         onDisconnect(lockRef).remove();
 
         session.gel = gel;
         document.getElementById('sessionInfo').innerText = `MONITOR UTAMA KETUA | ${session.gel.toUpperCase()}`;
         document.getElementById('mainApp').style.display = 'flex';
-        
-        let modalInst = bootstrap.Modal.getInstance(document.getElementById('modalLogin'));
-        if (modalInst) modalInst.hide();
 
         pasangMasterMonitor();
     };
@@ -595,13 +556,10 @@
         });
     };
 
-    // 🔥 LOGIKA MODAL POPUP MENGGANTIKAN ALERT/CONFIRM BAWAAN 🔥
     window.tampilkanKonfirmasiReset = function() {
-        // Tutup modal setup dulu agar tidak menumpuk aneh
         let setupModal = bootstrap.Modal.getInstance(document.getElementById('modalSetupLaga'));
         if(setupModal) setupModal.hide();
         
-        // Panggil modal peringatan kustom
         let resetModalEl = document.getElementById('modalKonfirmasiResetKetua');
         let resetModal = bootstrap.Modal.getInstance(resetModalEl) || new bootstrap.Modal(resetModalEl);
         resetModal.show();
@@ -616,16 +574,14 @@
         updates[`${baseRef}/timer`] = "02:00";
         updates[`${baseRef}/status`] = "READY";
         
-        update(ref(database), updates).then(() => {
-            // Berhasil direset
-        });
+        update(ref(database), updates).then(() => {});
     };
 
+    // 🔥 PINTU KELUAR RESMI KE LAYAR JURI 🔥
     window.eksekusiLogout = function() {
         if(session.gel) set(ref(database, `pertandingan/${session.gel}/locks/ketua`), null);
         setTimeout(() => { 
-            // Kita paksa browser pulang ke nama file murni tanpa membawa buntut ?gel=...
-            window.location.href = 'layar-ketua.html'; 
+            window.location.href = 'layar-juri.html'; 
         }, 200);
     };
 </script>
