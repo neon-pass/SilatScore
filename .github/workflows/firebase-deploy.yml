@@ -16,5 +16,5 @@ jobs:
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_APK_SILAT }}'
-          projectId: apk-silat
+          projectId: tesapksilat99
           channelId: live
