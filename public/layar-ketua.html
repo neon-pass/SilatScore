@@ -381,71 +381,51 @@
     let riwayatBiru = { 1: [], 2: [], 3: [] }; 
     let riwayatMerah = { 1: [], 2: [], 3: [] };
 
-    // Tambahkan di dalam <script type="module"> pada layar-ketua.html
-function checkAutoLogin() {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('autoLogin') === 'true') {
-        // Isi password otomatis (pastikan ini sesuai password di layar ketua)
-        document.getElementById('adminPass').value = "ketua123"; 
-        
-        // Panggil fungsi login otomatis
-        initAppKetua();
-    }
-}
-
-// Panggil fungsi ini di dalam DOMContentLoaded atau langsung setelah script dimuat
-// Modifikasi bagian ini:
-document.addEventListener("DOMContentLoaded", () => {
-    // Cek apakah perlu auto login
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('autoLogin') === 'true') {
-        // Langsung panggil fungsi login tanpa menampilkan modal login
-        document.getElementById('adminPass').value = "ketua123";
-        initAppKetua(); 
-    } else {
-        // Tampilkan modal login biasa jika tidak ada parameter
-        new bootstrap.Modal(document.getElementById('modalLogin')).show();
-    }
-});
+    
 
     document.addEventListener("DOMContentLoaded", () => {
         new bootstrap.Modal(document.getElementById('modalLogin')).show();
     });
 
     window.initAppKetua = async function() {
-        const errorEl = document.getElementById('loginError');
-        const btnLogin = document.getElementById('btnLoginApp');
-        let gel = document.getElementById('lGelanggang').value;
-        const pass = document.getElementById('adminPass').value;
+    const errorEl = document.getElementById('loginError');
+    const btnLogin = document.getElementById('btnLoginApp');
+    let gel = document.getElementById('lGelanggang').value;
+    const pass = document.getElementById('adminPass').value;
 
-        if(pass !== "ketua123") {
-            errorEl.innerText = "❌ Password Salah!";
-            errorEl.style.display = "block";
-            return;
-        }
+    // SAMAKAN PASSWORD DENGAN LAYAR JURI
+    if(pass !== "admin123") { 
+        errorEl.innerText = "❌ Password Salah!";
+        errorEl.style.display = "block";
+        return;
+    }
 
-        btnLogin.innerText = "LOADING..."; btnLogin.disabled = true;
-        let lockRef = ref(database, `pertandingan/${gel}/locks/ketua`);
-        let snap = await get(lockRef);
+    btnLogin.innerText = "MEMPROSES..."; 
+    btnLogin.disabled = true;
 
-        if(snap.exists() && snap.val() === true) {
-            errorEl.innerText = `❌ Sesi Ketua di arena ini sedang terbuka!`;
-            errorEl.style.display = "block";
-            btnLogin.innerText = "MASUK MONITOR"; btnLogin.disabled = false;
-            return;
-        }
+    // Cek status lock di database (ini membuat keduanya terhubung)
+    let lockRef = ref(database, `pertandingan/${gel}/locks/ketua`);
+    let snap = await get(lockRef);
 
-        errorEl.style.display = "none";
-        await set(lockRef, true);
-        onDisconnect(lockRef).remove();
+    if(snap.exists() && snap.val() === true) {
+        errorEl.innerText = `❌ Sesi Ketua di arena ini sudah dipakai!`;
+        errorEl.style.display = "block";
+        btnLogin.innerText = "MASUK MONITOR"; 
+        btnLogin.disabled = false;
+        return;
+    }
 
-        session.gel = gel;
-        document.getElementById('sessionInfo').innerText = `MONITOR UTAMA KETUA | ${session.gel.toUpperCase()}`;
-        document.getElementById('mainApp').style.display = 'flex';
-        bootstrap.Modal.getInstance(document.getElementById('modalLogin')).hide();
+    errorEl.style.display = "none";
+    await set(lockRef, true); // Mengunci posisi Ketua di database
+    onDisconnect(lockRef).remove(); // Otomatis lepas kunci jika browser ditutup
 
-        pasangMasterMonitor();
-    };
+    session.gel = gel;
+    document.getElementById('sessionInfo').innerText = `MONITOR UTAMA KETUA | ${session.gel.toUpperCase()}`;
+    document.getElementById('mainApp').style.display = 'flex';
+    bootstrap.Modal.getInstance(document.getElementById('modalLogin')).hide();
+
+    pasangMasterMonitor(); // Jalankan fungsi monitor
+};
 
     function pasangMasterMonitor() {
         let baseRef = `pertandingan/${session.gel}`;

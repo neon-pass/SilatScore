@@ -460,13 +460,11 @@
         if(pass !== "admin123") { errorEl.innerText = "❌ Password Salah! Coba lagi."; errorEl.style.display = "block"; return; }
         
         
-        // Ganti bagian ini di layar-juri.html
-if (pos === 'ketua') {
-    localStorage.setItem('gelanggang_aktif', gel);
-    // Tambahkan parameter ?autoLogin=true agar halaman ketua tahu harus login otomatis
-    window.location.href = `layar-ketua.html?gel=${gel}&autoLogin=true`;
-    return; 
-}
+        if (pos === 'ketua') {
+            localStorage.setItem('gelanggang_aktif', gel);
+            window.location.href = `layar-ketua.html?gel=${gel}`;
+            return; 
+        }
 
         btnLogin.innerText = "MEMPROSES..."; btnLogin.disabled = true;
         let slotId = (pos === 'dewan') ? 'dewan' : juri; let lockRef = ref(database, `pertandingan/${gel}/locks/${slotId}`);
