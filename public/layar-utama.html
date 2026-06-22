@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Layar Utama - Digital Pencak Silat</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* CSS FULL SCREEN MURNI */
+        body { 
+            background-color: #1a1a1a; 
+            color: #fff; 
+            font-family: 'Arial', sans-serif; 
+            margin: 0; 
+            padding: 0.625rem; 
+            width: 100vw;
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden; 
+            user-select: none; 
+            transition: background-color 0.8s ease; 
+        }
+        body.lead-biru { background-color: #031f42 !important; } 
+        body.lead-merah { background-color: #380202 !important; } 
+        html { font-size: 13px; }
+        
+        .form-select { background-color: #333 !important; color: #fff !important; border: 0.0625rem solid #555 !important; }
+        .form-select:focus { background-color: #444 !important; border-color: #ffc107 !important; box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.25) !important; }
+        option:disabled { color: #777; font-style: italic; background-color: #222; }
+        
+        /* Modal Theme */
+        .modal-content.dark-theme { background-color: #1a1a1a; border: 1px solid #555; color: white; box-shadow: 0 10px 25px rgba(0,0,0,0.8); }
+        .modal-header.dark-theme { border-bottom: 1px solid #333; }
+        .modal-footer.dark-theme { border-top: 1px solid #333; justify-content: center; }
+        .btn-close-white { filter: invert(1) grayscale(100%) brightness(200%); }
+
+        #mainAppUI { display: none; flex-direction: column; flex: 1; width: 100%; height: 100%; }
+
+        .header-top { display: flex; justify-content: space-between; align-items: center; background: linear-gradient(180deg, #333 0%, #111 100%); border: 0.125rem solid #555; border-radius: 0.5rem; padding: 0.3125rem 1.25rem; margin-bottom: 0.625rem; box-shadow: 0 4px 10px rgba(0,0,0,0.5); min-height: 4.5rem; position: relative; }
+        .sponsor-container { display: flex; align-items: center; gap: 0.8rem; z-index: 2; }
+        .sponsor-logo { height: 3.5rem; max-width: 6rem; object-fit: contain; }
+        .championship-title { font-size: 1.75rem; font-weight: 900; letter-spacing: 0.125rem; text-transform: uppercase; text-shadow: 2px 2px 5px rgba(0,0,0,0.8); position: absolute; left: 50%; transform: translateX(-50%); z-index: 1; text-align: center; width: 60%; }
+
+        .category-bar { display: flex; justify-content: space-between; margin-bottom: 0.625rem; gap: 0.625rem; }
+        .category-box { flex: 1; background: linear-gradient(180deg, #444 0%, #222 100%); text-align: center; font-size: 1.375rem; font-weight: bold; padding: 0.3125rem 0; border-radius: 0.5rem; border: 0.125rem solid #555; text-transform: uppercase; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        #labelGelanggangBar { color: #ffc107; border-color: #ffc107; }
+
+        .profile-bar { display: flex; gap: 0.625rem; margin-bottom: 0.625rem; height: 5rem; }
+        .profile-box { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; border-radius: 0.5rem; border: 0.125rem solid #222; overflow: hidden; white-space: nowrap; box-shadow: 0 4px 8px rgba(0,0,0,0.4); }
+        .bg-biru-gelap { background: linear-gradient(180deg, #0a4ebd 0%, #06307a 100%); }
+        .bg-merah-gelap { background: linear-gradient(180deg, #cc0000 0%, #800000 100%); }
+        .pesilat-nama { font-size: 1.375rem; font-weight: bold; text-transform: uppercase; text-shadow: 1px 1px 3px rgba(0,0,0,0.5); }
+        .pesilat-negara { font-size: 1rem; font-weight: normal; text-transform: uppercase; color: #ccc;}
+        .timer-box { width: 15.625rem; background: linear-gradient(180deg, #333 0%, #000 100%); border-radius: 0.5rem; border: 0.125rem solid #555; display: flex; align-items: center; justify-content: center; font-size: 3.4375rem; font-weight: bold; letter-spacing: 0.1875rem; color: #ffc107; box-shadow: inset 0 0 10px rgba(0,0,0,0.8); }
+
+        .match-info-bar { display: flex; gap: 0.625rem; margin-bottom: 0.625rem; }
+        .info-box { flex: 1; background: linear-gradient(180deg, #555 0%, #222 100%); text-align: center; font-size: 1.5rem; font-weight: bold; padding: 0.5rem 0; border-radius: 0.5rem; border: 0.125rem solid #666; text-transform: uppercase; color: #0dcaf0; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        #teksRonde { color: #fff; }
+
+        .score-container { flex: 1; display: flex; gap: 0; position: relative; border-radius: 0.5rem; overflow: hidden; border: 0.125rem solid #444; margin-bottom: 0.625rem; box-shadow: 0 6px 15px rgba(0,0,0,0.6); }
+        .score-side { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; transition: background-color 0.5s ease; }
+        .bg-biru-terang { background-color: #0b5ed7; }
+        .bg-merah-terang { background-color: #dc3545; }
+        #panelSkorBiru.kalah { background-color: #021a3b !important; }
+        #panelSkorMerah.kalah { background-color: #380101 !important; }
+        .skor-besar { font-size: 17.5rem; font-weight: bold; line-height: 1; text-shadow: 5px 5px 15px rgba(0,0,0,0.5); }
+
+        .icons-panel { position: absolute; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 0.5rem; padding: 0.9375rem; }
+        .icons-panel.left { left: 0.625rem; }
+        .icons-panel.right { right: 0.625rem; }
+        .icon-box { width: 5rem; height: 2.8125rem; background: #222; border: 0.125rem solid #555; border-radius: 0.5rem; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; box-shadow: inset 0 0 0.625rem rgba(0,0,0,0.8); gap: 0.5rem; }
+        .icon-count { color: #ffc107; font-size: 1.25rem; font-weight: bold; }
+
+        .juri-footer { display: flex; background: #222; border-top: 0.125rem solid #444; border-radius: 0.5rem; overflow: hidden; text-align: center; font-weight: bold; box-shadow: 0 -2px 10px rgba(0,0,0,0.5); }
+        .juri-col { flex: 1; padding: 0.3125rem; border-right: 0.0625rem solid #444; font-size: 0.875rem; transition: all 0.15s ease-in-out; }
+        .juri-col:last-child { border-right: none; }
+        .juri-row-top { border-bottom: 0.0625rem solid #444; color: #aaa; background: linear-gradient(180deg, #555 0%, #333 100%); }
+        .juri-row-bot { background: linear-gradient(180deg, #444 0%, #222 100%); color: #ccc;}
+        .center-icons { flex: 0.5; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 1.25rem; background-color: #111; border-left: 0.125rem solid #555; border-right: 0.125rem solid #555;}
+        .juri-col.active { background: #ffc107 !important; color: #000 !important; box-shadow: inset 0 0 0.625rem rgba(0,0,0,0.5); }
+        .btn-back-modal { position: absolute; top: 0.9375rem; left: 0.9375rem; text-decoration: none; color: #888; font-size: 1.375rem; font-weight: bold; transition: 0.2s; z-index: 10; }
+        .btn-back-modal:active { color: #fff; transform: scale(0.9); }
+
+        /* 🔥 CSS KHUSUS SCREENSAVER LAYAR PENUH 🔥 */
+        #screensaverOverlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: #000; z-index: 9999; justify-content: center; align-items: center;
+        }
+        #screensaverImg {
+            width: 100%; height: 100%; object-fit: contain; 
+            transition: opacity 0.8s ease-in-out; opacity: 0;
+        }
+
+        /* 🔥 ANIMASI KEDAP-KEDIP VAR 🔥 */
+        @keyframes blinkVar {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        .var-blinker { animation: blinkVar 1.5s infinite; }
+    </style>
+</head>
+<body>
+    
+    <div id="screensaverOverlay">
+        <img id="screensaverImg" src="">
+    </div>
+
+    <div class="modal fade" id="modalSetupLayar" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content dark-theme p-4 position-relative">
+                <a href="index.html" class="btn-back-modal">❮</a>
+                <h4 class="text-info text-center mb-4 fw-bold">TAMPILAN LAYAR UTAMA</h4>
+                <label class="form-label mb-1 text-secondary" style="font-size: 0.875rem;">Pilih Gelanggang yang akan ditayangkan:</label>
+                <select id="lGelanggangLayar" class="form-select mb-3" onchange="pantauLockLayar()">
+                    <option value="" disabled selected>-- Pilih Gelanggang --</option>
+                    <option value="g1" id="opt_g1">Gelanggang 1</option>
+                    <option value="g2" id="opt_g2">Gelanggang 2</option>
+                    <option value="g3" id="opt_g3">Gelanggang 3</option>
+                    <option value="g4" id="opt_g4">Gelanggang 4</option>
+                    <option value="g5" id="opt_g5">Gelanggang 5</option>
+                    <option value="g6" id="opt_g6">Gelanggang 6</option>
+                    <option value="g7" id="opt_g7">Gelanggang 7</option>
+                </select>
+                <div id="setupError" class="text-danger fw-bold mb-3 text-center" style="display: none; font-size: 0.875rem;"></div>
+                <button class="btn btn-info text-dark w-100 fw-bold mt-2" id="btnMulaiLayar" onclick="mulaiLayarUtama()">TAMPILKAN KE TV</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="mainAppUI">
+        <div class="header-top">
+            <div class="sponsor-container" id="wadahKiri"></div>
+            <div class="championship-title" id="judulKejuaraan">KEJUARAAN PENCAK SILAT</div>
+            <div class="sponsor-container" id="wadahKanan"></div>
+        </div>
+        <div class="category-bar">
+            <div class="category-box" id="labelGelanggangBar">G?</div><div class="category-box" id="l_kelas">KELAS</div><div class="category-box">TANDING</div>
+        </div>
+        <div class="profile-bar">
+            <div class="profile-box bg-biru-gelap"><div class="pesilat-nama" id="l_nama_biru">SUDUT BIRU</div><div class="pesilat-negara" id="l_kon_biru">KONTINGEN</div></div>
+            <div class="timer-box" id="l_timer">00:00</div>
+            <div class="profile-box bg-merah-gelap"><div class="pesilat-nama" id="l_nama_merah">SUDUT MERAH</div><div class="pesilat-negara" id="l_kon_merah">KONTINGEN</div></div>
+        </div>
+        <div class="match-info-bar">
+            <div class="info-box" id="l_partai">PARTAI</div><div class="info-box" id="l_babak">BABAK</div><div class="info-box text-warning" id="teksRonde">RONDE 1</div>
+        </div>
+
+        <div class="score-container">
+            <div class="score-side bg-biru-terang" id="panelSkorBiru">
+                <div class="icons-panel left">
+                    <div class="icon-box">👉<span class="icon-count" id="b_count_0" style="display:none;">0</span></div>
+                    <div class="icon-box">☝️<span class="icon-count" id="b_count_-1" style="display:none;">0</span></div>
+                    <div class="icon-box">✌️<span class="icon-count" id="b_count_-5" style="display:none;">0</span></div>
+                    <div class="icon-box">🤼<span class="icon-count" id="b_count_3" style="display:none;">0</span></div>
+                </div>
+                <div class="skor-besar" id="skorTotalBiru">0</div>
+            </div>
+            <div class="score-side bg-merah-terang" id="panelSkorMerah">
+                <div class="skor-besar" id="skorTotalMerah">0</div>
+                <div class="icons-panel right">
+                    <div class="icon-box">👈<span class="icon-count" id="m_count_0" style="display:none;">0</span></div>
+                    <div class="icon-box">☝️<span class="icon-count" id="m_count_-1" style="display:none;">0</span></div>
+                    <div class="icon-box">✌️<span class="icon-count" id="m_count_-5" style="display:none;">0</span></div>
+                    <div class="icon-box">🤼<span class="icon-count" id="m_count_3" style="display:none;">0</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="juri-footer">
+            <div style="flex: 1; display: flex; flex-direction: column;">
+                <div style="display: flex;" class="juri-row-top"><div class="juri-col" id="b_j1_top">J1</div><div class="juri-col" id="b_j2_top">J2</div><div class="juri-col" id="b_j3_top">J3</div></div>
+                <div style="display: flex;" class="juri-row-bot"><div class="juri-col" id="b_j1_bot">J1</div><div class="juri-col" id="b_j2_bot">J2</div><div class="juri-col" id="b_j3_bot">J3</div></div>
+            </div>
+            <div class="center-icons"><div>👊</div><div>🦶</div></div>
+            <div style="flex: 1; display: flex; flex-direction: column;">
+                <div style="display: flex;" class="juri-row-top"><div class="juri-col" id="m_j1_top">J1</div><div class="juri-col" id="m_j2_top">J2</div><div class="juri-col" id="m_j3_top">J3</div></div>
+                <div style="display: flex;" class="juri-row-bot"><div class="juri-col" id="m_j1_bot">J1</div><div class="juri-col" id="m_j2_bot">J2</div><div class="juri-col" id="m_j3_bot">J3</div></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal fade" id="modalHasilTV" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content dark-theme shadow-lg" style="border: 2px solid #ffc107;">
+                <div class="modal-header dark-theme">
+                    <h3 class="modal-title fw-bold text-warning w-100 text-center m-0">HASIL PERTANDINGAN</h3>
+                </div>
+                <div class="modal-body text-center py-5">
+                    <h1 id="teksPemenangTV" class="fw-bold mb-4" style="font-size: 3rem; text-shadow: 2px 2px 5px rgba(0,0,0,0.8);">SUDUT BIRU MENANG</h1>
+                    <h4 id="teksAlasanTV" class="text-secondary fw-bold mb-5" style="letter-spacing: 2px; display: none;">DIKARENAKAN W.M.P</h4>
+                    
+                    <div class="row align-items-center mb-3">
+                        <div class="col-5"><h3 class="text-primary fw-bold" id="namaBiruTV">PESILAT BIRU</h3></div>
+                        <div class="col-2 text-warning fw-bold fs-3">VS</div>
+                        <div class="col-5"><h3 class="text-danger fw-bold" id="namaMerahTV">PESILAT MERAH</h3></div>
+                    </div>
+
+                    <div class="row align-items-center">
+                        <div class="col-5 text-primary fw-bold" style="font-size: 4rem;" id="skorBiruTV">0</div>
+                        <div class="col-2 text-secondary fw-bold fs-4">SKOR</div>
+                        <div class="col-5 text-danger fw-bold" style="font-size: 4rem;" id="skorMerahTV">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalVerifikasiTV" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content dark-theme shadow-lg" style="border: 4px solid #0dcaf0; background-color: rgba(26, 26, 26, 0.95);">
+                <div class="modal-body text-center py-5">
+                    <h1 class="fw-bold mb-4 var-blinker" style="font-size: 4rem; text-shadow: 0px 0px 15px rgba(13, 202, 240, 0.8); color: #0dcaf0;">
+                        🎥 VIDEO REPLAY (VAR)
+                    </h1>
+                    <h2 id="varTipeTV" class="text-white fw-bold mb-3" style="font-size: 2.5rem; letter-spacing: 5px;">VERIFIKASI JATUHAN</h2>
+                    <h1 id="varSudutTV" class="fw-bold" style="font-size: 5rem; text-transform: uppercase;">SUDUT BIRU</h1>
+                    
+                    <div id="varProsesTV" class="mt-5">
+                        <div class="spinner-grow text-info" style="width: 3rem; height: 3rem;" role="status"></div>
+                        <h4 class="text-info mt-3 fw-bold" style="letter-spacing: 2px;">MENUNGGU KEPUTUSAN DEWAN JURI...</h4>
+                    </div>
+
+                    <div id="varHasilTV" class="mt-5" style="display: none;">
+                        <h1 id="varTeksHasil" class="fw-bold" style="font-size: 4.5rem; letter-spacing: 3px;">✅ SAH</h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
+        import { getDatabase, ref, set, get, onValue, onDisconnect } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js";
+
+        const firebaseConfig = {
+  apiKey: "AIzaSyAyVuVQOTcsR7wqcFtNzKnGIrdYJ12eCxw",
+  authDomain: "apk-silat.firebaseapp.com",
+  databaseURL: "https://apk-silat-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "apk-silat",
+  storageBucket: "apk-silat.firebasestorage.app",
+  messagingSenderId: "579871050282",
+  appId: "1:579871050282:web:73f8da4176640a0d93d153",
+  measurementId: "G-GQPLM3QZG6"
+};
+        const app = initializeApp(firebaseConfig); const database = getDatabase(app);
+
+        let GELANGGANG = ""; let baseRefPath = ""; let rondeRef = null; let rondeAktif = 1;
+        let riwayatBiru = { 1: [], 2: [], 3: [] }; let riwayatMerah = { 1: [], 2: [], 3: [] };
+        let modalHasilTVInstance = null;
+        let modalVerifikasiTVInstance = null;
+        let finalSkorBiru = 0; let finalSkorMerah = 0;
+
+        // 🔥 VARIABEL MESIN SCREENSAVER 🔥
+        let arrScreensavers = [];
+        let ssDelay = 60000; 
+        let idleTimer = null;
+        let slideInterval = null;
+        let currentSlide = 0;
+        let isScreensaverAktifManual = false; // Penampung Sinyal Tombol Panitia
+
+        // 🔥 FUNGSI PEMANTAUAN SCREENSAVER (OTOMATIS / MANUAL) 🔥
+        function resetIdleTimer() {
+            clearTimeout(idleTimer); 
+            // Cek jika Panitia memaksa screensaver menyala via tombol
+            if (isScreensaverAktifManual === true) {
+                tampilkanScreensaver();
+                return;
+            }
+            
+            sembunyikanScreensaver();
+            // Jalankan idle timer jika ada gambar (Otomatis)
+            if (arrScreensavers.length > 0) { 
+                idleTimer = setTimeout(tampilkanScreensaver, ssDelay); 
+            }
+        }
+
+        function tampilkanScreensaver() {
+            if(arrScreensavers.length === 0) return;
+            document.getElementById('screensaverOverlay').style.display = 'flex';
+            currentSlide = 0; 
+            gantiSlide(); 
+            clearInterval(slideInterval);
+            slideInterval = setInterval(gantiSlide, 5000); 
+        }
+
+        function sembunyikanScreensaver() {
+            document.getElementById('screensaverOverlay').style.display = 'none';
+            document.getElementById('screensaverImg').style.opacity = 0;
+            clearInterval(slideInterval);
+        }
+
+        function gantiSlide() {
+            if(arrScreensavers.length === 0) return;
+            let imgEl = document.getElementById('screensaverImg');
+            imgEl.style.opacity = 0; 
+            setTimeout(() => { 
+                imgEl.src = arrScreensavers[currentSlide]; 
+                imgEl.style.opacity = 1; 
+                currentSlide = (currentSlide + 1) % arrScreensavers.length; 
+            }, 800); 
+        }
+
+        document.addEventListener("DOMContentLoaded", () => { 
+            modalHasilTVInstance = new bootstrap.Modal(document.getElementById('modalHasilTV'));
+            modalVerifikasiTVInstance = new bootstrap.Modal(document.getElementById('modalVerifikasiTV'));
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const gelParam = urlParams.get('gelanggang');
+
+            if (gelParam) {
+                window.isDiLayarTV = true; 
+                setTimeout(() => { document.getElementById('lGelanggangLayar').value = gelParam; window.mulaiLayarUtama(); }, 500);
+            } else {
+                new bootstrap.Modal(document.getElementById('modalSetupLayar')).show(); 
+            }
+            pantauSemuaLayar(); 
+        });
+
+        function pantauSemuaLayar() {
+            for(let i=1; i<=7; i++) {
+                let gel = `g${i}`;
+                onValue(ref(database, `pertandingan/${gel}/locks/layar_utama`), (snap) => {
+                    let isLocked = snap.val(); let opt = document.getElementById(`opt_${gel}`);
+                    if(opt) { if(isLocked) { opt.disabled = true; opt.innerText = `Gelanggang ${i} (Sedang Dipakai)`; if(document.getElementById('lGelanggangLayar').value === gel) document.getElementById('lGelanggangLayar').value = ""; } else { opt.disabled = false; opt.innerText = `Gelanggang ${i} (Tersedia)`; } }
+                });
+            }
+        }
+
+        window.pantauLockLayar = function() { document.getElementById('setupError').style.display = "none"; }
+
+        window.mulaiLayarUtama = async function() {
+            const errorEl = document.getElementById('setupError'); const btnLogin = document.getElementById('btnMulaiLayar');
+            let gel = document.getElementById('lGelanggangLayar').value; 
+            if(!gel) { errorEl.innerText = "❌ Silakan pilih Gelanggang yang ingin ditampilkan!"; errorEl.style.display = "block"; return; }
+            
+            if (!window.isDiLayarTV && typeof AndroidApp !== "undefined" && AndroidApp.isTvConnected()) {
+                btnLogin.innerText = "MENGIRIM KE TV..."; btnLogin.disabled = true;
+                AndroidApp.bukaDiTV(gel); 
+                setTimeout(() => { btnLogin.innerText = "TAYANG DI TV ✅"; btnLogin.classList.replace("btn-info", "btn-success"); }, 500);
+                setTimeout(() => { window.location.href = "index.html"; }, 2500); return; 
+            }
+
+            btnLogin.innerText = "MENGHUBUNGKAN..."; btnLogin.disabled = true;
+
+            let lockRef = ref(database, `pertandingan/${gel}/locks/layar_utama`);
+            let snap = await get(lockRef);
+            if(snap.exists() && snap.val() === true) { errorEl.innerHTML = `❌ <strong>Layar Utama Gelanggang Ini</strong> baru saja diaktifkan di perangkat lain!`; errorEl.style.display = "block"; btnLogin.innerText = "TAMPILKAN KE TV"; btnLogin.disabled = false; return; }
+
+            errorEl.style.display = "none"; await set(lockRef, true); onDisconnect(lockRef).remove();
+            GELANGGANG = gel; baseRefPath = `pertandingan/${GELANGGANG}`; rondeRef = ref(database, `${baseRefPath}/ronde_aktif`);
+            document.getElementById('labelGelanggangBar').innerText = GELANGGANG.toUpperCase();
+
+            let modalSetup = bootstrap.Modal.getInstance(document.getElementById('modalSetupLayar'));
+            if (modalSetup) { modalSetup.hide(); }
+            
+            document.getElementById('mainAppUI').style.display = 'flex';
+            jalankanMesinFirebase();
+        }
+
+        function jalankanMesinFirebase() {
+            onValue(ref(database, `pengaturan`), (snap) => {
+                let data = snap.val() || {};
+                if(data.nama_kejuaraan) document.getElementById('judulKejuaraan').innerText = data.nama_kejuaraan.toUpperCase();
+                if(data.logos) {
+                    let htmlKiri = ""; let htmlKanan = "";
+                    for(let i=1; i<=4; i++) {
+                        if(data.logos[`kiri${i}`] && data.logos[`kiri${i}`].trim() !== "") htmlKiri += `<img src="${data.logos[`kiri${i}`]}" class="sponsor-logo">`;
+                        if(data.logos[`kanan${i}`] && data.logos[`kanan${i}`].trim() !== "") htmlKanan += `<img src="${data.logos[`kanan${i}`]}" class="sponsor-logo">`;
+                    }
+                    document.getElementById('wadahKiri').innerHTML = htmlKiri; document.getElementById('wadahKanan').innerHTML = htmlKanan;
+                }
+                if (data.waktu_screensaver) ssDelay = parseInt(data.waktu_screensaver) * 1000;
+                if (data.screensavers) { arrScreensavers = Object.values(data.screensavers).filter(img => img && img.trim() !== ""); }
+                resetIdleTimer(); 
+            });
+
+            // 🔥 DENGAREKAN SINYAL TOMBOL MANUAL DARI PANITIA 🔥
+            onValue(ref(database, `${baseRefPath}/status_screensaver`), (snap) => {
+                isScreensaverAktifManual = snap.val() || false;
+                if (isScreensaverAktifManual === true) {
+                    tampilkanScreensaver(); 
+                } else {
+                    sembunyikanScreensaver(); 
+                    resetIdleTimer(); 
+                }
+            });
+
+            // 🔥 DENGAREKAN TAMPARAN AKTIVITAS DARI PANITIA 🔥
+            onValue(ref(database, `${baseRefPath}/last_activity`), (snap) => {
+                // Setiap kali ada klik/perubahan waktu di panitia, fungsi ini berjalan & mereset hitungan mundur idle TV
+                resetIdleTimer();
+            });
+
+            onValue(ref(database, `${baseRefPath}/verifikasi`), (snap) => {
+                let dataVAR = snap.val();
+                if (dataVAR && dataVAR.aktif) {
+                    resetIdleTimer(); 
+                    document.getElementById('varTipeTV').innerText = `VERIFIKASI ${dataVAR.tipe.toUpperCase()}`;
+                    
+                    let elSudut = document.getElementById('varSudutTV');
+                    elSudut.innerText = `SUDUT ${dataVAR.sudut.toUpperCase()}`;
+                    elSudut.className = dataVAR.sudut === 'biru' ? "fw-bold text-primary" : "fw-bold text-danger";
+                    
+                    if (dataVAR.hasil) {
+                        document.getElementById('varProsesTV').style.display = 'none';
+                        document.getElementById('varHasilTV').style.display = 'block';
+                        let elHasil = document.getElementById('varTeksHasil');
+                        
+                        if(dataVAR.hasil === 'sah') {
+                            elHasil.innerHTML = '✅ KEPUTUSAN: SAH';
+                            elHasil.className = 'fw-bold text-success';
+                        } else {
+                            elHasil.innerHTML = '❌ KEPUTUSAN: TIDAK SAH';
+                            elHasil.className = 'fw-bold text-danger';
+                        }
+                    } else {
+                        document.getElementById('varProsesTV').style.display = 'block';
+                        document.getElementById('varHasilTV').style.display = 'none';
+                    }
+                    
+                    if (modalVerifikasiTVInstance) modalVerifikasiTVInstance.show();
+                } else {
+                    if (modalVerifikasiTVInstance) modalVerifikasiTVInstance.hide();
+                }
+            });
+
+            onValue(ref(database, `${baseRefPath}/setup`), (snap) => {
+                let data = snap.val();
+                if(data) {
+                    let nB = data.nama_biru || "SUDUT BIRU"; let nM = data.nama_merah || "SUDUT MERAH";
+                    document.getElementById('l_nama_biru').innerText = nB; document.getElementById('l_kon_biru').innerText = data.kontingen_biru || "-";
+                    document.getElementById('l_nama_merah').innerText = nM; document.getElementById('l_kon_merah').innerText = data.kontingen_merah || "-";
+                    document.getElementById('l_partai').innerText = data.partai ? `PARTAI ${data.partai}` : "PARTAI -"; document.getElementById('l_babak').innerText = data.babak || "-";
+                    document.getElementById('l_kelas').innerText = data.kelas ? `KELAS ${data.kelas}` : "-";
+                    
+                    document.getElementById('namaBiruTV').innerText = nB;
+                    document.getElementById('namaMerahTV').innerText = nM;
+                    resetIdleTimer();
+                }
+            });
+
+            onValue(ref(database, `${baseRefPath}/timer`), (snap) => { 
+                document.getElementById('l_timer').innerText = snap.val() || "00:00"; 
+                resetIdleTimer(); 
+            });
+            
+            onValue(rondeRef, (snap) => { 
+                rondeAktif = snap.val() || 1; 
+                document.getElementById('teksRonde').innerText = "RONDE " + rondeAktif; 
+                updateLayarUtama(); 
+            });
+
+            [1, 2, 3].forEach(r => {
+                onValue(ref(database, `${baseRefPath}/biru/r${r}_log`), (snap) => { riwayatBiru[r] = snap.val() ? Object.values(snap.val()) : []; updateLayarUtama(); });
+                onValue(ref(database, `${baseRefPath}/merah/r${r}_log`), (snap) => { riwayatMerah[r] = snap.val() ? Object.values(snap.val()) : []; updateLayarUtama(); });
+            });
+
+            onValue(ref(database, `${baseRefPath}/sinyal`), (snap) => {
+                let dataSinyal = snap.val(); if(!dataSinyal) return; 
+                resetIdleTimer();
+                for (let kodeAksi in dataSinyal) {
+                    let sudut = kodeAksi.split('_')[0]; let nilai = parseInt(kodeAksi.split('_')[1]); let perangkatAktif = dataSinyal[kodeAksi]; 
+                    for (let juriId in perangkatAktif) {
+                        let inisialSudut = (sudut === 'biru') ? 'b' : 'm'; let barisLampu = (nilai === 2) ? 'bot' : 'top'; 
+                        let targetLampu = document.getElementById(`${inisialSudut}_${juriId}_${barisLampu}`);
+                        if(targetLampu && !targetLampu.classList.contains('active')) {
+                            targetLampu.classList.add('active'); setTimeout(() => { targetLampu.classList.remove('active'); }, 1500);
+                        }
+                    }
+                }
+            });
+
+            onValue(ref(database, baseRefPath), (snap) => {
+                let data = snap.val();
+                resetIdleTimer();
+
+                if(data && data.izin_simpan === true) {
+                    let teks = document.getElementById('teksPemenangTV');
+                    let alasan = document.getElementById('teksAlasanTV');
+                    
+                    if (data.pemenang_keputusan) {
+                        let alasanTxt = "";
+                        
+                        if(data.alasan_menang === "teknik") alasanTxt = "T.K.O / TEKNIK";
+                        else if(data.alasan_menang === "undur_diri") alasanTxt = "UNDUR DIRI";
+                        else if(data.alasan_menang === "wmp") alasanTxt = "W.M.P";
+                        
+                        if (data.pemenang_keputusan === "biru") {
+                            teks.innerHTML = "<span class='text-primary'>PEMENANG SUDUT BIRU</span>";
+                            if(data.alasan_menang === "diskualifikasi") {
+                                alasan.innerHTML = "DIKARENAKAN <span class='text-danger'>SUDUT MERAH</span> DIDISKUALIFIKASI";
+                            } else {
+                                alasan.innerHTML = `DIKARENAKAN ${alasanTxt}`;
+                            }
+                        } else {
+                            teks.innerHTML = "<span class='text-danger'>PEMENANG SUDUT MERAH</span>";
+                            if(data.alasan_menang === "diskualifikasi") {
+                                alasan.innerHTML = "DIKARENAKAN <span class='text-primary'>SUDUT BIRU</span> DIDISKUALIFIKASI";
+                            } else {
+                                alasan.innerHTML = `DIKARENAKAN ${alasanTxt}`;
+                            }
+                        }
+                        alasan.style.display = "block";
+                    } 
+                    else {
+                        alasan.style.display = "none"; 
+                        
+                        if (finalSkorBiru > finalSkorMerah) teks.innerHTML = "<span class='text-primary'>SUDUT BIRU MENANG</span>";
+                        else if (finalSkorMerah > finalSkorBiru) teks.innerHTML = "<span class='text-danger'>SUDUT MERAH MENANG</span>";
+                        else teks.innerHTML = "<span class='text-secondary'>HASIL SERI</span>";
+                    }
+                    
+                    document.getElementById('skorBiruTV').innerText = finalSkorBiru;
+                    document.getElementById('skorMerahTV').innerText = finalSkorMerah;
+                    modalHasilTVInstance.show();
+                } else {
+                    if(modalHasilTVInstance) modalHasilTVInstance.hide();
+                }
+            });
+        }
+
+        function updateLayarUtama() {
+            resetIdleTimer();
+            let totalBiru = 0; let totalMerah = 0;
+            let hitungIkonBiru = { '0': 0, '-1': 0, '-5': 0, '3': 0 };
+            let hitungIkonMerah = { '0': 0, '-1': 0, '-5': 0, '3': 0 };
+
+            for(let i = 1; i <= rondeAktif; i++) {
+                totalBiru += riwayatBiru[i].reduce((a, b) => a + b, 0); totalMerah += riwayatMerah[i].reduce((a, b) => a + b, 0);
+                
+                riwayatBiru[i].forEach(poin => { 
+                    if(poin === 0) hitungIkonBiru['0']++;
+                    else if(poin === -1 || poin === -2) hitungIkonBiru['-1']++; 
+                    else if(poin === -5 || poin === -10) hitungIkonBiru['-5']++; 
+                    else if(poin === 3) hitungIkonBiru['3']++; 
+                });
+                riwayatMerah[i].forEach(poin => { 
+                    if(poin === 0) hitungIkonMerah['0']++;
+                    else if(poin === -1 || poin === -2) hitungIkonMerah['-1']++; 
+                    else if(poin === -5 || poin === -10) hitungIkonMerah['-5']++; 
+                    else if(poin === 3) hitungIkonMerah['3']++; 
+                });
+            }
+
+            finalSkorBiru = totalBiru; finalSkorMerah = totalMerah;
+            document.getElementById('skorTotalBiru').innerText = totalBiru; document.getElementById('skorTotalMerah').innerText = totalMerah;
+
+            let panelBiru = document.getElementById('panelSkorBiru'); let panelMerah = document.getElementById('panelSkorMerah');
+            if (totalBiru > totalMerah) { panelBiru.classList.remove('kalah'); panelMerah.classList.add('kalah'); document.body.classList.add('lead-biru'); document.body.classList.remove('lead-merah'); } 
+            else if (totalMerah > totalBiru) { panelMerah.classList.remove('kalah'); panelBiru.classList.add('kalah'); document.body.classList.add('lead-merah'); document.body.classList.remove('lead-biru'); } 
+            else { panelBiru.classList.remove('kalah'); panelMerah.classList.remove('kalah'); document.body.classList.remove('lead-biru'); document.body.classList.remove('lead-merah'); }
+
+            const arrPoin = ['0', '-1', '-5', '3'];
+            arrPoin.forEach(poin => {
+                let countBiru = document.getElementById(`b_count_${poin}`);
+                if (hitungIkonBiru[poin] > 0) { countBiru.style.display = "inline"; countBiru.innerText = hitungIkonBiru[poin]; } else { countBiru.style.display = "none"; }
+                
+                let countMerah = document.getElementById(`m_count_${poin}`);
+                if (hitungIkonMerah[poin] > 0) { countMerah.style.display = "inline"; countMerah.innerText = hitungIkonMerah[poin]; } else { countMerah.style.display = "none"; }
+            });
+        }
+    </script>
+</body>
+</html>

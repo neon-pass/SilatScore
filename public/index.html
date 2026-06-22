@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <!-- KODE ANTI-CACHE AGAR WEBVIEW SELALU UPDATE -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
+    <title>Menu Utama - Digital Pencak Silat</title>
+    <style>
+        /* FONT & LAYOUT DASAR */
+        body {
+            background-color: #050505; /* Hitam pekat mewah */
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            user-select: none;
+            touch-action: manipulation;
+        }
+        
+        .menu-container {
+            width: 85%;
+            max-width: 400px;
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        /* TYPOGRAPHY MEWAH */
+        .app-title {
+            /* Efek Teks Emas Klasik */
+            background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 900;
+            font-size: 32px;
+            letter-spacing: 6px;
+            margin: 0 0 5px 0;
+            text-transform: uppercase;
+        }
+        
+        .app-subtitle {
+            color: #888888;
+            font-size: 11px;
+            margin-bottom: 50px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+        
+        /* TOMBOL MEWAH (Luxury Buttons) */
+        .btn-luxury {
+            display: block;
+            width: 100%;
+            padding: 22px 0;
+            margin-bottom: 20px;
+            background-color: #0a0a0a; /* Hitam Matte */
+            border: 1px solid #bf953f; /* Garis Emas Tipis */
+            color: #fcf6ba; /* Teks Emas Pucat */
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            text-decoration: none;
+            border-radius: 4px; /* Sudut sedikit tajam agar elegan */
+            box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.8);
+            transition: all 0.15s ease-in-out;
+        }
+        
+        /* EFEK SAAT DITEKAN */
+        .btn-luxury:active {
+            transform: scale(0.96);
+            background: linear-gradient(to right, #bf953f, #b38728); /* Latar berubah emas */
+            color: #000000; /* Teks berubah hitam */
+            border-color: #fcf6ba;
+            box-shadow: 0px 5px 15px rgba(191, 149, 63, 0.3);
+        }
+        
+        /* FOOTER */
+        .footer-text {
+            margin-top: 50px;
+            color: #444444;
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="menu-container">
+        
+        <h1 class="app-title">DIGITAL SILAT</h1>
+        <div class="app-subtitle">Sistem Validasi IPSI</div>
+        
+        <!-- TOMBOL MENU -->
+        <a href="layar-utama.html" class="btn-luxury">LAYAR UTAMA</a>
+        <a href="layar-juri.html" class="btn-luxury">TANDING</a>
+        <a href="seni-tgr.html" class="btn-luxury">JURUS</a>
+        
+        <a href="panitia.html" class="btn-luxury">SEKRETARIS</a>
+        
+            v1.0 &bull; Dunia Event Indo
+        </div>
+
+    </div>
+
+</body>
+</html>
