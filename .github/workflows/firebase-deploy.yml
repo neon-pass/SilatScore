@@ -11,6 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Kita tambahkan baris ini untuk mempercepat proses
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
@@ -18,3 +19,5 @@ jobs:
           firebaseServiceAccount: '${{ secrets.TESAPKSILAT99 }}'
           projectId: tesapksilat99
           channelId: live
+          # Tambahkan ini untuk bypass proses build yang tidak perlu
+          skipBuild: true
