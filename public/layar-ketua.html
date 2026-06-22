@@ -362,15 +362,14 @@
     import { getDatabase, ref, set, onValue, get, onDisconnect, update } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js";
 
     const firebaseConfig = {
-  apiKey: "AIzaSyAyVuVQOTcsR7wqcFtNzKnGIrdYJ12eCxw",
-  authDomain: "apk-silat.firebaseapp.com",
-  databaseURL: "https://apk-silat-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "apk-silat",
-  storageBucket: "apk-silat.firebasestorage.app",
-  messagingSenderId: "579871050282",
-  appId: "1:579871050282:web:73f8da4176640a0d93d153",
-  measurementId: "G-GQPLM3QZG6"
-};
+        apiKey: "AIzaSyCNsOk8MsIhBoZ44Nd9WGGl6eBJOEKu3nI",
+        authDomain: "tesapksilat99.firebaseapp.com",
+        databaseURL: "https://tesapksilat99-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "tesapksilat99",
+        storageBucket: "tesapksilat99.firebasestorage.app",
+        messagingSenderId: "747533449255",
+        appId: "1:747533449255:web:358edf3c6032c22cdbb602"
+    };
 
     const app = initializeApp(firebaseConfig);
     const database = getDatabase(app);
@@ -381,60 +380,44 @@
     let riwayatBiru = { 1: [], 2: [], 3: [] }; 
     let riwayatMerah = { 1: [], 2: [], 3: [] };
 
-    
-
-    // Cari kode ini di layar-ketua.html
-document.addEventListener("DOMContentLoaded", () => {
-    // KITA UBAH LOGIKANYA DI SINI
-    if (localStorage.getItem('ketua_logged_in') === 'true') {
-        // Jika sudah pernah login, langsung jalankan fungsi masuk
-        initAppKetua(); 
-    } else {
-        // Jika belum, baru tampilkan login
+    document.addEventListener("DOMContentLoaded", () => {
         new bootstrap.Modal(document.getElementById('modalLogin')).show();
-    }
-});
+    });
 
     window.initAppKetua = async function() {
-    const errorEl = document.getElementById('loginError');
-    const btnLogin = document.getElementById('btnLoginApp');
-    let gel = document.getElementById('lGelanggang').value;
-    const pass = document.getElementById('adminPass').value;
+        const errorEl = document.getElementById('loginError');
+        const btnLogin = document.getElementById('btnLoginApp');
+        let gel = document.getElementById('lGelanggang').value;
+        const pass = document.getElementById('adminPass').value;
 
-    // SAMAKAN PASSWORD DENGAN LAYAR JURI
-    if(pass !== "admin123") { 
-        errorEl.innerText = "❌ Password Salah!";
-        errorEl.style.display = "block";
-        return;
-    }
-    localStorage.setItem('ketua_logged_in', 'true');
+        if(pass !== "ketua123") {
+            errorEl.innerText = "❌ Password Salah!";
+            errorEl.style.display = "block";
+            return;
+        }
 
-    btnLogin.innerText = "MEMPROSES..."; 
-    btnLogin.disabled = true;
+        btnLogin.innerText = "LOADING..."; btnLogin.disabled = true;
+        let lockRef = ref(database, `pertandingan/${gel}/locks/ketua`);
+        let snap = await get(lockRef);
 
-    // Cek status lock di database (ini membuat keduanya terhubung)
-    let lockRef = ref(database, `pertandingan/${gel}/locks/ketua`);
-    let snap = await get(lockRef);
+        if(snap.exists() && snap.val() === true) {
+            errorEl.innerText = `❌ Sesi Ketua di arena ini sedang terbuka!`;
+            errorEl.style.display = "block";
+            btnLogin.innerText = "MASUK MONITOR"; btnLogin.disabled = false;
+            return;
+        }
 
-    if(snap.exists() && snap.val() === true) {
-        errorEl.innerText = `❌ Sesi Ketua di arena ini sudah dipakai!`;
-        errorEl.style.display = "block";
-        btnLogin.innerText = "MASUK MONITOR"; 
-        btnLogin.disabled = false;
-        return;
-    }
+        errorEl.style.display = "none";
+        await set(lockRef, true);
+        onDisconnect(lockRef).remove();
 
-    errorEl.style.display = "none";
-    await set(lockRef, true); // Mengunci posisi Ketua di database
-    onDisconnect(lockRef).remove(); // Otomatis lepas kunci jika browser ditutup
+        session.gel = gel;
+        document.getElementById('sessionInfo').innerText = `MONITOR UTAMA KETUA | ${session.gel.toUpperCase()}`;
+        document.getElementById('mainApp').style.display = 'flex';
+        bootstrap.Modal.getInstance(document.getElementById('modalLogin')).hide();
 
-    session.gel = gel;
-    document.getElementById('sessionInfo').innerText = `MONITOR UTAMA KETUA | ${session.gel.toUpperCase()}`;
-    document.getElementById('mainApp').style.display = 'flex';
-    bootstrap.Modal.getInstance(document.getElementById('modalLogin')).hide();
-
-    pasangMasterMonitor(); // Jalankan fungsi monitor
-};
+        pasangMasterMonitor();
+    };
 
     function pasangMasterMonitor() {
         let baseRef = `pertandingan/${session.gel}`;
@@ -635,10 +618,9 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     window.eksekusiLogout = function() {
-    localStorage.removeItem('ketua_logged_in'); // Hapus session
-    if(session.gel) set(ref(database, `pertandingan/${session.gel}/locks/ketua`), null);
-    setTimeout(() => { window.location.reload(); }, 200);
-};
+        if(session.gel) set(ref(database, `pertandingan/${session.gel}/locks/ketua`), null);
+        setTimeout(() => { window.location.reload(); }, 200);
+    };
 </script>
 </body>
 </html>
