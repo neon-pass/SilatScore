@@ -80,7 +80,7 @@
             <select id="lPosisi" class="form-select mb-3" onchange="toggleJuriDropdown()">
                 <option value="" disabled selected>-- Pilih Posisi Anda --</option>
                 <option value="ketua" id="optKetua">Layar Ketua Pertandingan</option>
-                <option value="dewan" id="optDewan">Dewan Juri (Master)</option>
+                <option value="dewan" id="optDewan">Dewan Juri</option>
                 <option value="juri" id="optJuri">Juri Poin</option>
             </select>
             <div id="containerJuri" style="display: none;">
@@ -440,8 +440,8 @@
         if(unsubscribeLock) unsubscribeLock(); let lockRef = ref(database, `pertandingan/${gel}/locks`);
         unsubscribeLock = onValue(lockRef, (snap) => {
             let locks = snap.val() || {}; let optDewan = document.getElementById('optDewan');
-            if(locks['dewan']) { optDewan.disabled = true; optDewan.innerText = "👑 Dewan Juri (Sedang Dipakai)"; if(document.getElementById('lPosisi').value === 'dewan') document.getElementById('lPosisi').value = ""; } 
-            else { optDewan.disabled = false; optDewan.innerText = "👑 Dewan Juri (Tersedia)"; }
+            if(locks['dewan']) { optDewan.disabled = true; optDewan.innerText = "Dewan Juri (Sedang Dipakai)"; if(document.getElementById('lPosisi').value === 'dewan') document.getElementById('lPosisi').value = ""; } 
+            else { optDewan.disabled = false; optDewan.innerText = "Dewan Juri (Tersedia)"; }
 
             ['j1', 'j2', 'j3'].forEach(jId => {
                 let optJ = document.getElementById(`opt${jId.toUpperCase()}`); 
@@ -477,7 +477,7 @@
         errorEl.style.display = "none"; await set(lockRef, true); onDisconnect(lockRef).remove(); if(unsubscribeLock) unsubscribeLock();
 
         session.gel = gel; session.juri = (pos === 'dewan') ? 'master' : juri; session.pos = pos; session.slotId = slotId;
-        let labelPosisi = (session.pos === 'dewan') ? "👑 DEWAN JURI" : `💻 JURI ${juri.replace('j','')}`;
+        let labelPosisi = (session.pos === 'dewan') ? "DEWAN JURI" : `JURI ${juri.replace('j','')}`;
         document.getElementById('sessionInfo').innerText = `${session.gel.toUpperCase()}  |  ${labelPosisi}`; document.getElementById('mainApp').style.display = 'flex';
         bootstrap.Modal.getInstance(document.getElementById('modalLogin')).hide();
         aturPeranUI(); pasangSistemFirebase();
