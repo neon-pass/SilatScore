@@ -11,8 +11,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install Firebase CLI
-        run: npm install -g firebase-tools
+      - name: Install Firebase CLI (Versi Stabil)
+        run: npm install -g firebase-tools@12.9.1
 
       - name: Jalankan Deploy
-        run: firebase deploy --only hosting --project apk-silat --token "${{ secrets.FIREBASE_TOKEN }}"
+        run: firebase deploy --project apk-silat --token "${{ secrets.FIREBASE_TOKEN }}" --non-interactive
