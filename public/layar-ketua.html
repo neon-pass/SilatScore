@@ -383,9 +383,17 @@
 
     
 
-    document.addEventListener("DOMContentLoaded", () => {
+    // Cari kode ini di layar-ketua.html
+document.addEventListener("DOMContentLoaded", () => {
+    // KITA UBAH LOGIKANYA DI SINI
+    if (localStorage.getItem('ketua_logged_in') === 'true') {
+        // Jika sudah pernah login, langsung jalankan fungsi masuk
+        initAppKetua(); 
+    } else {
+        // Jika belum, baru tampilkan login
         new bootstrap.Modal(document.getElementById('modalLogin')).show();
-    });
+    }
+});
 
     window.initAppKetua = async function() {
     const errorEl = document.getElementById('loginError');
@@ -399,6 +407,7 @@
         errorEl.style.display = "block";
         return;
     }
+    localStorage.setItem('ketua_logged_in', 'true');
 
     btnLogin.innerText = "MEMPROSES..."; 
     btnLogin.disabled = true;
@@ -626,9 +635,10 @@
     };
 
     window.eksekusiLogout = function() {
-        if(session.gel) set(ref(database, `pertandingan/${session.gel}/locks/ketua`), null);
-        setTimeout(() => { window.location.reload(); }, 200);
-    };
+    localStorage.removeItem('ketua_logged_in'); // Hapus session
+    if(session.gel) set(ref(database, `pertandingan/${session.gel}/locks/ketua`), null);
+    setTimeout(() => { window.location.reload(); }, 200);
+};
 </script>
 </body>
 </html>
