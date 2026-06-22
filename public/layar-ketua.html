@@ -94,12 +94,12 @@
 </head>
 <body>
 
-<!-- 🔐 LOGIN MODAL -->
+<!-- 🔐 LOGIN MODAL (Tanpa Password) -->
 <div class="modal" id="modalLogin" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content p-4 dark-theme text-center">
-            <h5 class="text-warning mb-3 fw-bold">👑 LOG IN KETUA</h5>
-            <select id="lGelanggang" class="form-select mb-2 text-center">
+            <h5 class="text-warning mb-3 fw-bold">👑 PILIH ARENA KETUA</h5>
+            <select id="lGelanggang" class="form-select mb-3 text-center">
                 <option value="g1" selected>Gelanggang 1</option>
                 <option value="g2">Gelanggang 2</option>
                 <option value="g3">Gelanggang 3</option>
@@ -108,7 +108,6 @@
                 <option value="g6">Gelanggang 6</option>
                 <option value="g7">Gelanggang 7</option>
             </select>
-            <input type="password" id="adminPass" class="form-control mb-3 text-center" placeholder="Password Otoritas">
             <div id="loginError" class="text-danger fw-bold small mb-2" style="display: none;"></div>
             <button class="btn btn-warning w-100 fw-bold text-dark" id="btnLoginApp" onclick="initAppKetua()">MASUK MONITOR</button>
         </div>
@@ -380,21 +379,24 @@
     let riwayatBiru = { 1: [], 2: [], 3: [] }; 
     let riwayatMerah = { 1: [], 2: [], 3: [] };
 
+    // 🔥 LOGIKA DETEKSI OTOMATIS DARI URL 🔥
     document.addEventListener("DOMContentLoaded", () => {
-        new bootstrap.Modal(document.getElementById('modalLogin')).show();
+        const urlParams = new URLSearchParams(window.location.search);
+        const gelDariURL = urlParams.get('gel');
+
+        if (gelDariURL) {
+            let selectEl = document.getElementById('lGelanggang');
+            if (selectEl) selectEl.value = gelDariURL;
+            initAppKetua();
+        } else {
+            new bootstrap.Modal(document.getElementById('modalLogin')).show();
+        }
     });
 
     window.initAppKetua = async function() {
         const errorEl = document.getElementById('loginError');
         const btnLogin = document.getElementById('btnLoginApp');
         let gel = document.getElementById('lGelanggang').value;
-        const pass = document.getElementById('adminPass').value;
-
-        if(pass !== "ketua123") {
-            errorEl.innerText = "❌ Password Salah!";
-            errorEl.style.display = "block";
-            return;
-        }
 
         btnLogin.innerText = "LOADING..."; btnLogin.disabled = true;
         let lockRef = ref(database, `pertandingan/${gel}/locks/ketua`);
@@ -414,7 +416,9 @@
         session.gel = gel;
         document.getElementById('sessionInfo').innerText = `MONITOR UTAMA KETUA | ${session.gel.toUpperCase()}`;
         document.getElementById('mainApp').style.display = 'flex';
-        bootstrap.Modal.getInstance(document.getElementById('modalLogin')).hide();
+        
+        let modalInst = bootstrap.Modal.getInstance(document.getElementById('modalLogin'));
+        if (modalInst) modalInst.hide();
 
         pasangMasterMonitor();
     };
