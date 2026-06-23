@@ -21,25 +21,24 @@
         .form-select, .form-control { background-color: #333 !important; color: #fff !important; border: 1px solid #555 !important; }
         .form-select:focus, .form-control:focus { border-color: #ffc107 !important; box-shadow: 0 0 5px rgba(255, 193, 7, 0.5); }
         
-        /* HEADER BERSAMA (ANTI BENTROK) */
+        /* TOMBOL KEMBALI DI MODAL */
+        .btn-back-modal { position: absolute; top: 15px; left: 15px; text-decoration: none; color: #888; font-size: 22px; font-weight: bold; transition: 0.2s; z-index: 10; }
+        .btn-back-modal:active { color: #fff; transform: scale(0.9); }
+
+        /* HEADER BERSAMA */
         .header-box { 
             background-color: #111; 
             border-bottom: 2px solid #ffc107; 
-            padding: 10px 110px; /* Menjaga jarak aman 110px di kiri-kanan teks */
+            padding: 15px; 
             text-align: center; 
             position: relative;
-            min-height: 80px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
         }
         .nama-pesilat { font-size: 24px; font-weight: bold; color: #0dcaf0; letter-spacing: 1px; line-height: 1.1; }
         .asal-kontingen { font-size: 13px; color: #aaa; letter-spacing: 2px; text-transform: uppercase; margin-top: 3px; }
         .btn-keluar { 
             position: absolute; 
-            top: 50%; 
-            right: 20px; 
-            transform: translateY(-50%); /* Terkunci presisi di tengah vertikal */
+            top: 15px; 
+            left: 15px; 
             font-size: 12px; 
             font-weight: bold; 
             z-index: 10;
@@ -70,7 +69,7 @@
         .btn-hukuman.warning-hukuman:active { background: #ffc107; color: #000; }
         .badge-hukuman { font-size: 11px; background: #fff; color: #dc3545; padding: 2px 6px; border-radius: 5px; margin-top: 3px; font-weight: 900;}
         
-        /* PERBAIKAN LOG KOTAK DEWAN (FLEX KUNCI BAWAH) */
+        /* LOG KOTAK DEWAN (FLEX KUNCI BAWAH) */
         .log-hukuman-dewan { 
             background: #1a1a1a; 
             border: 1px dashed #dc3545; 
@@ -90,10 +89,10 @@
 </head>
 <body>
 
-<!-- 🔐 MODAL LOGIN PORTAL LENGKAP -->
 <div class="modal" id="modalLogin" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content p-4 position-relative dark-theme">
+            <a href="index.html" class="btn-back-modal">❮</a>
             <h4 class="text-warning text-center mb-4 fw-bold">PORTAL JURI SENI</h4>
             
             <label class="form-label mb-1 text-secondary" style="font-size: 12px;">1. Pilih Gelanggang:</label>
@@ -132,7 +131,6 @@
             <div id="loginError" class="text-danger fw-bold mb-3 text-center" style="display: none; font-size: 13px;"></div>
             <button class="btn btn-warning w-100 fw-bold mt-2 text-dark" id="btnLoginApp" onclick="initAppSeni()">MASUK GELANGGANG</button>
 
-            <!-- TOMBOL BANTUAN DEVELOPER UNTUK RESET LOCK SAAT TESTING -->
             <div class="text-center mt-3">
                 <a href="#" onclick="KunciPerangkat.releaseAll(); return false;" class="text-secondary" style="font-size: 10px; text-decoration: underline;">[ Dev: Reset Seluruh Kunci Gelanggang ]</a>
             </div>
@@ -140,10 +138,8 @@
     </div>
 </div>
 
-<!-- 📱 CONTAINER UTAMA APLIKASI -->
-<div id="mainApp" style="display: none; flex-grow: 1;">
+<div id="mainApp" style="display: none; flex-direction: column; flex-grow: 1;">
     
-    <!-- HEADER BERSAMA (SUDAH DIPERBAIKI) -->
     <div class="header-box">
         <button class="btn btn-outline-danger btn-keluar" onclick="logoutSeni()">🚪 KELUAR</button>
         <div id="labelJabatanTeks" class="text-warning fw-bold mb-1" style="font-size: 12px; letter-spacing: 2px;">-</div>
@@ -153,12 +149,8 @@
 
     <div class="container-fluid mt-3 px-3">
         
-        <!-- ========================================= -->
-        <!-- 💻 TAMPILAN PANEL DEWAN SENI              -->
-        <!-- ========================================= -->
         <div id="panelDewan" style="display: none;">
             <div class="row">
-                <!-- KOLOM KIRI DEWAN -->
                 <div class="col-md-7">
                     <div class="card-custom">
                         <h6 class="text-info border-bottom border-secondary pb-2 mb-3">💻 SIMULASI SKOR TABLET JURI (DUMMY)</h6>
@@ -187,7 +179,6 @@
                                 </div>
                             </div>
                             
-                            <!-- KOLOM LOG HUKUMAN (TOMBOL RESET TERKUNCI DI BAWAH) -->
                             <div class="col-4">
                                 <div class="log-hukuman-dewan">
                                     <div class="text-center fw-bold text-danger border-bottom border-danger pb-1 mb-2">LOG HUKUMAN</div>
@@ -202,7 +193,6 @@
                     </div>
                 </div>
 
-                <!-- KOLOM KANAN DEWAN (KALKULASI MEDIAN) -->
                 <div class="col-md-5">
                     <div class="card-custom sticky-top" style="top: 10px;">
                         <h6 class="text-warning border-bottom border-secondary pb-2 mb-3 text-center">📊 PAPAN KALKULASI</h6>
@@ -230,9 +220,6 @@
             </div>
         </div>
 
-        <!-- ========================================= -->
-        <!-- 📱 TAMPILAN PANEL JURI SENI               -->
-        <!-- ========================================= -->
         <div id="panelJuri" style="display: none; max-width: 600px; margin: auto;">
             <div class="skor-utama-juri" id="displaySkorJuri">10.00</div>
             
@@ -342,7 +329,7 @@
         errorEl.style.display = "none";
 
         setTimeout(() => {
-            // KUNCI POSISI INI AGAR TIDAK BISA DIAMBIL TABLET LAIN
+            // KUNCI POSISI INI
             KunciPerangkat.lockSlot(gel, pos, juri);
 
             sessionSeni = { gel, pos, juriId: juri };
@@ -369,7 +356,6 @@
     }
 
     window.logoutSeni = function() {
-        // LEPASKAN KUNCI SLOT SAAT KLIK KELUAR
         if(sessionSeni.gel && sessionSeni.pos) {
             KunciPerangkat.releaseSlot(sessionSeni.gel, sessionSeni.pos, sessionSeni.juriId);
         }
