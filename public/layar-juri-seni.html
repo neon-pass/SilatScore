@@ -29,17 +29,17 @@
         .header-box { 
             background-color: #111; 
             border-bottom: 2px solid #ffc107; 
-            padding: 15px; 
+            padding: 12px 15px; 
             text-align: center; 
             position: relative;
         }
         .nama-pesilat { font-size: 24px; font-weight: bold; color: #0dcaf0; letter-spacing: 1px; line-height: 1.1; }
-        .asal-kontingen { font-size: 13px; color: #aaa; letter-spacing: 2px; text-transform: uppercase; margin-top: 3px; }
+        .asal-kontingen { font-size: 12px; color: #aaa; letter-spacing: 2px; text-transform: uppercase; margin-top: 3px; }
         .btn-keluar { 
             position: absolute; 
             top: 15px; 
-            left: 15px; 
-            font-size: 12px; 
+            left: 20px; 
+            font-size: 11px; 
             font-weight: bold; 
             z-index: 10;
         }
@@ -57,9 +57,26 @@
 
         /* STYLING DEWAN SENI */
         .card-custom { background-color: #222; border: 1px solid #444; border-radius: 10px; padding: 15px; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-        .input-skor-dewan { background-color: #333 !important; color: #fff !important; border: 1px solid #555 !important; font-size: 22px; font-weight: bold; text-align: center; height: 50px; font-family: monospace; }
         .juri-box { background: linear-gradient(180deg, #0b5ed7 0%, #084298 100%); border-radius: 8px; padding: 8px; text-align: center; border: 1px solid #0d6efd; }
         .juri-title { font-size: 13px; font-weight: bold; color: #fff; margin-bottom: 5px; }
+        
+        /* KOTAK SKOR JURI YANG SUDAH DIKUNCI MATI (NON-INPUT) */
+        .display-skor-juri { 
+            background-color: #333; 
+            color: #fff; 
+            border: 1px solid #555; 
+            border-radius: 5px;
+            font-size: 22px; 
+            font-weight: bold; 
+            text-align: center; 
+            height: 50px; 
+            line-height: 48px; 
+            font-family: monospace; 
+            cursor: default; 
+            user-select: none;
+            pointer-events: none; /* Mematikan total respon klik */
+        }
+
         .result-box { background: #000; border: 2px solid #ffc107; border-radius: 10px; padding: 15px; text-align: center; }
         .result-title { color: #ffc107; font-size: 15px; font-weight: bold; letter-spacing: 2px; }
         .result-value { font-size: 50px; font-weight: bold; line-height: 1; color: #fff; font-family: monospace;}
@@ -70,25 +87,13 @@
         .badge-hukuman { font-size: 11px; background: #fff; color: #dc3545; padding: 2px 6px; border-radius: 5px; margin-top: 3px; font-weight: 900;}
         
         /* LOG KOTAK DEWAN (FLEX KUNCI BAWAH) */
-        .log-hukuman-dewan { 
-            background: #1a1a1a; 
-            border: 1px dashed #dc3545; 
-            padding: 10px; 
-            border-radius: 8px; 
-            height: 100%; 
-            display: flex; 
-            flex-direction: column; 
-        }
-        .log-isi {
-            flex-grow: 1;
-            overflow-y: auto;
-            max-height: 115px;
-            margin-bottom: 10px;
-        }
+        .log-hukuman-dewan { background: #1a1a1a; border: 1px dashed #dc3545; padding: 10px; border-radius: 8px; height: 100%; display: flex; flex-direction: column; }
+        .log-isi { flex-grow: 1; overflow-y: auto; max-height: 115px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
+<!-- 🔐 MODAL LOGIN PORTAL LENGKAP -->
 <div class="modal" id="modalLogin" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content p-4 position-relative dark-theme">
@@ -138,8 +143,10 @@
     </div>
 </div>
 
+<!-- 📱 CONTAINER UTAMA APLIKASI -->
 <div id="mainApp" style="display: none; flex-direction: column; flex-grow: 1;">
     
+    <!-- HEADER BERSAMA -->
     <div class="header-box">
         <button class="btn btn-outline-danger btn-keluar" onclick="logoutSeni()">🚪 KELUAR</button>
         <div id="labelJabatanTeks" class="text-warning fw-bold mb-1" style="font-size: 12px; letter-spacing: 2px;">-</div>
@@ -149,20 +156,29 @@
 
     <div class="container-fluid mt-3 px-3">
         
+        <!-- ========================================= -->
+        <!-- 💻 TAMPILAN PANEL DEWAN SENI              -->
+        <!-- ========================================= -->
         <div id="panelDewan" style="display: none;">
             <div class="row">
+                <!-- KOLOM KIRI DEWAN -->
                 <div class="col-md-7">
                     <div class="card-custom">
-                        <h6 class="text-info border-bottom border-secondary pb-2 mb-3">💻 SIMULASI SKOR TABLET JURI (DUMMY)</h6>
+                        <div class="d-flex justify-content-between align-items-center border-bottom border-secondary pb-2 mb-3">
+                            <h6 class="text-info mb-0">💻 SIMULASI SKOR TABLET JURI (DUMMY)</h6>
+                            <button class="btn btn-sm btn-outline-info fw-bold" style="font-size: 11px;" onclick="acakNilaiJuriDev()">🔄 Acak Nilai</button>
+                        </div>
+
+                        <!-- KOTAK SKOR MENGGUNAKAN DIV STATIS (TIDAK BISA DIKLIK) -->
                         <div class="row g-2 mb-2">
-                            <div class="col-4"><div class="juri-box"><div class="juri-title">JURI 1</div><input type="number" id="skorJ1" class="form-control input-skor-dewan" value="9.90" step="0.01" oninput="kalkulasiSkorDewan()"></div></div>
-                            <div class="col-4"><div class="juri-box"><div class="juri-title">JURI 2</div><input type="number" id="skorJ2" class="form-control input-skor-dewan" value="9.92" step="0.01" oninput="kalkulasiSkorDewan()"></div></div>
-                            <div class="col-4"><div class="juri-box"><div class="juri-title">JURI 3</div><input type="number" id="skorJ3" class="form-control input-skor-dewan" value="9.95" step="0.01" oninput="kalkulasiSkorDewan()"></div></div>
+                            <div class="col-4"><div class="juri-box"><div class="juri-title">JURI 1</div><div id="skorJ1" class="display-skor-juri">9.90</div></div></div>
+                            <div class="col-4"><div class="juri-box"><div class="juri-title">JURI 2</div><div id="skorJ2" class="display-skor-juri">9.92</div></div></div>
+                            <div class="col-4"><div class="juri-box"><div class="juri-title">JURI 3</div><div id="skorJ3" class="display-skor-juri">9.95</div></div></div>
                         </div>
                         <div class="row g-2">
-                            <div class="col-4"><div class="juri-box" style="background: linear-gradient(180deg, #dc3545 0%, #9e1c28 100%); border-color: #dc3545;"><div class="juri-title">JURI 4</div><input type="number" id="skorJ4" class="form-control input-skor-dewan" value="9.96" step="0.01" oninput="kalkulasiSkorDewan()"></div></div>
-                            <div class="col-4"><div class="juri-box" style="background: linear-gradient(180deg, #dc3545 0%, #9e1c28 100%); border-color: #dc3545;"><div class="juri-title">JURI 5</div><input type="number" id="skorJ5" class="form-control input-skor-dewan" value="9.98" step="0.01" oninput="kalkulasiSkorDewan()"></div></div>
-                            <div class="col-4"><div class="juri-box" style="background: linear-gradient(180deg, #dc3545 0%, #9e1c28 100%); border-color: #dc3545;"><div class="juri-title">JURI 6</div><input type="number" id="skorJ6" class="form-control input-skor-dewan" value="9.99" step="0.01" oninput="kalkulasiSkorDewan()"></div></div>
+                            <div class="col-4"><div class="juri-box" style="background: linear-gradient(180deg, #dc3545 0%, #9e1c28 100%); border-color: #dc3545;"><div class="juri-title">JURI 4</div><div id="skorJ4" class="display-skor-juri">9.96</div></div></div>
+                            <div class="col-4"><div class="juri-box" style="background: linear-gradient(180deg, #dc3545 0%, #9e1c28 100%); border-color: #dc3545;"><div class="juri-title">JURI 5</div><div id="skorJ5" class="display-skor-juri">9.98</div></div></div>
+                            <div class="col-4"><div class="juri-box" style="background: linear-gradient(180deg, #dc3545 0%, #9e1c28 100%); border-color: #dc3545;"><div class="juri-title">JURI 6</div><div id="skorJ6" class="display-skor-juri">9.99</div></div></div>
                         </div>
                     </div>
 
@@ -179,6 +195,7 @@
                                 </div>
                             </div>
                             
+                            <!-- KOLOM LOG HUKUMAN -->
                             <div class="col-4">
                                 <div class="log-hukuman-dewan">
                                     <div class="text-center fw-bold text-danger border-bottom border-danger pb-1 mb-2">LOG HUKUMAN</div>
@@ -193,6 +210,7 @@
                     </div>
                 </div>
 
+                <!-- KOLOM KANAN DEWAN (KALKULASI MEDIAN) -->
                 <div class="col-md-5">
                     <div class="card-custom sticky-top" style="top: 10px;">
                         <h6 class="text-warning border-bottom border-secondary pb-2 mb-3 text-center">📊 PAPAN KALKULASI</h6>
@@ -220,6 +238,9 @@
             </div>
         </div>
 
+        <!-- ========================================= -->
+        <!-- 📱 TAMPILAN PANEL JURI SENI               -->
+        <!-- ========================================= -->
         <div id="panelJuri" style="display: none; max-width: 600px; margin: auto;">
             <div class="skor-utama-juri" id="displaySkorJuri">10.00</div>
             
@@ -261,9 +282,7 @@
 <script>
     let sessionSeni = {};
 
-    // ==========================================
     // SISTEM PENGUNCI PERANGKAT (SLOT LOCKING)
-    // ==========================================
     const KunciPerangkat = {
         generateKey: function(gel, pos, juriId) {
             return pos === 'dewan' ? `LOCK_SENI_${gel}_DEWAN` : `LOCK_SENI_${gel}_${juriId}`;
@@ -316,7 +335,6 @@
         if(pos === 'juri' && !juri) { errorEl.innerText = "❌ Silakan pilih Nomor Perangkat Juri!"; errorEl.style.display = "block"; return; }
         if(pass !== "admin123") { errorEl.innerText = "❌ Password Salah!"; errorEl.style.display = "block"; return; }
 
-        // CEK APAKAH PERANGKAT LAIN SUDAH MENGAMBIL POSISI INI
         if (KunciPerangkat.isLocked(gel, pos, juri)) {
             let namaAlat = pos === 'dewan' ? "Dewan Seni" : juri.toUpperCase();
             errorEl.innerText = `❌ DITOLAK: Posisis ${namaAlat} di ${gel.toUpperCase()} sedang dipakai oleh perangkat lain!`;
@@ -329,9 +347,7 @@
         errorEl.style.display = "none";
 
         setTimeout(() => {
-            // KUNCI POSISI INI
             KunciPerangkat.lockSlot(gel, pos, juri);
-
             sessionSeni = { gel, pos, juriId: juri };
 
             let namaEvent = "KATEGORI SENI - " + gel.toUpperCase();
@@ -386,7 +402,16 @@
         if (totalPotonganJuri > 0) { totalPotonganJuri--; riwayatPotonganJuri.pop(); updateLayarJuri(); }
     }
 
-    // LOGIKA DEWAN SENI
+    // FUNGSI BARU: ACAK SKOR DUMMY JURI (DEV)
+    window.acakNilaiJuriDev = function() {
+        [1,2,3,4,5,6].forEach(i => {
+            let nilaiRandom = (9.80 + (Math.random() * 0.19)).toFixed(2);
+            document.getElementById(`skorJ${i}`).innerText = nilaiRandom;
+        });
+        kalkulasiSkorDewan();
+    }
+
+    // LOGIKA DEWAN SENI (MENGAMBIL DARI .innerText BUKAN .value)
     let totalHukumanDewan = 0;
     let listHukumanDewan = [];
 
@@ -406,7 +431,8 @@
     }
 
     window.kalkulasiSkorDewan = function() {
-        let skor = [1,2,3,4,5,6].map(i => parseFloat(document.getElementById(`skorJ${i}`).value) || 0).sort((a, b) => a - b);
+        // PERHATIKAN: Sekarang dia mengambil innerText dari div
+        let skor = [1,2,3,4,5,6].map(i => parseFloat(document.getElementById(`skorJ${i}`).innerText) || 0).sort((a, b) => a - b);
         document.getElementById('arrayUrut').innerText = `[ ${skor.map(s => s.toFixed(2)).join(', ')} ]`;
         
         let median = (skor[2] + skor[3]) / 2;
