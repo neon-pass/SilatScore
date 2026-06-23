@@ -436,15 +436,16 @@
                 if (data.waktu_screensaver) ssDelay = parseInt(data.waktu_screensaver) * 1000;
                 if (data.screensavers) arrScreensavers = Object.values(data.screensavers).filter(img => img !== "");
                 
-                // =======================================================
-                // 🔥 SENSOR PENERIMA PAKET SKALA VISUAL REAL-TIME 🔥
-                // =======================================================
-                if (data.skala) {
+                // SENSOR SKALA KINI BERDIRI SENDIRI PER-MATRAS
+            onValue(ref(database, `${baseRefPath}/skala`), (snap) => {
+                let skalaData = snap.val();
+                if (skalaData) {
                     const r = document.documentElement.style;
-                    if (data.skala.global !== undefined) r.setProperty('--skala-global', `${data.skala.global}px`);
-                    if (data.skala.skor !== undefined) r.setProperty('--skala-skor', `${data.skala.skor}rem`);
-                    if (data.skala.ikon !== undefined) r.setProperty('--skala-ikon', `${data.skala.ikon}rem`);
+                    if (skalaData.global !== undefined) r.setProperty('--skala-global', `${skalaData.global}px`);
+                    if (skalaData.skor !== undefined) r.setProperty('--skala-skor', `${skalaData.skor}rem`);
+                    if (skalaData.ikon !== undefined) r.setProperty('--skala-ikon', `${skalaData.ikon}rem`);
                 }
+            });
 
                 resetIdleTimer(); 
             });
