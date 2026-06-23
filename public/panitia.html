@@ -807,7 +807,17 @@
             let gel = document.getElementById('pilihGelanggang').value; let base = `pertandingan/${gel}`;
             
             updateLayarDanFirebase(modeKategoriAktif === 'tanding' ? "02:00" : "00:00");
-            set(ref(database, `${base}/biru`), { r1:0, r2:0, r3:0 }); set(ref(database, `${base}/merah`), { r1:0, r2:0, r3:0 }); set(ref(database, `${base}/ronde_aktif`), 1);
+            set(ref(database, `${base}/biru`), { r1:0, r2:0, r3:0 }); 
+            set(ref(database, `${base}/merah`), { r1:0, r2:0, r3:0 }); 
+            set(ref(database, `${base}/ronde_aktif`), 1);
+
+            // 🔥 PENYAMBUNG SERAT KABEL SENI YANG PUTUS 🔥
+            set(ref(database, `${base}/seni`), {
+                skor: { j1: 10, j2: 10, j3: 10, j4: 10, j5: 10, j6: 10 },
+                hukuman: 0,
+                hasil_akhir: 0
+            });
+
             set(ref(database, `${base}/setup`), { kategori: modeKategoriAktif, partai: "-", babak: "-", kelas: "-", wasit: "-", dewan: "-", juri1: "-", juri2: "-", juri3: "-", nama_biru: "SUDUT BIRU", kontingen_biru: "-", nama_merah: "SUDUT MERAH", kontingen_merah: "-" });
             set(ref(database, `${base}/sinyal`), null); set(ref(database, `${base}/pemenang_mutlak`), null); set(ref(database, `${base}/pemenang_keputusan`), null); set(ref(database, `${base}/alasan_menang`), null); set(ref(database, `${base}/izin_simpan`), null);
             
