@@ -49,7 +49,7 @@
         .score-row-highlight { background-color: #1f2937; font-weight: bold; }
         .score-row-highlight .label-row { color: #00f0ff; background-color: #111827; }
         
-        /* CONTAINER ALIRAN POIN HORIZONTAL */
+        /* CONTAINER ALIRAN POIN SINKRON */
         .points-timeline-container { 
             display: flex; 
             gap: 6px; 
@@ -58,19 +58,14 @@
             width: 100%;
             min-height: 28px;
             align-items: center;
+            scroll-behavior: auto !important; /* Dilarang 'smooth' agar sinkronisasi instan */
         }
         .points-timeline-container::-webkit-scrollbar { height: 4px; }
         .points-timeline-container::-webkit-scrollbar-thumb { background: #444; border-radius: 10px; }
 
         .log-cell { 
-            display: inline-flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-weight: bold; 
-            font-family: monospace; 
-            font-size: 14px; 
-            min-width: 12px; 
-            animation: fadeIn 0.2s ease-out;
+            display: inline-flex; align-items: center; justify-content: center; 
+            font-weight: bold; font-family: monospace; font-size: 14px; min-width: 12px; 
         }
         .tx-putih { color: #ffffff; font-size: 14px; }
         .tx-abu { color: #555; font-weight: normal; font-size: 14px; }
@@ -78,19 +73,14 @@
         .tx-biru { color: #00e1ff; font-size: 15px; text-shadow: 0 0 6px rgba(0,225,255,0.6); }
         .tx-merah { color: #ff3c3c; font-size: 15px; text-shadow: 0 0 6px rgba(255,60,60,0.6); }
 
-        .babak-divider { background: #1a1a1a; border: 1px solid #333; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 280px; }
+        .babak-divider { background: #1a1a1a; border: 1px solid #333; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 310px; }
         .babak-number { font-size: 38px; font-weight: bold; color: #ffc107; font-family: monospace; line-height: 1; }
 
-        @keyframes fadeIn {
-            0% { opacity: 0; transform: translateY(-3px); }
-            100% { opacity: 1; transform: translateY(0); }
-        }
         .modal-content.dark-theme { background-color: #1a1a1a; border: 1px solid #555; color: white; }
     </style>
 </head>
 <body>
 
-<!-- 📊 DASHBOARD UTAMA MONITOR KETUA -->
 <div id="mainApp" style="display:none; flex-direction: column; min-height: 100vh;">
     
     <!-- INFO EVENT -->
@@ -233,7 +223,7 @@
         <span id="sessionInfo" class="text-secondary small fw-bold px-2"></span>
         <div class="d-flex gap-2">
             <button class="btn btn-sm btn-warning fw-bold text-dark px-3" data-bs-toggle="modal" data-bs-target="#modalSetupLaga">⚙️ PANEL SETUP & RESET</button>
-            <button class="btn btn-sm btn-outline-danger fw-bold" data-bs-toggle="modal" data-bs-target="#modalKonfirmasiLogoutKetua">🚪 KELUAR</button>
+            <button class="btn btn-sm btn-outline-danger fw-bold" onclick="eksekusiLogout()">🚪 KELUAR</button>
         </div>
     </div>
 </div>
@@ -310,41 +300,6 @@
     </div>
 </div>
 
-<!-- MODAL KONFIRMASI LOGOUT -->
-<div class="modal fade" id="modalKonfirmasiLogoutKetua" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content dark-theme shadow-lg" style="border: 1px solid #555;">
-            <div class="modal-header dark-theme border-bottom-0">
-                <h5 class="modal-title text-danger fw-bold w-100 text-center">🚪 KONFIRMASI KELUAR</h5>
-            </div>
-            <div class="modal-body text-center fs-5 py-4">
-                Apakah Anda yakin ingin keluar dari layar Master Monitor?
-            </div>
-            <div class="modal-footer dark-theme border-top-0 justify-content-center gap-3">
-                <button type="button" class="btn btn-outline-light px-4 fw-bold w-25" data-bs-dismiss="modal">BATAL</button>
-                <button type="button" class="btn btn-danger px-4 fw-bold w-50" onclick="eksekusiLogout()" data-bs-dismiss="modal">YA, KELUAR</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- 🔥 MODAL BARU: PENOLAKAN AKSES (GANTINYA ALERT BROWSER YANG BIKIN MALU) 🔥 -->
-<div class="modal fade" id="modalSesiKetuaTerpakai" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content dark-theme text-center p-4 shadow-lg" style="border: 2px solid #dc3545;">
-            <div class="modal-header border-0 justify-content-center pb-0">
-                <h5 class="modal-title text-danger fw-bold fs-5">⚠️ AKSES DITOLAK</h5>
-            </div>
-            <div class="modal-body py-3 fs-6 text-light" id="teksPesanPenolakan">
-                Sesi Ketua di arena ini sedang terbuka di perangkat lain!
-            </div>
-            <div class="modal-footer border-0 justify-content-center pt-0">
-                <button type="button" class="btn btn-danger w-100 fw-bold" onclick="pulangKeJuri()">KEMBALI KE MENU JURI</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
@@ -378,20 +333,43 @@
         } else {
             window.location.href = 'layar-juri.html';
         }
+
+        // 🔥 MESIN PENGIKAT 7 BARIS SINKRON SECARA SERENTAK 🔥
+        aktifkanSinkronisasiScroll(['j1-biru', 'j2-biru', 'j3-biru', 'score-biru', 'jatuhan-biru', 'hukuman-biru', 'binaan-biru']);
+        aktifkanSinkronisasiScroll(['j1-merah', 'j2-merah', 'j3-merah', 'score-merah', 'jatuhan-merah', 'hukuman-merah', 'binaan-merah']);
     });
+
+    // FUNGSI INTI SINKRONISASI 7 JALUR (Sangat Ringan, Bebas Lag)
+    function aktifkanSinkronisasiScroll(kelompokIds) {
+        let sedangSinkron = false;
+        kelompokIds.forEach(id => {
+            let el = document.getElementById(`timeline-${id}`);
+            if(!el) return;
+            el.addEventListener('scroll', (e) => {
+                if(sedangSinkron) return; // Mencegah feedback loop!
+                sedangSinkron = true;
+                let posisiKiri = e.target.scrollLeft;
+
+                kelompokIds.forEach(saudara => {
+                    if(saudara !== id) {
+                        let target = document.getElementById(`timeline-${saudara}`);
+                        if(target && target.scrollLeft !== posisiKiri) {
+                            target.scrollLeft = posisiKiri;
+                        }
+                    }
+                });
+                requestAnimationFrame(() => { sedangSinkron = false; });
+            }, { passive: true });
+        });
+    }
 
     window.initAppKetua = async function(gel) {
         let lockRef = ref(database, `pertandingan/${gel}/locks/ketua`);
         let snap = await get(lockRef);
 
         if(snap.exists() && snap.val() === true) {
-            // Tampilkan Custom Modal penolakan berkelas ala pro-dev
-            let divPesan = document.getElementById('teksPesanPenolakan');
-            if(divPesan) divPesan.innerHTML = `Sesi Monitor Ketua untuk arena <b>${gel.toUpperCase()}</b> sedang aktif di perangkat lain.<br><br><small class="text-secondary">Harap tutup sesi lama terlebih dahulu.</small>`;
-            
-            let modalTolakEl = document.getElementById('modalSesiKetuaTerpakai');
-            let modalTolak = bootstrap.Modal.getInstance(modalTolakEl) || new bootstrap.Modal(modalTolakEl);
-            modalTolak.show();
+            alert(`❌ Sesi Ketua di arena ${gel.toUpperCase()} sedang terbuka di perangkat lain!`);
+            window.location.href = 'layar-juri.html';
             return;
         }
 
@@ -403,10 +381,6 @@
         document.getElementById('mainApp').style.display = 'flex';
 
         pasangMasterMonitor();
-    };
-
-    window.pulangKeJuri = function() {
-        window.location.href = 'layar-juri.html';
     };
 
     function pasangMasterMonitor() {
@@ -437,6 +411,7 @@
             document.getElementById('liveStatus').innerText = st;
             document.getElementById('liveStatus').className = st === "PLAY" ? "badge bg-success mt-1 px-2 py-1" : "badge bg-danger mt-1 px-2 py-1";
         });
+        
         onValue(ref(database, `${baseRef}/timer`), (snap) => { document.getElementById('liveTimer').innerText = snap.val() || "00:00"; });
         
         onValue(ref(database, `${baseRef}/ronde_aktif`), (snap) => { 
@@ -449,8 +424,12 @@
             onValue(ref(database, `${baseRef}/merah/r${r}_log`), (snap) => { riwayatMerah[r] = snap.val() || []; skorMerah[r] = riwayatMerah[r].reduce((a,b) => a+b, 0); updateSkorLayarMata(); });
         });
 
+        let timeoutRender = null;
         onValue(ref(database, `${baseRef}/logs`), (snap) => {
-            renderPoinDetail(snap.val());
+            if (timeoutRender) clearTimeout(timeoutRender);
+            timeoutRender = setTimeout(() => {
+                renderPoinDetail(snap.val());
+            }, 60); 
         });
     }
 
@@ -476,14 +455,20 @@
         document.getElementById('totBinaanMerah').innerText = sP_M.filter(v => v === 0).length;
     }
 
+    // MEMASUKKAN SELURUH 7 JALUR KE DALAM RENDER DOM
     function renderPoinDetail(logsData) {
         const targetIds = [
             'j1-biru', 'j2-biru', 'j3-biru', 'score-biru', 'jatuhan-biru', 'hukuman-biru', 'binaan-biru',
             'j1-merah', 'j2-merah', 'j3-merah', 'score-merah', 'jatuhan-merah', 'hukuman-merah', 'binaan-merah'
         ];
         
-        targetIds.forEach(id => { document.getElementById(`timeline-${id}`).innerHTML = ''; });
-        if (!logsData) return;
+        let htmlBuffer = {};
+        targetIds.forEach(id => htmlBuffer[id] = "");
+
+        if (!logsData) {
+            targetIds.forEach(id => { document.getElementById(`timeline-${id}`).innerHTML = ''; });
+            return;
+        }
 
         let logArray = Object.keys(logsData).map(key => ({ id: key, ...logsData[key] }));
         logArray.sort((a, b) => a.time_millis - b.time_millis);
@@ -497,13 +482,15 @@
                 if (mentah.type === 'juri_hit_mentah' && mentah.sudut === sah.sudut && mentah.poin === sah.poin) {
                     if (hits.includes(mentah.juri)) {
                         let diff = sah.time_millis - mentah.time_millis;
-                        if (diff >= -500 && diff <= 4000) { 
-                            suppressedLogs.add(mentah.id); 
-                        }
+                        if (diff >= -500 && diff <= 4000) { suppressedLogs.add(mentah.id); }
                     }
                 }
             });
         });
+
+        function pushHTML(id, className, text) {
+            htmlBuffer[id] += `<span class="log-cell ${className}">${text}</span>`;
+        }
 
         logArray.forEach(log => {
             if (suppressedLogs.has(log.id)) return; 
@@ -512,56 +499,46 @@
             let jenis = log.type;
 
             if (jenis === 'juri_hit_sah') {
-                let poin = log.poin;
-                let hits = log.juri_hits || [];
-                
+                let poin = log.poin; let hits = log.juri_hits || [];
                 ['j1', 'j2', 'j3'].forEach(j => {
-                    if (hits.includes(j)) appendLogText(`timeline-${j}-${sdt}`, 'tx-putih', poin);
-                    else appendLogText(`timeline-${j}-${sdt}`, 'tx-abu', '/');
+                    if (hits.includes(j)) pushHTML(`${j}-${sdt}`, 'tx-putih', poin);
+                    else pushHTML(`${j}-${sdt}`, 'tx-abu', '/');
                 });
-                appendLogText(`timeline-score-${sdt}`, (sdt === 'biru' ? 'tx-biru' : 'tx-merah'), poin);
-                ['jatuhan', 'hukuman', 'binaan'].forEach(kat => appendLogText(`timeline-${kat}-${sdt}`, 'tx-abu', '/'));
+                pushHTML(`score-${sdt}`, (sdt === 'biru' ? 'tx-biru' : 'tx-merah'), poin);
+                ['jatuhan', 'hukuman', 'binaan'].forEach(kat => pushHTML(`${kat}-${sdt}`, 'tx-abu', '/'));
             } 
             else if (jenis === 'juri_hit_mentah') {
-                let jNum = log.juri; 
-                let poin = log.poin;
-                
+                let jNum = log.juri; let poin = log.poin;
                 ['j1', 'j2', 'j3'].forEach(j => {
-                    if (j === jNum) appendLogText(`timeline-${j}-${sdt}`, 'tx-putih', poin);
-                    else appendLogText(`timeline-${j}-${sdt}`, 'tx-abu', '/');
+                    if (j === jNum) pushHTML(`${j}-${sdt}`, 'tx-putih', poin);
+                    else pushHTML(`${j}-${sdt}`, 'tx-abu', '/');
                 });
-                appendLogText(`timeline-score-${sdt}`, 'tx-abu', '/');
-                ['jatuhan', 'hukuman', 'binaan'].forEach(kat => appendLogText(`timeline-${kat}-${sdt}`, 'tx-abu', '/'));
+                pushHTML(`score-${sdt}`, 'tx-abu', '/');
+                ['jatuhan', 'hukuman', 'binaan'].forEach(kat => pushHTML(`${kat}-${sdt}`, 'tx-abu', '/'));
             }
             else {
-                ['j1', 'j2', 'j3', 'score'].forEach(j => appendLogText(`timeline-${j}-${sdt}`, 'tx-abu', '/'));
-                
+                ['j1', 'j2', 'j3', 'score'].forEach(j => pushHTML(`${j}-${sdt}`, 'tx-abu', '/'));
                 ['jatuhan', 'hukuman', 'binaan'].forEach(kat => {
                     if (kat === jenis) {
                         let txt = (jenis === 'jatuhan' ? '+3' : (jenis === 'hukuman' ? log.poin : 'B'));
                         let warna = (jenis === 'jatuhan') ? 'tx-kuning' : (jenis === 'hukuman' ? 'tx-merah' : 'tx-putih');
-                        appendLogText(`timeline-${kat}-${sdt}`, warna, txt);
-                    } else {
-                        appendLogText(`timeline-${kat}-${sdt}`, 'tx-abu', '/');
-                    }
+                        pushHTML(`${kat}-${sdt}`, warna, txt);
+                    } else { pushHTML(`${kat}-${sdt}`, 'tx-abu', '/'); }
                 });
             }
         });
 
         targetIds.forEach(id => {
             let el = document.getElementById(`timeline-${id}`);
-            if(el) el.scrollLeft = el.scrollWidth;
+            if(el && el.innerHTML !== htmlBuffer[id]) { el.innerHTML = htmlBuffer[id]; }
         });
-    }
 
-    function appendLogText(containerId, className, text) {
-        let container = document.getElementById(containerId);
-        if(container) {
-            let box = document.createElement('span');
-            box.className = `log-cell ${className}`;
-            box.innerText = text;
-            container.appendChild(box);
-        }
+        // 🔥 KEAJAIBAN KETIGA: Cukup geser baris 'Score' ke ujung kanan, 
+        // maka otomatis 6 baris saudaranya di atas & bawah akan terpelanting ikut ke kanan! 🔥
+        ['score-biru', 'score-merah'].forEach(id => {
+            let el = document.getElementById(`timeline-${id}`);
+            if(el) el.scrollLeft = el.scrollWidth; 
+        });
     }
 
     window.kirimSetupLaga = function() {
@@ -584,7 +561,6 @@
     window.tampilkanKonfirmasiReset = function() {
         let setupModal = bootstrap.Modal.getInstance(document.getElementById('modalSetupLaga'));
         if(setupModal) setupModal.hide();
-        
         let resetModalEl = document.getElementById('modalKonfirmasiResetKetua');
         let resetModal = bootstrap.Modal.getInstance(resetModalEl) || new bootstrap.Modal(resetModalEl);
         resetModal.show();
@@ -598,15 +574,12 @@
         updates[`${baseRef}/merah`] = { r1: 0, r2: 0, r3: 0, r1_log: [], r2_log: [], r3_log: [] };
         updates[`${baseRef}/timer`] = "02:00";
         updates[`${baseRef}/status`] = "READY";
-        
         update(ref(database), updates).then(() => {});
     };
 
     window.eksekusiLogout = function() {
         if(session.gel) set(ref(database, `pertandingan/${session.gel}/locks/ketua`), null);
-        setTimeout(() => { 
-            window.location.href = 'layar-juri.html'; 
-        }, 200);
+        setTimeout(() => { window.location.href = 'layar-juri.html'; }, 200);
     };
 </script>
 </body>
