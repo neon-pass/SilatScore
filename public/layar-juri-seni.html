@@ -93,11 +93,12 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content p-4 position-relative dark-theme">
             <a href="index.html" class="btn-back-modal">❮</a>
-            <h4 class="text-warning text-center mb-4 fw-bold">PORTAL JURI SENI</h4>
+            <h4 class="text-warning text-center mb-4 fw-bold">PORTAL JURUS</h4>
             
             <label class="form-label mb-1 text-secondary" style="font-size: 12px;">1. Pilih Gelanggang:</label>
             <select id="lGelanggang" class="form-select mb-3" onchange="pantauLockGelanggang()">
-                <option value="g1" selected>Gelanggang 1</option>
+                <option value="" disabled selected>-- Pilih Gelanggang --</option>
+                <option value="g1">Gelanggang 1</option>
                 <option value="g2">Gelanggang 2</option>
                 <option value="g3">Gelanggang 3</option>
                 <option value="g4">Gelanggang 4</option>
@@ -108,7 +109,7 @@
             <label class="form-label mb-1 text-secondary" style="font-size: 12px;">2. Pilih Jabatan Anda:</label>
             <select id="lPosisi" class="form-select mb-3" onchange="toggleJuriDropdown()">
                 <option value="" disabled selected>-- Pilih Jabatan --</option>
-                <option value="dewan" id="optDewan">Dewan Seni (Ketua / Penilai Hukuman)</option>
+                <option value="dewan" id="optDewan">Dewan Jurus (Ketua / Penilai Hukuman)</option>
                 <option value="juri">Juri Seni (Penilai Gerak)</option>
             </select>
             
