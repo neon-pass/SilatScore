@@ -75,7 +75,7 @@
                 
                 <label class="form-label mb-1 text-light fs-6 fw-bold">1. Posisi Gelanggang:</label>
                 <select id="lGelanggangPanitia" class="form-select mb-3 fs-5 py-2">
-                    <option value="" disabled selected>-- Pilih Matras --</option>
+                    <option value="" disabled selected>-- Pilih Gelanggang --</option>
                     <option value="g1" id="opt_g1">Gelanggang 1</option>
                     <option value="g2" id="opt_g2">Gelanggang 2</option>
                     <option value="g3" id="opt_g3">Gelanggang 3</option>
@@ -85,8 +85,8 @@
 
                 <label class="form-label mb-1 text-light fs-6 fw-bold">2. Sesi Pertandingan Saat Ini:</label>
                 <select id="lModeSesiPanitia" class="form-select mb-3 fs-5 py-2 text-warning fw-bold">
-                    <option value="tanding" selected>⚔️ KATEGORI TANDING</option>
-                    <option value="jurus">🕺 KATEGORI JURUS (SENI)</option>
+                    <option value="tanding" selected>KATEGORI TANDING</option>
+                    <option value="jurus">KATEGORI JURUS</option>
                 </select>
 
                 <label class="form-label mb-1 text-light fs-6 fw-bold">3. Kata Sandi Akses:</label>
@@ -450,7 +450,7 @@
             }
             
             errorEl.style.display = "none"; modeKategoriAktif = mode; document.getElementById('pilihGelanggang').value = gel;
-            let labelSesi = (mode === 'tanding') ? "⚔️ TANDING" : "🕺 JURUS (SENI)";
+            let labelSesi = (mode === 'tanding') ? "TANDING" : "JURUS";
             document.getElementById('bannerSesiPermanen').innerText = `GELANGGANG ${gel.replace('g','')}  —  SESI: ${labelSesi}`;
             
             if (mode === 'tanding') {
