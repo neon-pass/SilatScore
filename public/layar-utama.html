@@ -153,8 +153,8 @@
 
                 <label class="form-label mb-1 text-secondary" style="font-size: 0.875rem;">2. Tentukan Mode Kategori:</label>
                 <select id="lModeKategori" class="form-select mb-4">
-                    <option value="tanding" selected>⚔️ KATEGORI TANDING (Fighter)</option>
-                    <option value="seni">🕺 KATEGORI SENI (Tunggal/Ganda/Regu)</option>
+                    <option value="tanding" selected>KATEGORI TANDING (Fighter)</option>
+                    <option value="seni">KATEGORI JURUS (Tunggal/Ganda/Regu)</option>
                 </select>
 
                 <div id="setupError" class="text-danger fw-bold mb-3 text-center" style="display: none; font-size: 0.875rem;"></div>
@@ -224,7 +224,7 @@
         </div>
 
         <!-- ========================================================= -->
-        <!-- KAMAR B: TAMPILAN KATEGORI SENI                           -->
+        <!-- KAMAR B: TAMPILAN KATEGORI JURUS                           -->
         <!-- ========================================================= -->
         <div id="kamarSeni" style="display: none; flex-direction: column; flex: 1; gap: 0.625rem;">
             
@@ -338,6 +338,24 @@
         document.addEventListener("DOMContentLoaded", () => { 
             modalHasilTVInstance = new bootstrap.Modal(document.getElementById('modalHasilTV'));
             modalHasilSeniTVInstance = new bootstrap.Modal(document.getElementById('modalHasilSeniTV'));
+
+            // =======================================================
+            // 🔥 RADAR STATUS GELANGGANG (MODE OTOMATIS KUNCI/ABU) 🔥
+            // =======================================================
+            for(let i=1; i<=7; i++) {
+                let optEl = document.getElementById(`opt_g${i}`);
+                if(optEl) {
+                    onValue(ref(database, `pertandingan/g${i}/locks/layar_utama`), (snap) => {
+                        if(snap.exists() && snap.val() === true) {
+                            optEl.innerText = `Gelanggang ${i} (Sedang Dipakai)`;
+                            optEl.disabled = true; // Langsung dilempar ke CSS option:disabled
+                        } else {
+                            optEl.innerText = `Gelanggang ${i} (Tersedia)`;
+                            optEl.disabled = false;
+                        }
+                    });
+                }
+            }
 
             const urlParams = new URLSearchParams(window.location.search);
             const gelParam = urlParams.get('gelanggang');
