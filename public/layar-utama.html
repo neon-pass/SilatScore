@@ -6,9 +6,18 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Layar TV TV - Digital Scoring</title>
+    <title>Layar TV - Digital Scoring</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
+        /* =================================================== */
+        /* 🔥 VARIABEL PENGATUR SKALA REAL-TIME (SISTEM SARAF) */
+        /* =================================================== */
+        :root {
+            --skala-global: 13px;
+            --skala-skor: 17.5rem;
+            --skala-ikon: 1.5rem;
+        }
+
         /* CSS FULL SCREEN MURNI */
         body { 
             background-color: #1a1a1a; 
@@ -26,7 +35,9 @@
         }
         body.lead-biru { background-color: #031f42 !important; } 
         body.lead-merah { background-color: #380202 !important; } 
-        html { font-size: 13px; }
+        
+        /* TERhubung ke Tuas 1 (Zoom Keseluruhan) */
+        html { font-size: var(--skala-global); transition: font-size 0.15s ease-out; }
         
         .form-select { background-color: #333 !important; color: #fff !important; border: 0.0625rem solid #555 !important; }
         .form-select:focus { background-color: #444 !important; border-color: #ffc107 !important; box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.25) !important; }
@@ -46,7 +57,7 @@
         .championship-title { font-size: 1.75rem; font-weight: 900; letter-spacing: 0.125rem; text-transform: uppercase; text-shadow: 2px 2px 5px rgba(0,0,0,0.8); position: absolute; left: 50%; transform: translateX(-50%); z-index: 1; text-align: center; width: 60%; }
 
         /* =================================================== */
-        /* STYLING ASLI UI TANDING (Milikmu, tidak diubah)    */
+        /* STYLING ASLI UI TANDING                            */
         /* =================================================== */
         .category-bar { display: flex; justify-content: space-between; margin-bottom: 0.625rem; gap: 0.625rem; }
         .category-box { flex: 1; background: linear-gradient(180deg, #444 0%, #222 100%); text-align: center; font-size: 1.375rem; font-weight: bold; padding: 0.3125rem 0; border-radius: 0.5rem; border: 0.125rem solid #555; text-transform: uppercase; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
@@ -70,13 +81,16 @@
         .bg-merah-terang { background-color: #dc3545; }
         #panelSkorBiru.kalah { background-color: #021a3b !important; }
         #panelSkorMerah.kalah { background-color: #380101 !important; }
-        .skor-besar { font-size: 17.5rem; font-weight: bold; line-height: 1; text-shadow: 5px 5px 15px rgba(0,0,0,0.5); }
+        
+        /* TERhubung ke Tuas 2 (Angka Skor Utama) */
+        .skor-besar { font-size: var(--skala-skor); font-weight: bold; line-height: 1; text-shadow: 5px 5px 15px rgba(0,0,0,0.5); transition: font-size 0.15s ease-out; }
 
-        .icons-panel { position: absolute; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 0.5rem; padding: 0.9375rem; }
+        /* TERhubung ke Tuas 3 (Ikon Pelanggaran & Bantingan) */
+        .icons-panel { position: absolute; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 0.33em; padding: 0.625em; font-size: var(--skala-ikon); transition: font-size 0.15s ease-out; }
         .icons-panel.left { left: 0.625rem; }
         .icons-panel.right { right: 0.625rem; }
-        .icon-box { width: 5rem; height: 2.8125rem; background: #222; border: 0.125rem solid #555; border-radius: 0.5rem; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; box-shadow: inset 0 0 0.625rem rgba(0,0,0,0.8); gap: 0.5rem; }
-        .icon-count { color: #ffc107; font-size: 1.25rem; font-weight: bold; }
+        .icon-box { width: 3.33em; height: 1.875em; background: #222; border: 0.083em solid #555; border-radius: 0.33em; display: flex; justify-content: center; align-items: center; font-size: 1em; box-shadow: inset 0 0 0.4em rgba(0,0,0,0.8); gap: 0.33em; }
+        .icon-count { color: #ffc107; font-size: 0.833em; font-weight: bold; }
 
         .juri-footer { display: flex; background: #222; border-top: 0.125rem solid #444; border-radius: 0.5rem; overflow: hidden; text-align: center; font-weight: bold; box-shadow: 0 -2px 10px rgba(0,0,0,0.5); }
         .juri-col { flex: 1; padding: 0.3125rem; border-right: 0.0625rem solid #444; font-size: 0.875rem; transition: all 0.15s ease-in-out; }
@@ -87,7 +101,7 @@
         .juri-col.active { background: #ffc107 !important; color: #000 !important; box-shadow: inset 0 0 0.625rem rgba(0,0,0,0.5); }
 
         /* =================================================== */
-        /* STYLING BARU KHUSUS UI SENI (IPSI LAYOUT)           */
+        /* STYLING KHUSUS UI SENI                             */
         /* =================================================== */
         .box-atlet-seni { background: linear-gradient(180deg, #111 0%, #000 100%); border: 2px solid #333; border-radius: 10px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 5px 15px rgba(0,0,0,0.8); }
         .atlet-seni-nama { font-size: 3.5rem; font-weight: 900; color: #0dcaf0; text-shadow: 2px 2px 10px rgba(13,202,240,0.4); letter-spacing: 2px; }
@@ -108,7 +122,6 @@
         .btn-back-modal { position: absolute; top: 0.9375rem; left: 0.9375rem; text-decoration: none; color: #888; font-size: 1.375rem; font-weight: bold; transition: 0.2s; z-index: 10; }
         .btn-back-modal:active { color: #fff; transform: scale(0.9); }
 
-        /* SCREENSAVER LAYAR PENUH */
         #screensaverOverlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #000; z-index: 9999; justify-content: center; align-items: center; }
         #screensaverImg { width: 100%; height: 100%; object-fit: contain; transition: opacity 0.8s ease-in-out; opacity: 0; }
     </style>
@@ -119,7 +132,7 @@
         <img id="screensaverImg" src="">
     </div>
 
-    <!-- 📺 MODAL SOKET 2 PIN (PILIH GELANGGANG + KATEGORI) -->
+    <!-- 📺 MODAL SOKET 2 PIN -->
     <div class="modal fade" id="modalSetupLayar" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content dark-theme p-4 position-relative">
@@ -211,11 +224,10 @@
         </div>
 
         <!-- ========================================================= -->
-        <!-- KAMAR B: TAMPILAN KATEGORI SENI (BARU)                    -->
+        <!-- KAMAR B: TAMPILAN KATEGORI SENI                           -->
         <!-- ========================================================= -->
         <div id="kamarSeni" style="display: none; flex-direction: column; flex: 1; gap: 0.625rem;">
             
-            <!-- BARIS IDENTITAS ATLET & JAM -->
             <div style="display: flex; gap: 0.625rem; height: 22%;">
                 <div class="box-atlet-seni" style="flex: 0.68;">
                     <div class="atlet-seni-nama" id="s_nama_atlet">NAMA PESILAT SENI</div>
@@ -226,10 +238,7 @@
                 </div>
             </div>
 
-            <!-- BARIS BAWAH: MATRIKS 6 JURI & HASIL AKHIR -->
             <div style="display: flex; gap: 0.8rem; flex: 1;">
-                
-                <!-- GRID 6 JURI KIRI -->
                 <div style="flex: 0.68; display: flex; flex-direction: column; gap: 0.6rem;">
                     <div style="display: flex; gap: 0.6rem; flex: 1;">
                         <div style="flex:1;" class="card-juri-seni"><div class="cjs-header">JURI 1</div><div class="cjs-score" id="s_j1">10.00</div></div>
@@ -243,7 +252,6 @@
                     </div>
                 </div>
 
-                <!-- BOX REKAP SKOR FINAL KANAN -->
                 <div class="box-skor-final-seni" style="flex: 0.32;">
                     <div style="border-bottom: 1px solid #1f4f37; padding-bottom: 10px;">
                         <span style="color: #888; font-size: 1.1rem; font-weight: bold;">HUKUMAN DEWAN</span><br>
@@ -254,7 +262,6 @@
                         <div class="angka-final-seni" id="s_skor_akhir">0.000</div>
                     </div>
                 </div>
-
             </div>
 
         </div>
@@ -280,7 +287,7 @@
         </div>
     </div>
 
-    <!-- MODAL HASIL PEMENANG SENI (BARU) -->
+    <!-- MODAL HASIL PEMENANG SENI -->
     <div class="modal fade" id="modalHasilSeniTV" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content p-4 text-center" style="background: #051b11; border: 4px solid #20c997; border-radius: 20px;">
@@ -321,7 +328,7 @@
         let modalHasilTVInstance = null;
         let modalHasilSeniTVInstance = null;
 
-        // SCREENSAVER LOGIC (Milikmu)
+        // SCREENSAVER LOGIC
         let arrScreensavers = []; let ssDelay = 60000; let idleTimer = null; let slideInterval = null; let currentSlide = 0; let isScreensaverAktifManual = false;
         function resetIdleTimer() { clearTimeout(idleTimer); if(isScreensaverAktifManual){ tampilkanScreensaver(); return; } sembunyikanScreensaver(); if(arrScreensavers.length > 0) idleTimer = setTimeout(tampilkanScreensaver, ssDelay); }
         function tampilkanScreensaver() { if(arrScreensavers.length===0)return; document.getElementById('screensaverOverlay').style.display='flex'; currentSlide=0; gantiSlide(); clearInterval(slideInterval); slideInterval=setInterval(gantiSlide, 5000); }
@@ -334,7 +341,7 @@
 
             const urlParams = new URLSearchParams(window.location.search);
             const gelParam = urlParams.get('gelanggang');
-            const modeParam = urlParams.get('kategori'); // Cek apakah ada parameter soket
+            const modeParam = urlParams.get('kategori');
 
             if (gelParam) {
                 window.isDiLayarTV = true; 
@@ -357,15 +364,9 @@
 
             if(!gel) { errorEl.innerText = "❌ Silakan pilih Gelanggang TV!"; errorEl.style.display = "block"; return; }
 
-            // ===============================================================
-            // 🔥 PERHATIKAN INI: SOKET KONEKTOR KE ANDROID STUDIO (2 PIN) 🔥
-            // ===============================================================
             if (!window.isDiLayarTV && typeof AndroidApp !== "undefined" && AndroidApp.isTvConnected()) {
                 btnLogin.innerText = "MENGIRIM KABEL KE TV..."; btnLogin.disabled = true;
-                
-                // MENGIRIM 2 DATA SEKALIGUS KE JAVA ANDROID: (Gelanggang, Kategori)
                 AndroidApp.bukaDiTV(gel, mode); 
-
                 setTimeout(() => { btnLogin.innerText = "TAYANG DI TV ✅"; btnLogin.classList.replace("btn-info", "btn-success"); }, 500);
                 setTimeout(() => { window.location.href = "index.html"; }, 2000); 
                 return; 
@@ -373,7 +374,6 @@
 
             btnLogin.innerText = "MEMBUKA SOKET..."; btnLogin.disabled = true;
 
-            // Kunci Layar di Firebase agar tidak ditimpa TV lain
             let lockRef = ref(database, `pertandingan/${gel}/locks/layar_utama`);
             let snap = await get(lockRef);
             if(snap.exists() && snap.val() === true && !window.isDiLayarTV) { 
@@ -386,7 +386,6 @@
             MODE_KATEGORI = mode; 
             baseRefPath = `pertandingan/${GELANGGANG}`; 
 
-            // PENGATUR SAKLAR KAMAR DOM:
             if(MODE_KATEGORI === "tanding") {
                 document.getElementById('kamarTanding').style.display = "flex";
                 document.getElementById('kamarSeni').style.display = "none";
@@ -405,7 +404,6 @@
         }
 
         function jalankanMesinFirebase() {
-            // Pengaturan Umum (Header Sponsor)
             onValue(ref(database, `pengaturan`), (snap) => {
                 let data = snap.val() || {};
                 if(data.nama_kejuaraan) document.getElementById('judulKejuaraan').innerText = data.nama_kejuaraan.toUpperCase();
@@ -419,6 +417,17 @@
                 }
                 if (data.waktu_screensaver) ssDelay = parseInt(data.waktu_screensaver) * 1000;
                 if (data.screensavers) arrScreensavers = Object.values(data.screensavers).filter(img => img !== "");
+                
+                // =======================================================
+                // 🔥 SENSOR PENERIMA PAKET SKALA VISUAL REAL-TIME 🔥
+                // =======================================================
+                if (data.skala) {
+                    const r = document.documentElement.style;
+                    if (data.skala.global !== undefined) r.setProperty('--skala-global', `${data.skala.global}px`);
+                    if (data.skala.skor !== undefined) r.setProperty('--skala-skor', `${data.skala.skor}rem`);
+                    if (data.skala.ikon !== undefined) r.setProperty('--skala-ikon', `${data.skala.ikon}rem`);
+                }
+
                 resetIdleTimer(); 
             });
 
@@ -428,9 +437,6 @@
                 if(isScreensaverAktifManual) tampilkanScreensaver(); else { sembunyikanScreensaver(); resetIdleTimer(); }
             });
 
-            // ========================================================
-            // CABANG 1: JIKA TV DALAM MODE TANDING
-            // ========================================================
             if(MODE_KATEGORI === "tanding") {
                 onValue(ref(database, `${baseRefPath}/timer`), (snap) => { document.getElementById('t_timer').innerText = snap.val() || "00:00"; resetIdleTimer(); });
                 
@@ -486,16 +492,11 @@
                 });
             } 
             
-            // ========================================================
-            // CABANG 2: JIKA TV DALAM MODE SENI (MENDENGARKAN /seni)
-            // ========================================================
             else {
                 let seniRef = `${baseRefPath}/seni`;
 
-                // 1. Dengarkan Jam Seni
                 onValue(ref(database, `${baseRefPath}/timer`), (snap) => { document.getElementById('s_timer').innerText = snap.val() || "00:00"; resetIdleTimer(); });
 
-                // 2. Dengarkan Identitas Atlet Seni (Bisa numpang dari setup.nama_biru)
                 onValue(ref(database, `${baseRefPath}/setup`), (snap) => {
                     let d = snap.val();
                     if(d) {
@@ -506,7 +507,6 @@
                     }
                 });
 
-                // 3. Dengarkan Skor Live 6 Juri Seni
                 onValue(ref(database, `${seniRef}/skor`), (snap) => {
                     let s = snap.val() || {};
                     for(let i=1; i<=6; i++) {
@@ -515,20 +515,17 @@
                     }
                 });
 
-                // 4. Dengarkan Potongan Hukuman Dewan
                 onValue(ref(database, `${seniRef}/hukuman`), (snap) => {
                     let h = snap.val() || 0;
                     document.getElementById('s_hukuman').innerText = "-" + parseFloat(h).toFixed(2);
                 });
 
-                // 5. Dengarkan Skor Akhir Final & Trigger Pengesahan TV
                 onValue(ref(database, `${seniRef}/hasil_akhir`), (snap) => {
                     let fa = snap.val() || 0;
                     document.getElementById('s_skor_akhir').innerText = parseFloat(fa).toFixed(3);
                     document.getElementById('pemenangSeniSkor').innerText = parseFloat(fa).toFixed(3);
                 });
 
-                // 6. Dengarkan Izin Sahkan Panitia khusus Seni
                 onValue(ref(database, `${baseRefPath}/izin_simpan`), (snap) => {
                     if(snap.val() === true) modalHasilSeniTVInstance.show(); else modalHasilSeniTVInstance.hide();
                 });

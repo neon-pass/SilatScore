@@ -3,279 +3,258 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pengaturan Aplikasi - Digital Pencak Silat</title>
+    <title>Pengaturan Sistem - Digital Pencak Silat</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         body {
-            background-color: #050505; color: #ffffff; min-height: 100vh; display: flex;
+            background-color: #080808; color: #ffffff; min-height: 100vh; display: flex;
             flex-direction: column; align-items: center; font-family: 'Arial', sans-serif;
-            margin: 0; padding: 30px 15px;
+            margin: 0; padding: 40px 15px;
         }
         .setting-container {
-            width: 100%; max-width: 900px; background-color: #111; padding: 25px;
-            border-radius: 12px; border: 1px solid #333; box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.8);
+            width: 100%; max-width: 850px; background-color: #121212; padding: 30px;
+            border-radius: 12px; border: 1px solid #2a2a2a; box-shadow: 0px 15px 40px rgba(0, 0, 0, 0.9);
         }
-        .setting-title {
-            color: #bf953f; font-size: 20px; font-weight: bold; margin-bottom: 20px;
-            text-transform: uppercase; letter-spacing: 2px; border-bottom: 1px solid #333;
-            padding-bottom: 10px; text-align: center;
+        .main-title {
+            color: #bf953f; font-size: 22px; font-weight: 900; margin-bottom: 30px;
+            text-transform: uppercase; letter-spacing: 3px; border-bottom: 2px solid #222;
+            padding-bottom: 15px; text-align: center;
         }
-        .form-group { margin-bottom: 20px; }
-        label {
-            display: block; color: #888; font-size: 12px; letter-spacing: 1px;
-            margin-bottom: 8px; text-transform: uppercase;
+
+        /* CARD PANEL STYLE */
+        .panel-box {
+            background-color: #1a1a1a; border: 1px solid #333; border-radius: 8px;
+            margin-bottom: 25px; overflow: hidden;
         }
+        .panel-header {
+            background: linear-gradient(90deg, #2a2a2a 0%, #1a1a1a 100%); color: #bf953f;
+            padding: 12px 20px; font-size: 14px; font-weight: bold; letter-spacing: 1px;
+            border-bottom: 1px solid #333; text-transform: uppercase;
+        }
+        .panel-body { padding: 20px; }
+
+        /* FORM ELEMENTS */
+        label { display: block; color: #aaa; font-size: 12px; letter-spacing: 1px; margin-bottom: 8px; text-transform: uppercase; font-weight: bold; }
         input[type="url"], input[type="text"], input[type="number"] {
-            width: 100%; background-color: #000; border: 1px solid #444; color: #fff;
-            padding: 12px; font-size: 14px; border-radius: 6px; box-sizing: border-box;
-            transition: border-color 0.3s;
+            width: 100%; background-color: #050505; border: 1px solid #444; color: #fff;
+            padding: 12px 15px; font-size: 15px; border-radius: 6px; transition: 0.3s;
         }
-        input[type="url"]:focus, input[type="text"]:focus, input[type="number"]:focus { outline: none; border-color: #bf953f; }
-        
-        .section-divider {
-            border-top: 1px dashed #444; margin: 25px 0 15px 0; padding-top: 15px;
-            color: #bf953f; font-size: 14px; font-weight: bold; text-align: center; letter-spacing: 1px;
-        }
+        input[type="url"]:focus, input[type="text"]:focus, input[type="number"]:focus { outline: none; border-color: #bf953f; box-shadow: 0 0 8px rgba(191, 149, 63, 0.3); }
 
-        .logo-box {
-            background: #000; border: 1px solid #333; border-radius: 8px; padding: 10px;
-            text-align: center; height: 100%; display: flex; flex-direction: column; justify-content: space-between;
-            transition: 0.2s;
-        }
+        /* CUSTOM SLIDER (RANGE) */
+        .slider-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; padding: 10px; background: #111; border-radius: 6px; border: 1px solid #222; }
+        .slider-label { width: 35%; color: #ddd; font-size: 14px; font-weight: bold; margin: 0; }
+        .slider-input { width: 45%; cursor: pointer; accent-color: #bf953f; }
+        .slider-val { width: 20%; text-align: right; color: #bf953f; font-size: 16px; font-weight: 900; font-family: monospace; }
+
+        /* MODAL & UPLOAD BOXES */
+        .modal-content.dark-theme { background-color: #1a1a1a; border: 1px solid #555; color: white; border-radius: 12px; }
+        .modal-header.dark-theme { border-bottom: 1px solid #333; background: #111; border-top-left-radius: 12px; border-top-right-radius: 12px; }
+        .modal-footer.dark-theme { border-top: 1px solid #333; background: #111; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; }
+        
+        .logo-box { background: #000; border: 1px solid #333; border-radius: 8px; padding: 10px; text-align: center; height: 100%; display: flex; flex-direction: column; justify-content: space-between; transition: 0.2s; }
         .logo-box:hover { border-color: #bf953f; }
-        
-        .logo-preview {
-            height: 60px; width: 100%; display: flex; align-items: center; justify-content: center;
-            margin-bottom: 10px; border: 1px dashed #444; border-radius: 4px; overflow: hidden;
-            color: #555; font-size: 10px; font-weight: bold;
-        }
+        .logo-preview { height: 60px; width: 100%; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; border: 1px dashed #444; border-radius: 4px; overflow: hidden; color: #555; font-size: 10px; font-weight: bold; }
         .logo-preview img { max-height: 100%; max-width: 100%; object-fit: contain; }
-
-        .screensaver-preview {
-            height: 100px; width: 100%; display: flex; align-items: center; justify-content: center;
-            margin-bottom: 10px; border: 1px dashed #444; border-radius: 4px; overflow: hidden;
-            color: #555; font-size: 10px; font-weight: bold; background-color: #0a0a0a;
-        }
+        .screensaver-preview { height: 100px; width: 100%; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; border: 1px dashed #444; border-radius: 4px; overflow: hidden; color: #555; font-size: 10px; font-weight: bold; background-color: #0a0a0a; }
         .screensaver-preview img { max-height: 100%; max-width: 100%; object-fit: contain; }
+        .badge-slot { background: #bf953f; color: #000; font-size: 10px; padding: 4px 8px; border-radius: 4px; font-weight: bold; margin-bottom: 8px; display: inline-block; letter-spacing: 1px;}
 
-        .btn-save {
-            width: 100%; padding: 15px; background: linear-gradient(to right, #bf953f, #b38728);
-            color: #000; border: none; font-weight: bold; letter-spacing: 2px;
-            border-radius: 6px; cursor: pointer; margin-top: 15px; margin-bottom: 15px;
-            transition: transform 0.1s;
-        }
-        .btn-save:active { transform: scale(0.98); }
-        .btn-back {
-            display: block; text-align: center; color: #888; text-decoration: none;
-            font-size: 12px; letter-spacing: 1px; padding: 10px; transition: 0.2s;
-        }
-        .btn-back:hover { color: #bf953f; }
-        .modal-content.dark-theme { background-color: #1a1a1a; border: 1px solid #555; color: white; }
-        .modal-header.dark-theme { border-bottom: 1px solid #333; }
-        .modal-footer.dark-theme { border-top: 1px solid #333; }
-        .badge-slot { background: #bf953f; color: #000; font-size: 10px; padding: 3px 6px; border-radius: 4px; font-weight: bold; margin-bottom: 5px; display: inline-block; }
+        /* BUTTONS */
+        .btn-kustom { background: #222; color: #fff; border: 1px solid #555; font-weight: bold; transition: 0.2s; }
+        .btn-kustom:hover { background: #333; border-color: #bf953f; color: #bf953f; }
+        .btn-emas { background: linear-gradient(to right, #bf953f, #b38728); color: #000; font-weight: 900; border: none; letter-spacing: 1px; }
+        .btn-emas:hover { background: linear-gradient(to right, #d4af37, #c5a017); color: #000; }
+        
+        .btn-save-master { width: 100%; padding: 18px; font-size: 18px; text-transform: uppercase; letter-spacing: 3px; border-radius: 8px; margin-top: 20px; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(191, 149, 63, 0.3); transition: 0.1s; }
+        .btn-save-master:active { transform: scale(0.98); }
+        .btn-back-link { display: block; text-align: center; color: #777; text-decoration: none; font-size: 13px; font-weight: bold; letter-spacing: 1px; padding: 10px; transition: 0.2s; }
+        .btn-back-link:hover { color: #fff; }
     </style>
 </head>
 <body>
 
     <div class="setting-container">
-        <div class="setting-title">⚙️ Konfigurasi Sistem</div>
+        <div class="main-title">⚙️ PANEL PENGATURAN SISTEM</div>
         
-        <div class="form-group">
-            <label>Judul / Nama Kejuaraan</label>
-            <input type="text" id="inputNamaKejuaraan" placeholder="Contoh: JAKARTA CHAMPIONSHIP 2025" autocomplete="off">
-        </div>
-
-        <div class="form-group">
-            <label>Link Endpoint (Google Sheet Panitia)</label>
-            <input type="url" id="sheetUrl" placeholder="https://docs.google.com/spreadsheets/d/..." autocomplete="off">
-        </div>
-
-        <div class="section-divider">📅 IMPORT JADWAL (EXCEL: TANDING & JURUS)</div>
-        <div class="form-group text-center mx-auto" style="max-width: 550px;">
-            <label style="line-height: 1.5;">Upload 1 file Excel jadwal pertandingan.<br>Pastikan memiliki <span class="text-warning fw-bold">Tab 1: TANDING</span> dan <span class="text-warning fw-bold">Tab 2: JURUS</span></label>
-            <input type="file" id="fileExcel" accept=".xlsx, .xls, .csv" class="d-none" onchange="prosesExcelJadwal(this)">
-            <button class="btn btn-info fw-bold w-100 py-3 mt-2 text-dark" onclick="document.getElementById('fileExcel').click()" style="box-shadow: 0 4px 6px rgba(0,0,0,0.5);">
-                📂 PILIH & UNGGAH FILE EXCEL
-            </button>
-            <small id="statusExcel" class="text-success fw-bold mt-3 d-block" style="display: none; font-size: 14px;"></small>
-        </div>
-
-        <div class="section-divider">📺 GAMBAR SLIDESHOW SCREENSAVER (MAKS. 10 GAMBAR)</div>
-        
-        <div class="form-group text-center mb-4 mx-auto" style="max-width: 300px;">
-            <label>Muncul Setelah Waktu Tunggu (Detik)</label>
-            <input type="number" id="inputWaktuScreensaver" placeholder="60" value="60" min="10" class="text-center fw-bold fs-5 text-warning">
-            <small class="text-secondary mt-1 d-block" style="font-size: 11px;">Berapa detik layar kosong sebelum slideshow mulai.</small>
-        </div>
-
-        <div class="row g-2 justify-content-center">
-            <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-                <div class="logo-box">
-                    <span class="badge-slot">GAMBAR 1</span>
-                    <div class="screensaver-preview" id="prev_s1">KOSONG</div>
-                    <input type="file" id="file_s1" accept="image/png, image/jpeg" class="d-none" onchange="prosesScreensaver(this, 's1')">
-                    <button class="btn btn-sm btn-outline-warning w-100 mb-1 fw-bold" style="font-size: 10px;" onclick="document.getElementById('file_s1').click()">PILIH</button>
-                    <button class="btn btn-sm btn-outline-danger w-100 fw-bold" style="font-size: 10px;" onclick="hapusScreensaver('s1')">HAPUS</button>
+        <div class="panel-box">
+            <div class="panel-header">1. INFORMASI KEJUARAAN</div>
+            <div class="panel-body">
+                <div class="mb-3">
+                    <label>Judul / Nama Kejuaraan</label>
+                    <input type="text" id="inputNamaKejuaraan" placeholder="Contoh: JAKARTA CHAMPIONSHIP 2025" autocomplete="off">
                 </div>
-            </div>
-            <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-                <div class="logo-box">
-                    <span class="badge-slot">GAMBAR 2</span>
-                    <div class="screensaver-preview" id="prev_s2">KOSONG</div>
-                    <input type="file" id="file_s2" accept="image/png, image/jpeg" class="d-none" onchange="prosesScreensaver(this, 's2')">
-                    <button class="btn btn-sm btn-outline-warning w-100 mb-1 fw-bold" style="font-size: 10px;" onclick="document.getElementById('file_s2').click()">PILIH</button>
-                    <button class="btn btn-sm btn-outline-danger w-100 fw-bold" style="font-size: 10px;" onclick="hapusScreensaver('s2')">HAPUS</button>
-                </div>
-            </div>
-            <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-                <div class="logo-box">
-                    <span class="badge-slot">GAMBAR 3</span>
-                    <div class="screensaver-preview" id="prev_s3">KOSONG</div>
-                    <input type="file" id="file_s3" accept="image/png, image/jpeg" class="d-none" onchange="prosesScreensaver(this, 's3')">
-                    <button class="btn btn-sm btn-outline-warning w-100 mb-1 fw-bold" style="font-size: 10px;" onclick="document.getElementById('file_s3').click()">PILIH</button>
-                    <button class="btn btn-sm btn-outline-danger w-100 fw-bold" style="font-size: 10px;" onclick="hapusScreensaver('s3')">HAPUS</button>
-                </div>
-            </div>
-            <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-                <div class="logo-box">
-                    <span class="badge-slot">GAMBAR 4</span>
-                    <div class="screensaver-preview" id="prev_s4">KOSONG</div>
-                    <input type="file" id="file_s4" accept="image/png, image/jpeg" class="d-none" onchange="prosesScreensaver(this, 's4')">
-                    <button class="btn btn-sm btn-outline-warning w-100 mb-1 fw-bold" style="font-size: 10px;" onclick="document.getElementById('file_s4').click()">PILIH</button>
-                    <button class="btn btn-sm btn-outline-danger w-100 fw-bold" style="font-size: 10px;" onclick="hapusScreensaver('s4')">HAPUS</button>
-                </div>
-            </div>
-            <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-                <div class="logo-box">
-                    <span class="badge-slot">GAMBAR 5</span>
-                    <div class="screensaver-preview" id="prev_s5">KOSONG</div>
-                    <input type="file" id="file_s5" accept="image/png, image/jpeg" class="d-none" onchange="prosesScreensaver(this, 's5')">
-                    <button class="btn btn-sm btn-outline-warning w-100 mb-1 fw-bold" style="font-size: 10px;" onclick="document.getElementById('file_s5').click()">PILIH</button>
-                    <button class="btn btn-sm btn-outline-danger w-100 fw-bold" style="font-size: 10px;" onclick="hapusScreensaver('s5')">HAPUS</button>
-                </div>
-            </div>
-            <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-                <div class="logo-box">
-                    <span class="badge-slot">GAMBAR 6</span>
-                    <div class="screensaver-preview" id="prev_s6">KOSONG</div>
-                    <input type="file" id="file_s6" accept="image/png, image/jpeg" class="d-none" onchange="prosesScreensaver(this, 's6')">
-                    <button class="btn btn-sm btn-outline-warning w-100 mb-1 fw-bold" style="font-size: 10px;" onclick="document.getElementById('file_s6').click()">PILIH</button>
-                    <button class="btn btn-sm btn-outline-danger w-100 fw-bold" style="font-size: 10px;" onclick="hapusScreensaver('s6')">HAPUS</button>
-                </div>
-            </div>
-            <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-                <div class="logo-box">
-                    <span class="badge-slot">GAMBAR 7</span>
-                    <div class="screensaver-preview" id="prev_s7">KOSONG</div>
-                    <input type="file" id="file_s7" accept="image/png, image/jpeg" class="d-none" onchange="prosesScreensaver(this, 's7')">
-                    <button class="btn btn-sm btn-outline-warning w-100 mb-1 fw-bold" style="font-size: 10px;" onclick="document.getElementById('file_s7').click()">PILIH</button>
-                    <button class="btn btn-sm btn-outline-danger w-100 fw-bold" style="font-size: 10px;" onclick="hapusScreensaver('s7')">HAPUS</button>
-                </div>
-            </div>
-            <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-                <div class="logo-box">
-                    <span class="badge-slot">GAMBAR 8</span>
-                    <div class="screensaver-preview" id="prev_s8">KOSONG</div>
-                    <input type="file" id="file_s8" accept="image/png, image/jpeg" class="d-none" onchange="prosesScreensaver(this, 's8')">
-                    <button class="btn btn-sm btn-outline-warning w-100 mb-1 fw-bold" style="font-size: 10px;" onclick="document.getElementById('file_s8').click()">PILIH</button>
-                    <button class="btn btn-sm btn-outline-danger w-100 fw-bold" style="font-size: 10px;" onclick="hapusScreensaver('s8')">HAPUS</button>
-                </div>
-            </div>
-            <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-                <div class="logo-box">
-                    <span class="badge-slot">GAMBAR 9</span>
-                    <div class="screensaver-preview" id="prev_s9">KOSONG</div>
-                    <input type="file" id="file_s9" accept="image/png, image/jpeg" class="d-none" onchange="prosesScreensaver(this, 's9')">
-                    <button class="btn btn-sm btn-outline-warning w-100 mb-1 fw-bold" style="font-size: 10px;" onclick="document.getElementById('file_s9').click()">PILIH</button>
-                    <button class="btn btn-sm btn-outline-danger w-100 fw-bold" style="font-size: 10px;" onclick="hapusScreensaver('s9')">HAPUS</button>
-                </div>
-            </div>
-            <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-                <div class="logo-box">
-                    <span class="badge-slot">GAMBAR 10</span>
-                    <div class="screensaver-preview" id="prev_s10">KOSONG</div>
-                    <input type="file" id="file_s10" accept="image/png, image/jpeg" class="d-none" onchange="prosesScreensaver(this, 's10')">
-                    <button class="btn btn-sm btn-outline-warning w-100 mb-1 fw-bold" style="font-size: 10px;" onclick="document.getElementById('file_s10').click()">PILIH</button>
-                    <button class="btn btn-sm btn-outline-danger w-100 fw-bold" style="font-size: 10px;" onclick="hapusScreensaver('s10')">HAPUS</button>
+                <div>
+                    <label>Link Endpoint (Google Sheet Panitia)</label>
+                    <input type="url" id="sheetUrl" placeholder="https://docs.google.com/spreadsheets/d/..." autocomplete="off">
                 </div>
             </div>
         </div>
 
-        <div class="section-divider">🖼️ LOGO SPONSOR KIRI & KANAN (TAMPIL SAAT TANDING)</div>
-        <div class="row g-2 justify-content-center">
-            <div class="col-3 col-md-2 col-lg-1" style="min-width: 90px;">
-                <div class="logo-box">
-                    <div class="logo-preview" id="prev_kiri1">KOSONG</div>
-                    <input type="file" id="file_kiri1" accept="image/png, image/jpeg" class="d-none" onchange="prosesGambar(this, 'kiri1')">
-                    <button class="btn btn-sm btn-outline-warning w-100 mb-1" style="font-size: 9px;" onclick="document.getElementById('file_kiri1').click()">L-1</button>
-                    <button class="btn btn-sm btn-outline-danger w-100" style="font-size: 9px;" onclick="hapusGambar('kiri1')">HPS</button>
+        <div class="panel-box">
+            <div class="panel-header">2. SINKRONISASI DATA JADWAL</div>
+            <div class="panel-body">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+                    <div style="flex: 1;">
+                        <label class="m-0 text-white" style="font-size: 14px;">Import Jadwal (Excel: Tanding & Jurus)</label>
+                        <small class="text-secondary d-block mt-1" style="text-transform: none;">Pastikan file memiliki <b>Tab 1: TANDING</b> dan <b>Tab 2: JURUS</b></small>
+                    </div>
+                    <div>
+                        <input type="file" id="fileExcel" accept=".xlsx, .xls, .csv" class="d-none" onchange="prosesExcelJadwal(this)">
+                        <button class="btn btn-emas px-4 py-3 shadow" onclick="document.getElementById('fileExcel').click()">
+                            📂 PILIH FILE EXCEL
+                        </button>
+                    </div>
                 </div>
-            </div>
-            <div class="col-3 col-md-2 col-lg-1" style="min-width: 90px;">
-                <div class="logo-box">
-                    <div class="logo-preview" id="prev_kiri2">KOSONG</div>
-                    <input type="file" id="file_kiri2" accept="image/png, image/jpeg" class="d-none" onchange="prosesGambar(this, 'kiri2')">
-                    <button class="btn btn-sm btn-outline-warning w-100 mb-1" style="font-size: 9px;" onclick="document.getElementById('file_kiri2').click()">L-2</button>
-                    <button class="btn btn-sm btn-outline-danger w-100" style="font-size: 9px;" onclick="hapusGambar('kiri2')">HPS</button>
-                </div>
-            </div>
-            <div class="col-3 col-md-2 col-lg-1" style="min-width: 90px;">
-                <div class="logo-box">
-                    <div class="logo-preview" id="prev_kiri3">KOSONG</div>
-                    <input type="file" id="file_kiri3" accept="image/png, image/jpeg" class="d-none" onchange="prosesGambar(this, 'kiri3')">
-                    <button class="btn btn-sm btn-outline-warning w-100 mb-1" style="font-size: 9px;" onclick="document.getElementById('file_kiri3').click()">L-3</button>
-                    <button class="btn btn-sm btn-outline-danger w-100" style="font-size: 9px;" onclick="hapusGambar('kiri3')">HPS</button>
-                </div>
-            </div>
-            <div class="col-3 col-md-2 col-lg-1" style="min-width: 90px;">
-                <div class="logo-box">
-                    <div class="logo-preview" id="prev_kiri4">KOSONG</div>
-                    <input type="file" id="file_kiri4" accept="image/png, image/jpeg" class="d-none" onchange="prosesGambar(this, 'kiri4')">
-                    <button class="btn btn-sm btn-outline-warning w-100 mb-1" style="font-size: 9px;" onclick="document.getElementById('file_kiri4').click()">L-4</button>
-                    <button class="btn btn-sm btn-outline-danger w-100" style="font-size: 9px;" onclick="hapusGambar('kiri4')">HPS</button>
-                </div>
-            </div>
-
-            <div class="col-12 d-block d-md-none" style="height: 10px;"></div>
-
-            <div class="col-3 col-md-2 col-lg-1" style="min-width: 90px;">
-                <div class="logo-box">
-                    <div class="logo-preview" id="prev_kanan1">KOSONG</div>
-                    <input type="file" id="file_kanan1" accept="image/png, image/jpeg" class="d-none" onchange="prosesGambar(this, 'kanan1')">
-                    <button class="btn btn-sm btn-outline-warning w-100 mb-1" style="font-size: 9px;" onclick="document.getElementById('file_kanan1').click()">R-1</button>
-                    <button class="btn btn-sm btn-outline-danger w-100" style="font-size: 9px;" onclick="hapusGambar('kanan1')">HPS</button>
-                </div>
-            </div>
-            <div class="col-3 col-md-2 col-lg-1" style="min-width: 90px;">
-                <div class="logo-box">
-                    <div class="logo-preview" id="prev_kanan2">KOSONG</div>
-                    <input type="file" id="file_kanan2" accept="image/png, image/jpeg" class="d-none" onchange="prosesGambar(this, 'kanan2')">
-                    <button class="btn btn-sm btn-outline-warning w-100 mb-1" style="font-size: 9px;" onclick="document.getElementById('file_kanan2').click()">R-2</button>
-                    <button class="btn btn-sm btn-outline-danger w-100" style="font-size: 9px;" onclick="hapusGambar('kanan2')">HPS</button>
-                </div>
-            </div>
-            <div class="col-3 col-md-2 col-lg-1" style="min-width: 90px;">
-                <div class="logo-box">
-                    <div class="logo-preview" id="prev_kanan3">KOSONG</div>
-                    <input type="file" id="file_kanan3" accept="image/png, image/jpeg" class="d-none" onchange="prosesGambar(this, 'kanan3')">
-                    <button class="btn btn-sm btn-outline-warning w-100 mb-1" style="font-size: 9px;" onclick="document.getElementById('file_kanan3').click()">R-3</button>
-                    <button class="btn btn-sm btn-outline-danger w-100" style="font-size: 9px;" onclick="hapusGambar('kanan3')">HPS</button>
-                </div>
-            </div>
-            <div class="col-3 col-md-2 col-lg-1" style="min-width: 90px;">
-                <div class="logo-box">
-                    <div class="logo-preview" id="prev_kanan4">KOSONG</div>
-                    <input type="file" id="file_kanan4" accept="image/png, image/jpeg" class="d-none" onchange="prosesGambar(this, 'kanan4')">
-                    <button class="btn btn-sm btn-outline-warning w-100 mb-1" style="font-size: 9px;" onclick="document.getElementById('file_kanan4').click()">R-4</button>
-                    <button class="btn btn-sm btn-outline-danger w-100" style="font-size: 9px;" onclick="hapusGambar('kanan4')">HPS</button>
-                </div>
+                <div id="statusExcel" class="text-success fw-bold mt-3 text-center" style="display: none; font-size: 14px;"></div>
             </div>
         </div>
 
-        <button class="btn-save mt-4" onclick="simpanPengaturan()">💾 SIMPAN SEMUA PENGATURAN</button>
-        <a href="index.html" class="btn-back">← KEMBALI KE MENU UTAMA</a>
+        <div class="panel-box">
+            <div class="panel-header">3. KONTROL SKALA MONITOR TV (LIVE REAL-TIME)</div>
+            <div class="panel-body" style="padding-bottom: 10px;">
+                
+                <div class="slider-row">
+                    <label class="slider-label">🔍 Zoom Keseluruhan</label>
+                    <input type="range" class="slider-input" id="slideGlobal" min="8" max="22" step="0.5" value="13" oninput="updateSkalaLive('global', this.value, 'px')">
+                    <span class="slider-val" id="valGlobal">13 px</span>
+                </div>
+
+                <div class="slider-row">
+                    <label class="slider-label">🔢 Angka Skor Besar</label>
+                    <input type="range" class="slider-input" id="slideSkor" min="10" max="25" step="0.5" value="17.5" oninput="updateSkalaLive('skor', this.value, 'rem')">
+                    <span class="slider-val" id="valSkor">17.5 rem</span>
+                </div>
+
+                <div class="slider-row">
+                    <label class="slider-label">⚠️ Ikon Pelanggaran</label>
+                    <input type="range" class="slider-input" id="slideIkon" min="1" max="3" step="0.1" value="1.5" oninput="updateSkalaLive('ikon', this.value, 'rem')">
+                    <span class="slider-val" id="valIkon">1.5 rem</span>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="panel-box">
+            <div class="panel-header">4. MEDIA & TAYANGAN</div>
+            <div class="panel-body">
+                
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 mb-4 pb-3 border-bottom border-dark">
+                    <div style="flex: 1;">
+                        <label class="m-0 text-white" style="font-size: 14px;">Pengaturan Screensaver TV</label>
+                        <small class="text-secondary d-block mt-1" style="text-transform: none;">Slideshow gambar saat gelanggang kosong.</small>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <input type="number" id="inputWaktuScreensaver" placeholder="60" value="60" min="10" class="text-center fw-bold text-warning" style="width: 80px; padding: 10px;">
+                        <span class="text-secondary fw-bold me-2" style="font-size: 12px;">Detik</span>
+                        <button class="btn btn-kustom px-4 py-2" data-bs-toggle="modal" data-bs-target="#modalScreensaver">🖼️ UPLOAD GAMBAR</button>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+                    <div style="flex: 1;">
+                        <label class="m-0 text-white" style="font-size: 14px;">Pengaturan Logo Sponsor</label>
+                        <small class="text-secondary d-block mt-1" style="text-transform: none;">Logo tampil di Kiri dan Kanan header Layar TV.</small>
+                    </div>
+                    <div>
+                        <button class="btn btn-kustom px-4 py-2" data-bs-toggle="modal" data-bs-target="#modalSponsor">🤝 ATUR SPONSOR</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <button class="btn btn-emas btn-save-master" onclick="simpanPengaturan()">💾 SIMPAN SEMUA PENGATURAN</button>
+        <a href="index.html" class="btn-back-link">❮ KEMBALI KE MENU UTAMA</a>
+    </div>
+
+
+    <div class="modal fade" id="modalScreensaver" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content dark-theme">
+                <div class="modal-header dark-theme">
+                    <h5 class="modal-title fw-bold text-warning">🖼️ MANAJER GAMBAR SCREENSAVER</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body py-4 bg-dark">
+                    <div class="row g-3 justify-content-center">
+                        <script>
+                            for(let i=1; i<=10; i++) {
+                                document.write(`
+                                <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                                    <div class="logo-box">
+                                        <span class="badge-slot">GAMBAR ${i}</span>
+                                        <div class="screensaver-preview" id="prev_s${i}">KOSONG</div>
+                                        <input type="file" id="file_s${i}" accept="image/png, image/jpeg" class="d-none" onchange="prosesScreensaver(this, 's${i}')">
+                                        <button class="btn btn-sm btn-outline-warning w-100 mb-1 fw-bold" style="font-size: 10px;" onclick="document.getElementById('file_s${i}').click()">PILIH</button>
+                                        <button class="btn btn-sm btn-outline-danger w-100 fw-bold" style="font-size: 10px;" onclick="hapusScreensaver('s${i}')">HAPUS</button>
+                                    </div>
+                                </div>`);
+                            }
+                        </script>
+                    </div>
+                </div>
+                <div class="modal-footer dark-theme">
+                    <button type="button" class="btn btn-emas px-5 fw-bold" data-bs-dismiss="modal">SELESAI & TUTUP</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalSponsor" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content dark-theme">
+                <div class="modal-header dark-theme">
+                    <h5 class="modal-title fw-bold text-warning">🤝 MANAJER LOGO SPONSOR</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body py-4 bg-dark">
+                    <div class="row g-4">
+                        <div class="col-md-6 border-end border-secondary">
+                            <h6 class="text-center text-info mb-3 border-bottom border-dark pb-2">SPONSOR SUDUT KIRI</h6>
+                            <div class="row g-2 justify-content-center">
+                                <script>
+                                    for(let i=1; i<=4; i++) {
+                                        document.write(`
+                                        <div class="col-6 col-sm-5">
+                                            <div class="logo-box">
+                                                <div class="logo-preview" id="prev_kiri${i}">KOSONG</div>
+                                                <input type="file" id="file_kiri${i}" accept="image/png, image/jpeg" class="d-none" onchange="prosesGambar(this, 'kiri${i}')">
+                                                <button class="btn btn-sm btn-outline-warning w-100 mb-1" style="font-size: 10px;" onclick="document.getElementById('file_kiri${i}').click()">PILIH L-${i}</button>
+                                                <button class="btn btn-sm btn-outline-danger w-100" style="font-size: 10px;" onclick="hapusGambar('kiri${i}')">HAPUS</button>
+                                            </div>
+                                        </div>`);
+                                    }
+                                </script>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h6 class="text-center text-info mb-3 border-bottom border-dark pb-2">SPONSOR SUDUT KANAN</h6>
+                            <div class="row g-2 justify-content-center">
+                                <script>
+                                    for(let i=1; i<=4; i++) {
+                                        document.write(`
+                                        <div class="col-6 col-sm-5">
+                                            <div class="logo-box">
+                                                <div class="logo-preview" id="prev_kanan${i}">KOSONG</div>
+                                                <input type="file" id="file_kanan${i}" accept="image/png, image/jpeg" class="d-none" onchange="prosesGambar(this, 'kanan${i}')">
+                                                <button class="btn btn-sm btn-outline-warning w-100 mb-1" style="font-size: 10px;" onclick="document.getElementById('file_kanan${i}').click()">PILIH R-${i}</button>
+                                                <button class="btn btn-sm btn-outline-danger w-100" style="font-size: 10px;" onclick="hapusGambar('kanan${i}')">HAPUS</button>
+                                            </div>
+                                        </div>`);
+                                    }
+                                </script>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer dark-theme">
+                    <button type="button" class="btn btn-emas px-5 fw-bold" data-bs-dismiss="modal">SELESAI & TUTUP</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="modal fade" id="modalInfo" tabindex="-1" aria-hidden="true">
@@ -289,7 +268,7 @@
               <p id="modalInfoBody" class="mb-0 fs-6" style="line-height: 1.5;"></p>
             </div>
             <div class="modal-footer dark-theme justify-content-center">
-              <button type="button" class="btn btn-warning px-4 fw-bold text-dark" data-bs-dismiss="modal">MENGERTI</button>
+              <button type="button" class="btn btn-emas px-5 fw-bold text-dark" data-bs-dismiss="modal">MENGERTI</button>
             </div>
           </div>
         </div>
@@ -298,7 +277,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
-        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js";
+        import { getDatabase, ref, set, update, onValue } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCNsOk8MsIhBoZ44Nd9WGGl6eBJOEKu3nI",
@@ -313,10 +292,8 @@
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
-        // Objek Penampung Data
         let dataLogos = { kiri1: "", kiri2: "", kiri3: "", kiri4: "", kanan1: "", kanan2: "", kanan3: "", kanan4: "" };
         let dataScreensavers = { s1: "", s2: "", s3: "", s4: "", s5: "", s6: "", s7: "", s8: "", s9: "", s10: "" }; 
-        
         let modalInfoInstance = null;
 
         window.showCustomAlert = function(title, message, titleColorClass = "text-info") {
@@ -328,23 +305,56 @@
             modalInfoInstance.show();
         }
 
+        // =======================================================
+        // 🔥 LOGIKA SENSOR TUAS REAL-TIME (SKALA TV) 🔥
+        // =======================================================
+        let timerDebounce = null;
+        window.updateSkalaLive = function(jenis, nilai, satuan) {
+            // 1. Update angka teks di ujung kanan tuas (Lokal)
+            let elLabel = null;
+            if(jenis === 'global') elLabel = document.getElementById('valGlobal');
+            if(jenis === 'skor') elLabel = document.getElementById('valSkor');
+            if(jenis === 'ikon') elLabel = document.getElementById('valIkon');
+            if(elLabel) elLabel.innerText = `${nilai} ${satuan}`;
+
+            // 2. Debounce Pengiriman ke Firebase (Biar tidak jebol Kuota Internet)
+            clearTimeout(timerDebounce);
+            timerDebounce = setTimeout(() => {
+                let sGlob = document.getElementById('slideGlobal').value;
+                let sSkor = document.getElementById('slideSkor').value;
+                let sIkon = document.getElementById('slideIkon').value;
+                
+                // Update langsung tembak ke folder /pengaturan/skala
+                update(ref(database, 'pengaturan/skala'), {
+                    global: sGlob,
+                    skor: sSkor,
+                    ikon: sIkon
+                });
+            }, 100); // Tunda 100 milidetik. Terasa real-time tapi sangat aman untuk database!
+        }
+
+        // Pemuatan Awal Data
         document.addEventListener("DOMContentLoaded", () => {
             onValue(ref(database, 'pengaturan'), (snap) => {
                 let data = snap.val() || {};
                 
                 if(data.nama_kejuaraan) document.getElementById('inputNamaKejuaraan').value = data.nama_kejuaraan;
-                if(data.silat_sheet_url) {
-                    document.getElementById('sheetUrl').value = data.silat_sheet_url;
-                } else {
-                    let savedUrl = localStorage.getItem('silat_sheet_url');
-                    if (savedUrl) document.getElementById('sheetUrl').value = savedUrl;
-                }
+                if(data.silat_sheet_url) { document.getElementById('sheetUrl').value = data.silat_sheet_url; } 
+                else { let savedUrl = localStorage.getItem('silat_sheet_url'); if (savedUrl) document.getElementById('sheetUrl').value = savedUrl; }
                 
+                // Ambil Data Skala Terakhir
+                if(data.skala) {
+                    if(data.skala.global) { document.getElementById('slideGlobal').value = data.skala.global; document.getElementById('valGlobal').innerText = data.skala.global + ' px'; }
+                    if(data.skala.skor) { document.getElementById('slideSkor').value = data.skala.skor; document.getElementById('valSkor').innerText = data.skala.skor + ' rem'; }
+                    if(data.skala.ikon) { document.getElementById('slideIkon').value = data.skala.ikon; document.getElementById('valIkon').innerText = data.skala.ikon + ' rem'; }
+                }
+
                 if(data.logos) {
                     Object.keys(dataLogos).forEach(key => {
                         if(data.logos[key]) {
                             dataLogos[key] = data.logos[key];
-                            document.getElementById(`prev_${key}`).innerHTML = `<img src="${dataLogos[key]}">`;
+                            let pEl = document.getElementById(`prev_${key}`);
+                            if(pEl) pEl.innerHTML = `<img src="${dataLogos[key]}">`;
                         }
                     });
                 }
@@ -353,120 +363,80 @@
                     Object.keys(dataScreensavers).forEach(key => {
                         if(data.screensavers[key]) {
                             dataScreensavers[key] = data.screensavers[key];
-                            document.getElementById(`prev_${key}`).innerHTML = `<img src="${dataScreensavers[key]}">`;
+                            let sEl = document.getElementById(`prev_${key}`);
+                            if(sEl) sEl.innerHTML = `<img src="${dataScreensavers[key]}">`;
                         }
                     });
                 }
 
-                if(data.waktu_screensaver) {
-                    document.getElementById('inputWaktuScreensaver').value = data.waktu_screensaver;
-                }
+                if(data.waktu_screensaver) { document.getElementById('inputWaktuScreensaver').value = data.waktu_screensaver; }
 
             }, { onlyOnce: true });
         });
 
-        // 🔥 MESIN IMPORT EXCEL SUPER CERDAS (BACA 2 TAB SEKALIGUS) 🔥
+        // MESIN BACA EXCEL
         window.prosesExcelJadwal = function(input) {
             let file = input.files[0];
             if(!file) return;
 
             let btn = input.nextElementSibling;
             let originalText = btn.innerHTML;
-            btn.innerHTML = "⏳ MEMBACA FILE EXCEL...";
-            btn.disabled = true;
+            btn.innerHTML = "⏳ MEMBACA..."; btn.disabled = true;
 
             let reader = new FileReader();
             reader.onload = function(e) {
                 try {
                     let data = new Uint8Array(e.target.result);
                     let workbook = XLSX.read(data, {type: 'array'});
-                    
-                    let jadwalTanding = [];
-                    let jadwalJurus = [];
+                    let jadwalTanding = []; let jadwalJurus = [];
 
-                    // Deteksi Tab Berdasarkan Nama
                     workbook.SheetNames.forEach(sheetName => {
                         let nameLower = sheetName.toLowerCase();
                         let sheet = workbook.Sheets[sheetName];
                         let json = XLSX.utils.sheet_to_json(sheet);
-
-                        if (nameLower.includes('tanding')) {
-                            jadwalTanding = json;
-                        } else if (nameLower.includes('jurus') || nameLower.includes('seni')) {
-                            jadwalJurus = json;
-                        }
+                        if (nameLower.includes('tanding')) jadwalTanding = json;
+                        else if (nameLower.includes('jurus') || nameLower.includes('seni')) jadwalJurus = json;
                     });
 
-                    // Jika nama tab tidak baku (misal Sheet1, Sheet2), pakai deteksi urutan 
                     if (jadwalTanding.length === 0 && jadwalJurus.length === 0) {
-                         if (workbook.SheetNames.length >= 1) {
-                             jadwalTanding = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-                         }
-                         if (workbook.SheetNames.length >= 2) {
-                             jadwalJurus = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[1]]);
-                         }
+                         if (workbook.SheetNames.length >= 1) jadwalTanding = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+                         if (workbook.SheetNames.length >= 2) jadwalJurus = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[1]]);
                     }
 
                     if(jadwalTanding.length === 0 && jadwalJurus.length === 0) {
                         showCustomAlert("⚠️ Kosong", "File Excel tidak memiliki data jadwal sama sekali.", "text-warning");
-                        resetBtn();
-                        return;
+                        resetBtn(); return;
                     }
 
-                    btn.innerHTML = "☁️ MENGUNGGAH KE SERVER...";
-                    
-                    // Simpan kedua jadwal secara bersamaan
+                    btn.innerHTML = "☁️ MENGUNGGAH...";
                     Promise.all([
                         set(ref(database, 'pengaturan/jadwal_tanding'), jadwalTanding),
                         set(ref(database, 'pengaturan/jadwal_jurus'), jadwalJurus),
-                        set(ref(database, 'pengaturan/jadwal_excel'), null) // Hapus sistem lama agar bersih
+                        set(ref(database, 'pengaturan/jadwal_excel'), null) 
                     ]).then(() => {
-                        let detailPesan = `✅ Berhasil memuat data:<br><br>`;
-                        detailPesan += `<b class="text-warning">Kategori TANDING:</b> ${jadwalTanding.length} Partai<br>`;
-                        detailPesan += `<b class="text-warning">Kategori JURUS:</b> ${jadwalJurus.length} Partai<br><br>`;
-                        detailPesan += `Jadwal akan otomatis muncul di seluruh meja Panitia.`;
-
-                        document.getElementById('statusExcel').innerHTML = `✅ Tanding: ${jadwalTanding.length} | Jurus: ${jadwalJurus.length}`;
+                        let dPesan = `✅ Berhasil memuat data:<br><br><b class="text-warning">TANDING:</b> ${jadwalTanding.length} Partai<br><b class="text-warning">JURUS:</b> ${jadwalJurus.length} Partai<br>`;
+                        document.getElementById('statusExcel').innerHTML = `✅ Sukses | Tanding: ${jadwalTanding.length} | Jurus: ${jadwalJurus.length}`;
                         document.getElementById('statusExcel').style.display = 'block';
-                        
-                        showCustomAlert("✅ Sinkronisasi Jadwal Sukses", detailPesan, "text-success");
-                        resetBtn();
-                    }).catch((err) => {
-                        showCustomAlert("❌ Gagal", "Terjadi kesalahan upload ke server: " + err.message, "text-danger");
-                        resetBtn();
-                    });
-
-                } catch (error) {
-                    showCustomAlert("❌ Error", "Format file tidak didukung atau Excel dalam keadaan rusak.", "text-danger");
-                    resetBtn();
-                }
+                        showCustomAlert("✅ Sinkronisasi Sukses", dPesan, "text-success"); resetBtn();
+                    }).catch((err) => { showCustomAlert("❌ Gagal", "Terjadi kesalahan upload ke server: " + err.message, "text-danger"); resetBtn(); });
+                } catch (error) { showCustomAlert("❌ Error", "Format file rusak/tidak didukung.", "text-danger"); resetBtn(); }
             };
-            reader.readAsArrayBuffer(file);
-            input.value = ""; 
-            
-            function resetBtn() {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
+            reader.readAsArrayBuffer(file); input.value = ""; 
+            function resetBtn() { btn.innerHTML = originalText; btn.disabled = false; }
         }
 
         // MESIN KOMPRESOR LOGO
         window.prosesGambar = function(input, slotKey) {
-            const file = input.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
+            const file = input.files[0]; if (!file) return;
+            const reader = new FileReader(); reader.readAsDataURL(file);
             reader.onload = function(event) {
-                const img = new Image();
-                img.src = event.target.result;
+                const img = new Image(); img.src = event.target.result;
                 img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    const MAX_HEIGHT = 150; 
+                    const canvas = document.createElement('canvas'); const MAX_HEIGHT = 150; 
                     let width = img.width; let height = img.height;
                     if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
                     canvas.width = width; canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
+                    const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height);
                     const base64String = canvas.toDataURL('image/png');
                     dataLogos[slotKey] = base64String;
                     document.getElementById(`prev_${slotKey}`).innerHTML = `<img src="${base64String}">`;
@@ -476,16 +446,12 @@
 
         // MESIN KOMPRESOR SCREENSAVER
         window.prosesScreensaver = function(input, slotKey) {
-            const file = input.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
+            const file = input.files[0]; if (!file) return;
+            const reader = new FileReader(); reader.readAsDataURL(file);
             reader.onload = function(event) {
-                const img = new Image();
-                img.src = event.target.result;
+                const img = new Image(); img.src = event.target.result;
                 img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    const MAX_HEIGHT = 720; 
+                    const canvas = document.createElement('canvas'); const MAX_HEIGHT = 720; 
                     let width = img.width; let height = img.height;
                     if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
                     canvas.width = width; canvas.height = height;
@@ -501,14 +467,12 @@
 
         window.hapusGambar = function(slotKey) {
             dataLogos[slotKey] = "";
-            document.getElementById(`prev_${slotKey}`).innerHTML = "KOSONG";
-            document.getElementById(`file_${slotKey}`).value = ""; 
+            document.getElementById(`prev_${slotKey}`).innerHTML = "KOSONG"; document.getElementById(`file_${slotKey}`).value = ""; 
         }
 
         window.hapusScreensaver = function(slotKey) {
             dataScreensavers[slotKey] = "";
-            document.getElementById(`prev_${slotKey}`).innerHTML = "KOSONG";
-            document.getElementById(`file_${slotKey}`).value = ""; 
+            document.getElementById(`prev_${slotKey}`).innerHTML = "KOSONG"; document.getElementById(`file_${slotKey}`).value = ""; 
         }
 
         window.simpanPengaturan = function() {
@@ -518,21 +482,21 @@
             
             if(urlInput !== "") localStorage.setItem('silat_sheet_url', urlInput);
 
-            let btn = document.querySelector('.btn-save');
+            let btn = document.querySelector('.btn-save-master');
             let teksAsli = btn.innerText;
-            btn.innerText = "MENYIMPAN KE SERVER...";
-            btn.disabled = true;
+            btn.innerText = "MENYIMPAN KE SERVER..."; btn.disabled = true;
 
-            set(ref(database, 'pengaturan/nama_kejuaraan'), namaKejuaraan)
-            .then(() => set(ref(database, 'pengaturan/silat_sheet_url'), urlInput))
-            .then(() => set(ref(database, 'pengaturan/logos'), dataLogos))
-            .then(() => set(ref(database, 'pengaturan/screensavers'), dataScreensavers)) 
-            .then(() => set(ref(database, 'pengaturan/waktu_screensaver'), waktuTunggu))
-            .then(() => {
+            // Skala tidak usah disave lagi karena sudah real-time, kita simpan sisanya
+            update(ref(database, 'pengaturan'), {
+                nama_kejuaraan: namaKejuaraan,
+                silat_sheet_url: urlInput,
+                logos: dataLogos,
+                screensavers: dataScreensavers,
+                waktu_screensaver: waktuTunggu
+            }).then(() => {
                 showCustomAlert("✅ Sukses Disimpan!", "Semua konfigurasi termasuk <b>Link Google Sheet</b> telah disinkronkan ke Server Cloud.", "text-success");
                 btn.innerText = teksAsli; btn.disabled = false;
-            })
-            .catch((error) => {
+            }).catch((error) => {
                 showCustomAlert("❌ Gagal Menyimpan", "Terjadi kesalahan jaringan: " + error, "text-danger");
                 btn.innerText = teksAsli; btn.disabled = false;
             });
