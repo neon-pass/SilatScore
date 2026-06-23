@@ -35,8 +35,14 @@
         .center-score-box { font-size: 55px; font-weight: bold; font-family: monospace; line-height: 1; min-width: 60px; }
         .timer-box { font-size: 34px; color: #fff; background: #222; padding: 2px 18px; border-radius: 6px; border: 1px solid #555; font-weight: bold; margin: 0 20px; font-family: monospace; }
 
-        /* REAL-TIME MATRIX TABLE */
-        .matrix-table { width: 100%; border-collapse: collapse; background-color: #161616; text-align: center; }
+        /* 🔥 REAL-TIME MATRIX TABLE (SUDAH DIGEMBOK DENGAN TABLE-LAYOUT: FIXED) 🔥 */
+        .matrix-table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            background-color: #161616; 
+            text-align: center; 
+            table-layout: fixed; /* KUNCI UTAMANYA ADA DI SINI */
+        }
         .matrix-table th, .matrix-table td { border: 1px solid #333; padding: 6px 4px; vertical-align: middle; height: 44px; }
         .matrix-table th { background-color: #1f1f1f; color: #999; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
         
@@ -58,7 +64,7 @@
             width: 100%;
             min-height: 28px;
             align-items: center;
-            scroll-behavior: auto !important; /* Dilarang 'smooth' agar sinkronisasi instan */
+            scroll-behavior: auto !important; 
         }
         .points-timeline-container::-webkit-scrollbar { height: 4px; }
         .points-timeline-container::-webkit-scrollbar-thumb { background: #444; border-radius: 10px; }
@@ -66,6 +72,7 @@
         .log-cell { 
             display: inline-flex; align-items: center; justify-content: center; 
             font-weight: bold; font-family: monospace; font-size: 14px; min-width: 12px; 
+            flex-shrink: 0; /* 🔥 MENCEGAH KARAKTER MENGECIL/GEPENG SAAT KEPENUHAN 🔥 */
         }
         .tx-putih { color: #ffffff; font-size: 14px; }
         .tx-abu { color: #555; font-weight: normal; font-size: 14px; }
@@ -83,13 +90,11 @@
 
 <div id="mainApp" style="display:none; flex-direction: column; min-height: 100vh;">
     
-    <!-- INFO EVENT -->
     <div class="event-header text-center">
         <p class="event-title" id="liveEventName">MONITORING SYSTEM</p>
         <p class="event-subtitle" id="liveMatchInfo">MEMUAT DATA PERTANDINGAN...</p>
     </div>
 
-    <!-- PAPAN SKOR UTAMA -->
     <div class="score-bar container-fluid px-4">
         <div class="row align-items-center text-center">
             <div class="col-4 text-start">
@@ -108,11 +113,9 @@
         </div>
     </div>
 
-    <!-- MATRIKS Real-time -->
     <div class="container-fluid p-1 flex-grow-1">
         <div class="row g-1 align-items-stretch justify-content-center mx-0">
             
-            <!-- MATRIKS KIRI: SUDUT BIRU -->
             <div class="col" style="flex: 0 0 46%; max-width: 46%;">
                 <table class="matrix-table">
                     <thead>
@@ -159,7 +162,6 @@
                 </table>
             </div>
 
-            <!-- SEKTOR TENGAH: BABAK -->
             <div class="col text-center px-0" style="flex: 0 0 8%; max-width: 8%;">
                 <div class="babak-divider">
                     <span class="text-secondary fw-bold" style="font-size: 10px; letter-spacing: 1px;">BABAK</span>
@@ -168,7 +170,6 @@
                 </div>
             </div>
 
-            <!-- MATRIKS KANAN: SUDUT MERAH -->
             <div class="col" style="flex: 0 0 46%; max-width: 46%;">
                 <table class="matrix-table">
                     <thead>
@@ -218,7 +219,6 @@
         </div>
     </div>
 
-    <!-- FOOTER PANEL -->
     <div class="p-2 bg-dark d-flex justify-content-between border-top border-secondary align-items-center">
         <span id="sessionInfo" class="text-secondary small fw-bold px-2"></span>
         <div class="d-flex gap-2">
@@ -228,7 +228,6 @@
     </div>
 </div>
 
-<!-- MODAL MANAGEMENT & SETUP -->
 <div class="modal fade" id="modalSetupLaga" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content dark-theme border-secondary">
@@ -282,7 +281,6 @@
     </div>
 </div>
 
-<!-- MODAL KONFIRMASI RESET -->
 <div class="modal fade" id="modalKonfirmasiResetKetua" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content dark-theme shadow-lg" style="border: 2px solid #dc3545;">
@@ -346,7 +344,7 @@
             let el = document.getElementById(`timeline-${id}`);
             if(!el) return;
             el.addEventListener('scroll', (e) => {
-                if(sedangSinkron) return; // Mencegah feedback loop!
+                if(sedangSinkron) return; 
                 sedangSinkron = true;
                 let posisiKiri = e.target.scrollLeft;
 
@@ -533,8 +531,6 @@
             if(el && el.innerHTML !== htmlBuffer[id]) { el.innerHTML = htmlBuffer[id]; }
         });
 
-        // 🔥 KEAJAIBAN KETIGA: Cukup geser baris 'Score' ke ujung kanan, 
-        // maka otomatis 6 baris saudaranya di atas & bawah akan terpelanting ikut ke kanan! 🔥
         ['score-biru', 'score-merah'].forEach(id => {
             let el = document.getElementById(`timeline-${id}`);
             if(el) el.scrollLeft = el.scrollWidth; 
