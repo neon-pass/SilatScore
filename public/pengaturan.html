@@ -92,9 +92,9 @@
             <input type="url" id="sheetUrl" placeholder="https://docs.google.com/spreadsheets/d/..." autocomplete="off">
         </div>
 
-        <div class="section-divider">📅 IMPORT JADWAL PERTANDINGAN (EXCEL)</div>
-        <div class="form-group text-center mx-auto" style="max-width: 500px;">
-            <label>Upload file jadwal untuk disinkronkan ke seluruh perangkat Panitia</label>
+        <div class="section-divider">📅 IMPORT JADWAL (EXCEL: TANDING & JURUS)</div>
+        <div class="form-group text-center mx-auto" style="max-width: 550px;">
+            <label style="line-height: 1.5;">Upload 1 file Excel jadwal pertandingan.<br>Pastikan memiliki <span class="text-warning fw-bold">Tab 1: TANDING</span> dan <span class="text-warning fw-bold">Tab 2: JURUS</span></label>
             <input type="file" id="fileExcel" accept=".xlsx, .xls, .csv" class="d-none" onchange="prosesExcelJadwal(this)">
             <button class="btn btn-info fw-bold w-100 py-3 mt-2 text-dark" onclick="document.getElementById('fileExcel').click()" style="box-shadow: 0 4px 6px rgba(0,0,0,0.5);">
                 📂 PILIH & UNGGAH FILE EXCEL
@@ -301,14 +301,14 @@
         import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js";
 
         const firebaseConfig = {
-        apiKey: "AIzaSyCNsOk8MsIhBoZ44Nd9WGGl6eBJOEKu3nI",
-        authDomain: "tesapksilat99.firebaseapp.com",
-        databaseURL: "https://tesapksilat99-default-rtdb.asia-southeast1.firebasedatabase.app",
-        projectId: "tesapksilat99",
-        storageBucket: "tesapksilat99.firebasestorage.app",
-        messagingSenderId: "747533449255",
-        appId: "1:747533449255:web:358edf3c6032c22cdbb602"
-    };
+            apiKey: "AIzaSyCNsOk8MsIhBoZ44Nd9WGGl6eBJOEKu3nI",
+            authDomain: "tesapksilat99.firebaseapp.com",
+            databaseURL: "https://tesapksilat99-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "tesapksilat99",
+            storageBucket: "tesapksilat99.firebasestorage.app",
+            messagingSenderId: "747533449255",
+            appId: "1:747533449255:web:358edf3c6032c22cdbb602"
+        };
 
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
@@ -329,21 +329,17 @@
         }
 
         document.addEventListener("DOMContentLoaded", () => {
-            // Tarik data saat ini dari Firebase (Termasuk Link Sheet)
             onValue(ref(database, 'pengaturan'), (snap) => {
                 let data = snap.val() || {};
                 
-                // 🔥 SINKRONISASI NAMA & LINK SHEET DARI CLOUD 🔥
                 if(data.nama_kejuaraan) document.getElementById('inputNamaKejuaraan').value = data.nama_kejuaraan;
                 if(data.silat_sheet_url) {
                     document.getElementById('sheetUrl').value = data.silat_sheet_url;
                 } else {
-                    // Cadangan jika di server kosong, ambil dari lokal
                     let savedUrl = localStorage.getItem('silat_sheet_url');
                     if (savedUrl) document.getElementById('sheetUrl').value = savedUrl;
                 }
                 
-                // Load Logos
                 if(data.logos) {
                     Object.keys(dataLogos).forEach(key => {
                         if(data.logos[key]) {
@@ -353,7 +349,6 @@
                     });
                 }
 
-                // Load Screensavers
                 if(data.screensavers) {
                     Object.keys(dataScreensavers).forEach(key => {
                         if(data.screensavers[key]) {
@@ -363,7 +358,6 @@
                     });
                 }
 
-                // Load Waktu Screensaver
                 if(data.waktu_screensaver) {
                     document.getElementById('inputWaktuScreensaver').value = data.waktu_screensaver;
                 }
@@ -371,14 +365,14 @@
             }, { onlyOnce: true });
         });
 
-        // 🔥 MESIN IMPORT JADWAL EXCEL KE CLOUD 🔥
+        // 🔥 MESIN IMPORT EXCEL SUPER CERDAS (BACA 2 TAB SEKALIGUS) 🔥
         window.prosesExcelJadwal = function(input) {
             let file = input.files[0];
             if(!file) return;
 
             let btn = input.nextElementSibling;
             let originalText = btn.innerHTML;
-            btn.innerHTML = "⏳ MEMBACA FILE...";
+            btn.innerHTML = "⏳ MEMBACA FILE EXCEL...";
             btn.disabled = true;
 
             let reader = new FileReader();
@@ -386,37 +380,69 @@
                 try {
                     let data = new Uint8Array(e.target.result);
                     let workbook = XLSX.read(data, {type: 'array'});
-                    let sheetName = workbook.SheetNames[0];
-                    let sheet = workbook.Sheets[sheetName];
-                    let json = XLSX.utils.sheet_to_json(sheet);
                     
-                    if(json.length === 0) {
-                        showCustomAlert("⚠️ Kosong", "File Excel tidak memiliki data/kosong.", "text-warning");
+                    let jadwalTanding = [];
+                    let jadwalJurus = [];
+
+                    // Deteksi Tab Berdasarkan Nama
+                    workbook.SheetNames.forEach(sheetName => {
+                        let nameLower = sheetName.toLowerCase();
+                        let sheet = workbook.Sheets[sheetName];
+                        let json = XLSX.utils.sheet_to_json(sheet);
+
+                        if (nameLower.includes('tanding')) {
+                            jadwalTanding = json;
+                        } else if (nameLower.includes('jurus') || nameLower.includes('seni')) {
+                            jadwalJurus = json;
+                        }
+                    });
+
+                    // Jika nama tab tidak baku (misal Sheet1, Sheet2), pakai deteksi urutan 
+                    if (jadwalTanding.length === 0 && jadwalJurus.length === 0) {
+                         if (workbook.SheetNames.length >= 1) {
+                             jadwalTanding = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+                         }
+                         if (workbook.SheetNames.length >= 2) {
+                             jadwalJurus = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[1]]);
+                         }
+                    }
+
+                    if(jadwalTanding.length === 0 && jadwalJurus.length === 0) {
+                        showCustomAlert("⚠️ Kosong", "File Excel tidak memiliki data jadwal sama sekali.", "text-warning");
                         resetBtn();
                         return;
                     }
 
-                    // Tembak Data Jadwal ke Firebase
                     btn.innerHTML = "☁️ MENGUNGGAH KE SERVER...";
-                    set(ref(database, 'pengaturan/jadwal_excel'), json)
-                        .then(() => {
-                            document.getElementById('statusExcel').innerText = `✅ Berhasil mengunggah ${json.length} partai ke Cloud!`;
-                            document.getElementById('statusExcel').style.display = 'block';
-                            showCustomAlert("✅ Sinkronisasi Sukses", `Berhasil memuat <b>${json.length}</b> partai pertandingan ke Server.<br>Jadwal akan otomatis muncul di seluruh perangkat Panitia.`, "text-success");
-                            resetBtn();
-                        })
-                        .catch((err) => {
-                            showCustomAlert("❌ Gagal", "Terjadi kesalahan: " + err.message, "text-danger");
-                            resetBtn();
-                        });
+                    
+                    // Simpan kedua jadwal secara bersamaan
+                    Promise.all([
+                        set(ref(database, 'pengaturan/jadwal_tanding'), jadwalTanding),
+                        set(ref(database, 'pengaturan/jadwal_jurus'), jadwalJurus),
+                        set(ref(database, 'pengaturan/jadwal_excel'), null) // Hapus sistem lama agar bersih
+                    ]).then(() => {
+                        let detailPesan = `✅ Berhasil memuat data:<br><br>`;
+                        detailPesan += `<b class="text-warning">Kategori TANDING:</b> ${jadwalTanding.length} Partai<br>`;
+                        detailPesan += `<b class="text-warning">Kategori JURUS:</b> ${jadwalJurus.length} Partai<br><br>`;
+                        detailPesan += `Jadwal akan otomatis muncul di seluruh meja Panitia.`;
+
+                        document.getElementById('statusExcel').innerHTML = `✅ Tanding: ${jadwalTanding.length} | Jurus: ${jadwalJurus.length}`;
+                        document.getElementById('statusExcel').style.display = 'block';
+                        
+                        showCustomAlert("✅ Sinkronisasi Jadwal Sukses", detailPesan, "text-success");
+                        resetBtn();
+                    }).catch((err) => {
+                        showCustomAlert("❌ Gagal", "Terjadi kesalahan upload ke server: " + err.message, "text-danger");
+                        resetBtn();
+                    });
 
                 } catch (error) {
-                    showCustomAlert("❌ Error", "Format file tidak didukung atau rusak.", "text-danger");
+                    showCustomAlert("❌ Error", "Format file tidak didukung atau Excel dalam keadaan rusak.", "text-danger");
                     resetBtn();
                 }
             };
             reader.readAsArrayBuffer(file);
-            input.value = ""; // Reset form input file
+            input.value = ""; 
             
             function resetBtn() {
                 btn.innerHTML = originalText;
@@ -473,7 +499,6 @@
             };
         }
 
-        // FUNGSI PENGHAPUSAN
         window.hapusGambar = function(slotKey) {
             dataLogos[slotKey] = "";
             document.getElementById(`prev_${slotKey}`).innerHTML = "KOSONG";
@@ -486,13 +511,11 @@
             document.getElementById(`file_${slotKey}`).value = ""; 
         }
 
-        // FUNGSI SIMPAN KE CLOUD
         window.simpanPengaturan = function() {
             let urlInput = document.getElementById('sheetUrl').value.trim();
             let namaKejuaraan = document.getElementById('inputNamaKejuaraan').value.trim();
             let waktuTunggu = parseInt(document.getElementById('inputWaktuScreensaver').value) || 60;
             
-            // Tetap simpan di lokal sebagai cadangan
             if(urlInput !== "") localStorage.setItem('silat_sheet_url', urlInput);
 
             let btn = document.querySelector('.btn-save');
