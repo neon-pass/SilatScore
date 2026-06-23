@@ -162,13 +162,22 @@
                     </div>
                 </div>
 
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 mt-4 pt-3 border-top border-dark">
+                    <div style="flex: 1;">
+                        <label class="m-0 text-info" style="font-size: 14px;">Koneksi Layar Eksternal</label>
+                        <small class="text-secondary d-block mt-1" style="text-transform: none;">Sambungkan aplikasi ke TV/STB via Wireless Display/Cast bawaan HP.</small>
+                    </div>
+                    <div>
+                        <button class="btn btn-info px-4 py-2 fw-bold text-dark border-0 shadow-sm" onclick="panggilMenuCast()">📡 SAMBUNGKAN PERANGKAT NIRKABEL</button>
+                    </div>
+                </div>
+
             </div>
         </div>
 
         <button class="btn btn-emas btn-save-master" onclick="simpanPengaturan()">💾 SIMPAN SEMUA PENGATURAN</button>
         <a href="index.html" class="btn-back-link">❮ KEMBALI KE MENU UTAMA</a>
     </div>
-
 
     <div class="modal fade" id="modalScreensaver" tabindex="-1">
         <div class="modal-dialog modal-xl modal-dialog-centered">
@@ -306,31 +315,39 @@
         }
 
         // =======================================================
+        // 🔥 PEMANGGIL MENU CAST/NIRKABEL 🔥
+        // =======================================================
+        window.panggilMenuCast = function() {
+            if (typeof AndroidApp !== "undefined" && AndroidApp.panggilMenuCast) {
+                AndroidApp.panggilMenuCast();
+            } else {
+                showCustomAlert("⚠️ Akses Ditolak", "Fitur <b>Koneksi Nirkabel</b> ini hanya bisa dijalankan jika Anda membuka aplikasi melalui Aplikasi Android (APK).", "text-warning");
+            }
+        }
+
+        // =======================================================
         // 🔥 LOGIKA SENSOR TUAS REAL-TIME (SKALA TV) 🔥
         // =======================================================
         let timerDebounce = null;
         window.updateSkalaLive = function(jenis, nilai, satuan) {
-            // 1. Update angka teks di ujung kanan tuas (Lokal)
             let elLabel = null;
             if(jenis === 'global') elLabel = document.getElementById('valGlobal');
             if(jenis === 'skor') elLabel = document.getElementById('valSkor');
             if(jenis === 'ikon') elLabel = document.getElementById('valIkon');
             if(elLabel) elLabel.innerText = `${nilai} ${satuan}`;
 
-            // 2. Debounce Pengiriman ke Firebase (Biar tidak jebol Kuota Internet)
             clearTimeout(timerDebounce);
             timerDebounce = setTimeout(() => {
                 let sGlob = document.getElementById('slideGlobal').value;
                 let sSkor = document.getElementById('slideSkor').value;
                 let sIkon = document.getElementById('slideIkon').value;
                 
-                // Update langsung tembak ke folder /pengaturan/skala
                 update(ref(database, 'pengaturan/skala'), {
                     global: sGlob,
                     skor: sSkor,
                     ikon: sIkon
                 });
-            }, 100); // Tunda 100 milidetik. Terasa real-time tapi sangat aman untuk database!
+            }, 100); 
         }
 
         // Pemuatan Awal Data
@@ -342,7 +359,6 @@
                 if(data.silat_sheet_url) { document.getElementById('sheetUrl').value = data.silat_sheet_url; } 
                 else { let savedUrl = localStorage.getItem('silat_sheet_url'); if (savedUrl) document.getElementById('sheetUrl').value = savedUrl; }
                 
-                // Ambil Data Skala Terakhir
                 if(data.skala) {
                     if(data.skala.global) { document.getElementById('slideGlobal').value = data.skala.global; document.getElementById('valGlobal').innerText = data.skala.global + ' px'; }
                     if(data.skala.skor) { document.getElementById('slideSkor').value = data.skala.skor; document.getElementById('valSkor').innerText = data.skala.skor + ' rem'; }
@@ -486,7 +502,6 @@
             let teksAsli = btn.innerText;
             btn.innerText = "MENYIMPAN KE SERVER..."; btn.disabled = true;
 
-            // Skala tidak usah disave lagi karena sudah real-time, kita simpan sisanya
             update(ref(database, 'pengaturan'), {
                 nama_kejuaraan: namaKejuaraan,
                 silat_sheet_url: urlInput,
