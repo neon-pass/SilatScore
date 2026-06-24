@@ -112,6 +112,7 @@
 </head>
 <body>
 
+    <!-- MODAL SETUP -->
     <div class="modal fade" id="modalSetupJadwal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content dark-theme p-4 position-relative">
@@ -154,6 +155,7 @@
             </div>
         </div>
 
+        <!-- LAYOUT NORMAL (1 GELANGGANG) -->
         <div id="normalLayout">
             <div class="left-panel">
                 <div class="panel-title" id="judulPanelKiri">LIVE: SEDANG & AKAN MAIN</div>
@@ -183,6 +185,7 @@
             </div>
         </div>
 
+        <!-- LAYOUT MASTER GRID (SEMUA GELANGGANG) -->
         <div id="masterLayout">
             <div class="master-grid grid-count-1" id="masterGridContainer"></div>
         </div>
@@ -239,7 +242,9 @@
             GELANGGANG = document.getElementById('pilihGelanggang').value;
             KATEGORI_TAMPILAN = document.getElementById('pilihKategori').value;
 
-            // MESIN PENGIRIM PERINTAH KE TV VIA APK
+            // =======================================================
+            // 🔥 MESIN APK: LEMPAR TABLET BALIK KE INDEX.HTML
+            // =======================================================
             if (!window.isDiLayarTV && typeof AndroidApp !== "undefined" && AndroidApp.isTvConnected()) {
                 let btn = document.querySelector('#modalSetupJadwal .btn-warning');
                 btn.innerText = "MENGIRIM JADWAL KE TV..."; 
@@ -252,14 +257,14 @@
                     btn.classList.replace("btn-warning", "btn-success"); 
                 }, 500);
 
+                // Meniru persis Layar Utama: Usir tablet kembali ke beranda!
                 setTimeout(() => {
-                    let modalSetup = bootstrap.Modal.getInstance(document.getElementById('modalSetupJadwal'));
-                    if (modalSetup) modalSetup.hide();
-                    window.isDiLayarTV = true; 
-                    window.mulaiLayarJadwal(); 
-                }, 1500);
-                return; 
+                    window.location.href = "index.html"; 
+                }, 2000);
+
+                return; // Proses tablet dimatikan di sini
             }
+            // =======================================================
 
             let modalSetup = bootstrap.Modal.getInstance(document.getElementById('modalSetupJadwal'));
             if (modalSetup) modalSetup.hide();
@@ -321,9 +326,6 @@
             else { renderNormalPanelKiri(); renderNormalTabelKanan(); }
         }
 
-        // ====================================================================
-        // RENDER NORMAL (1 GELANGGANG) DENGAN STRUKTUR PARTAI ATAS, NAMA BAWAH
-        // ====================================================================
         function renderNormalPanelKiri() {
             let wadah = document.getElementById('wadahUpNext');
             let sumberData = (KATEGORI_TAMPILAN === 'jurus') ? dataGlobalJurus : dataGlobalTanding;
@@ -395,9 +397,6 @@
             document.getElementById('scrollWrapper').style.animationDuration = Math.max(12, tersaring.length * 3.2) + "s";
         }
 
-        // ====================================================================
-        // RENDER MASTER (SEMUA GELANGGANG) DENGAN STRUKTUR PARTAI ATAS, NAMA BAWAH
-        // ====================================================================
         function renderMasterFIDS() {
             let container = document.getElementById('masterGridContainer');
             let sumberData = (KATEGORI_TAMPILAN === 'jurus') ? dataGlobalJurus : dataGlobalTanding;
