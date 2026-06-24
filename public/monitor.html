@@ -250,24 +250,43 @@
             }
         });
 
-        // Logika Pengiriman Parameter Layar TV
-        window.bukaLayar = function(jenis) {
-            if (jenis === 'tanding') {
-                let gel = document.getElementById('selectTanding').value;
-                if(!gel) { alert("Silakan pilih Gelanggang Tanding!"); return; }
-                window.location.href = `layar-utama.html?gelanggang=${gel}`;
-            } 
-            else if (jenis === 'seni') {
-                let gel = document.getElementById('selectSeni').value;
-                if(!gel) { alert("Silakan pilih Gelanggang Seni!"); return; }
-                window.location.href = `layar-seni.html?gelanggang=${gel}`;
-            } 
-            else if (jenis === 'jadwal') {
-                let gel = document.getElementById('selectJadwalGel').value;
-                let kat = document.getElementById('selectJadwalKat').value;
-                window.location.href = `jadwal-tv.html?gelanggang=JADWAL_${gel.toUpperCase()}&kategori=${kat}`;
-            }
+        // Logika Pengiriman Parameter Layar TV Pintar (Mendukung APK & Browser Biasa)
+window.bukaLayar = function(jenis) {
+    if (jenis === 'tanding') {
+        let gel = document.getElementById('selectTanding').value;
+        if(!gel) { alert("Silakan pilih Gelanggang Tanding!"); return; }
+        
+        // JIKA DI DALAM APK ANDROID & TV TERHUBUNG (Halaman tersendiri, tablet tidak pindah)
+        if (typeof AndroidApp !== "undefined" && AndroidApp.isTvConnected()) {
+            AndroidApp.bukaDiTV(gel, "tanding");
+        } else {
+            // Jika di laptop/browser biasa (Gunakan Mode Extend / Tarik Tab ke Jendela TV)
+            window.open(`layar-utama.html?gelanggang=${gel}`, '_blank');
         }
+    } 
+    else if (jenis === 'seni') {
+        let gel = document.getElementById('selectSeni').value;
+        if(!gel) { alert("Silakan pilih Gelanggang Seni!"); return; }
+        
+        if (typeof AndroidApp !== "undefined" && AndroidApp.isTvConnected()) {
+            AndroidApp.bukaDiTV(gel, "seni");
+        } else {
+            window.open(`layar-seni.html?gelanggang=${gel}`, '_blank');
+        }
+    } 
+    else if (jenis === 'jadwal') {
+        let gel = document.getElementById('selectJadwalGel').value; // menghasilkan 'g1', 'g2', atau 'semua'
+        let kat = document.getElementById('selectJadwalKat').value; // menghasilkan 'tanding' atau 'seni'
+        
+        if (typeof AndroidApp !== "undefined" && AndroidApp.isTvConnected()) {
+            // Sesuai pesanan Mesin APK di jadwal-tv.html, parameter pertama wajib diawali "JADWAL_"
+            AndroidApp.bukaDiTV("JADWAL_" + gel, kat);
+        } else {
+            // Jika di browser laptop biasa, kirim parameter bersih tanpa "JADWAL_" agar select option tidak crash
+            window.open(`jadwal-tv.html?gelanggang=${gel}&kategori=${kat}`, '_blank');
+        }
+    }
+}
     </script>
 </body>
 </html>
