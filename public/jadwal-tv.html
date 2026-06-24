@@ -21,7 +21,6 @@
 
         .championship-title { font-size: 2.2rem; font-weight: 900; letter-spacing: 4px; text-transform: uppercase; color: #ffc107; text-shadow: 2px 2px 5px rgba(0,0,0,0.8); margin: 0; }
         
-        /* TOMBOL RAHASIA KIRI */
         .gelanggang-badge { 
             background: #ffc107; color: #000; font-size: 1.2rem; font-weight: 900; 
             padding: 6px 20px; border-radius: 8px; letter-spacing: 1px; 
@@ -29,16 +28,13 @@
         }
         .gelanggang-badge:hover { background: #fff; box-shadow: 0 0 15px rgba(255, 193, 7, 0.8); transform: scale(1.04); }
         
-        /* LABEL KATEGORI KANAN */
         .kategori-badge {
             background: #111; color: #0dcaf0; border: 2px solid #0dcaf0; 
             font-size: 1.2rem; font-weight: 900; padding: 6px 20px; 
             border-radius: 8px; letter-spacing: 1.5px; text-transform: uppercase;
         }
 
-        /* ==================================================== */
-        /* LAYOUT A: MODE NORMAL (1 GELANGGANG)                 */
-        /* ==================================================== */
+        /* MODE NORMAL (1 GELANGGANG) */
         #normalLayout { display: none; flex-grow: 1; overflow: hidden; }
 
         .left-panel { width: 45%; background: #0a0a0a; border-right: 2px solid #333; display: flex; flex-direction: column; padding: 15px; }
@@ -48,23 +44,8 @@
             height: 50px; display: flex; align-items: center; justify-content: center; 
         }
         
-        .upnext-box { background: #111; border: 1px solid #333; border-radius: 10px; margin-bottom: 10px; display: flex; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.5); }
-        .upnext-box.sedang-main { border: 2px solid #198754; background: linear-gradient(90deg, #051b11 0%, #111 100%); box-shadow: 0 0 15px rgba(25, 135, 84, 0.4); transform: scale(1.01); margin-bottom: 15px; margin-top: 5px; }
-        
-        .status-badge { width: 16%; background: #222; display: flex; flex-direction: column; justify-content: center; align-items: center; font-weight: 900; border-right: 1px solid #333; text-align: center; padding: 5px; }
-        .status-badge .partai-num { font-size: 2.1rem; color: #ffc107; font-family: monospace; line-height: 1; }
-        .status-badge .partai-lbl { font-size: 0.75rem; color: #aaa; text-transform: uppercase; letter-spacing: 1px; }
-
-        .upnext-content { width: 84%; display: flex; flex-direction: column; }
-        .kelas-badge { background: #1a1a1a; color: #ffc107; font-size: 0.85rem; font-weight: bold; text-align: center; padding: 4px 0; border-bottom: 1px solid #333; letter-spacing: 1px; text-transform: uppercase; }
-        .upnext-row { display: flex; flex-grow: 1; }
-        
-        .up-biru, .up-merah { flex: 1; padding: 10px 15px; display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
-        .up-biru { border-right: 2px solid #222; border-left: 4px solid #0b5ed7; text-align: left; }
-        .up-merah { border-right: 4px solid #dc3545; text-align: right; }
-        
-        .up-nama { font-size: 1.4rem; font-weight: bold; color: #fff; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.1; }
-        .up-kon { font-size: 0.85rem; color: #888; text-transform: uppercase; margin-top: 4px; letter-spacing: 1px; }
+        .upnext-box { background: #111; border: 1px solid #333; border-radius: 10px; margin-bottom: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.5); }
+        .upnext-box.sedang-main { border: 2px solid #198754; background: linear-gradient(180deg, #051b11 0%, #111 100%); box-shadow: 0 0 15px rgba(25, 135, 84, 0.4); }
 
         .right-panel { width: 55%; display: flex; flex-direction: column; background: #050505; }
         
@@ -88,14 +69,10 @@
             to   { transform: translateY(calc(-100% - var(--h-kontainer, 75vh))); } 
         }
 
-        /* ==================================================== */
-        /* LAYOUT B: MODE MASTER FIDS (SEMUA GELANGGANG)        */
-        /* ==================================================== */
+        /* MODE MASTER FIDS (SEMUA GELANGGANG) */
         #masterLayout { display: none; flex-grow: 1; background: #050505; }
-        
         .master-grid { display: grid; gap: 15px; padding: 15px; width: 100%; height: 100%; }
         
-        /* Auto Fit Grid Logic */
         .grid-count-1 { grid-template-columns: 1fr; }
         .grid-count-2 { grid-template-columns: 1fr 1fr; }
         .grid-count-3 { grid-template-columns: repeat(3, 1fr); }
@@ -105,34 +82,32 @@
 
         .gel-box { background: #0a0a0a; border: 2px solid #333; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.8); }
         .gb-header { background: linear-gradient(180deg, #ffc107 0%, #d39e00 100%); color: #000; text-align: center; font-weight: 900; padding: 10px; font-size: 1.3rem; letter-spacing: 3px; border-bottom: 3px solid #222; text-transform: uppercase; }
-        .gb-body { padding: 12px; flex-grow: 1; display: flex; flex-direction: column; gap: 8px; justify-content: flex-start; }
+        .gb-body { padding: 12px; flex-grow: 1; display: flex; flex-direction: column; gap: 10px; justify-content: flex-start; overflow-y: auto; }
 
-        .match-strip { display: flex; align-items: center; border-radius: 8px; padding: 10px 15px; gap: 15px; overflow: hidden; }
+        .match-strip { border-radius: 8px; padding: 10px 15px; display: flex; flex-direction: column; gap: 8px; }
+        .match-now { background: linear-gradient(180deg, #051b11 0%, #111 100%); border: 2px solid #198754; box-shadow: 0 0 10px rgba(25,135,84,0.3); }
+        .match-next { background: #111; border: 1px solid #333; }
         
-        .match-now { background: linear-gradient(90deg, #051b11 0%, #111 100%); border: 2px solid #198754; flex: 1.2; box-shadow: 0 0 15px rgba(25,135,84,0.3); }
-        .match-next { background: #111; border: 1px solid #333; flex: 1; }
-        
-        .ms-partai { font-family: monospace; font-size: 1.6rem; font-weight: 900; color: #ffc107; background: #000; padding: 5px 15px; border-radius: 6px; border: 1px solid #333; min-width: 90px; text-align: center; }
-        .match-now .ms-partai { background: #198754; color: #fff; border-color: #20c997; font-size: 2.2rem; }
+        .ms-partai { font-family: monospace; font-size: 1.5rem; font-weight: 900; color: #ffc107; background: #000; padding: 2px 12px; border-radius: 4px; border: 1px solid #444; display: inline-block; }
+        .match-now .ms-partai { background: #198754; color: #fff; border-color: #20c997; font-size: 1.8rem; }
 
-        .ms-detail { display: flex; flex-direction: column; justify-content: center; flex-grow: 1; overflow: hidden; white-space: nowrap; }
-        .ms-fighters { font-size: 1.4rem; font-weight: bold; overflow: hidden; text-overflow: ellipsis; }
-        .match-now .ms-fighters { font-size: 2rem; }
-        
-        .ms-kelas { font-size: 0.9rem; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-top: 3px; }
-        .match-now .ms-kelas { color: #20c997; font-weight: bold; }
+        .ms-kelas { font-size: 1.1rem; color: #0dcaf0; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; background: #222; padding: 4px 10px; border-radius: 4px; border: 1px solid #333; }
+        .match-now .ms-kelas { color: #20c997; background: #022e1f; border-color: #198754; }
+
+        .ms-fighters { font-size: 1.35rem; font-weight: bold; text-align: center; white-space: normal; line-height: 1.3; }
+        .match-now .ms-fighters { font-size: 1.7rem; }
 
         .pesilat-name { color: #fff; }
         .pesilat-biru { color: #0dcaf0; }
         .pesilat-merah { color: #ff4444; }
         .vs-text { color: #ffc107; font-size: 0.8em; margin: 0 10px; font-weight: 900; }
 
-        /* MODAL */
         .modal-content.dark-theme { background-color: #1a1a1a; border: 1px solid #555; color: white; }
     </style>
 </head>
 <body>
 
+    <!-- MODAL SETUP -->
     <div class="modal fade" id="modalSetupJadwal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content dark-theme p-4 position-relative">
@@ -162,7 +137,6 @@
     </div>
 
     <div id="mainAppUI" style="display: none; flex-direction: column; height: 100%;">
-        
         <div class="header-top">
             <div class="header-left">
                 <div class="gelanggang-badge" id="lblGelanggang" onclick="bukaModalRahasia()" title="Klik untuk buka pengaturan">GELANGGANG 1</div>
@@ -175,10 +149,11 @@
             </div>
         </div>
 
+        <!-- LAYOUT NORMAL (1 GELANGGANG) -->
         <div id="normalLayout">
             <div class="left-panel">
                 <div class="panel-title" id="judulPanelKiri">LIVE: SEDANG & AKAN MAIN</div>
-                <div id="wadahUpNext" style="display: flex; flex-direction: column; gap: 5px; flex-grow: 1; overflow-y:auto;">
+                <div id="wadahUpNext" style="display: flex; flex-direction: column; flex-grow: 1; overflow-y:auto;">
                     <div class="text-center text-secondary mt-5">Menunggu Koneksi...</div>
                 </div>
             </div>
@@ -196,22 +171,18 @@
                         </thead>
                     </table>
                 </div>
-
                 <div class="scroll-container">
                     <div class="scroll-content" id="scrollWrapper">
-                        <table id="tabelJadwal">
-                            <tbody id="isiTabelKanan"></tbody>
-                        </table>
+                        <table id="tabelJadwal"><tbody id="isiTabelKanan"></tbody></table>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- LAYOUT MASTER GRID (SEMUA GELANGGANG) -->
         <div id="masterLayout">
-            <div class="master-grid grid-count-1" id="masterGridContainer">
-                </div>
+            <div class="master-grid grid-count-1" id="masterGridContainer"></div>
         </div>
-
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -245,6 +216,7 @@
             const katParam = urlParams.get('kategori');
 
             if (gelParam && katParam) {
+                window.isDiLayarTV = true; // Kunci pemicu APK agar tidak looping
                 document.getElementById('pilihGelanggang').value = gelParam;
                 document.getElementById('pilihKategori').value = katParam;
                 window.mulaiLayarJadwal();
@@ -263,6 +235,32 @@
             GELANGGANG = document.getElementById('pilihGelanggang').value;
             KATEGORI_TAMPILAN = document.getElementById('pilihKategori').value;
 
+            // =======================================================
+            // 🔥 MESIN PENGIRIM PERINTAH KE TV VIA APK
+            // =======================================================
+            if (!window.isDiLayarTV && typeof AndroidApp !== "undefined" && AndroidApp.isTvConnected()) {
+                let btn = document.querySelector('#modalSetupJadwal .btn-warning');
+                btn.innerText = "MENGIRIM JADWAL KE TV..."; 
+                btn.disabled = true;
+                
+                // Kirimkan awalan "JADWAL_" agar ditangkap oleh router TV
+                AndroidApp.bukaDiTV("JADWAL_" + GELANGGANG, KATEGORI_TAMPILAN); 
+
+                setTimeout(() => { 
+                    btn.innerText = "TAYANG DI TV ✅"; 
+                    btn.classList.replace("btn-warning", "btn-success"); 
+                }, 500);
+
+                setTimeout(() => {
+                    let modalSetup = bootstrap.Modal.getInstance(document.getElementById('modalSetupJadwal'));
+                    if (modalSetup) modalSetup.hide();
+                    window.isDiLayarTV = true; 
+                    window.mulaiLayarJadwal(); // Tayangkan juga di tablet panitia
+                }, 1500);
+                return; 
+            }
+            // =======================================================
+
             let modalSetup = bootstrap.Modal.getInstance(document.getElementById('modalSetupJadwal'));
             if (modalSetup) modalSetup.hide();
 
@@ -273,7 +271,6 @@
             document.getElementById('lblKategoriAtas').innerText = teksKat;
             document.getElementById('mainAppUI').style.display = 'flex';
 
-            // ATUR TAMPILAN MANA YANG AKTIF
             if (GELANGGANG === 'semua') {
                 document.getElementById('normalLayout').style.display = 'none';
                 document.getElementById('masterLayout').style.display = 'flex';
@@ -294,10 +291,8 @@
             if (!valExcel) return false;
             let teks = String(valExcel).trim().toLowerCase();
             let targetAngka = kodeGelanggang.replace(/[^0-9]/g, '');
-
             let ekstraksiAngka = teks.match(/\b\d+\b/);
             if (ekstraksiAngka) return parseInt(ekstraksiAngka[0], 10) === parseInt(targetAngka, 10);
-            
             return teks === "g" + targetAngka || teks === "gelanggang" + targetAngka;
         }
 
@@ -322,21 +317,14 @@
         }
 
         function kalkulasiTampilan() {
-            if (GELANGGANG === 'semua') {
-                renderMasterFIDS();
-            } else {
-                renderNormalPanelKiri();
-                renderNormalTabelKanan();
-            }
+            if (GELANGGANG === 'semua') renderMasterFIDS();
+            else { renderNormalPanelKiri(); renderNormalTabelKanan(); }
         }
 
-        // =========================================================
-        // LAYOUT A: RENDER NORMAL (1 GELANGGANG)
-        // =========================================================
+        // STRUKTUR KOTAK PRESISI (MODE 1 GELANGGANG)
         function renderNormalPanelKiri() {
             let wadah = document.getElementById('wadahUpNext');
             let sumberData = (KATEGORI_TAMPILAN === 'jurus') ? dataGlobalJurus : dataGlobalTanding;
-
             let panitiaLokal = livePanitiaMap[GELANGGANG] || { partai: "-" };
             let jadwalLokal = sumberData.filter(x => isGelanggangCocok(x['Gelanggang'] || x['GELANGGANG'], GELANGGANG));
 
@@ -358,37 +346,31 @@
                 let partai = item['Partai'] || item['PARTAI'] || "-";
                 let kelas  = item['Kelas'] || item['KELAS'] || "-"; 
                 let nBiru  = item['Nama Biru'] || item['SUDUT BIRU'] || "-";
-                let kBiru  = item['Kontingen Biru'] || item['KONTINGEN BIRU'] || "-";
                 let nMerah = item['Nama Merah'] || item['SUDUT MERAH'] || "-";
-                let kMerah = item['Kontingen Merah'] || item['KONTINGEN MERAH'] || "-";
 
                 htmlKiri += `
-                <div class="upnext-box ${bg}">
-                    <div class="status-badge">
-                        <span class="partai-lbl">${lbl}</span>
-                        <span class="partai-num">${partai}</span>
-                    </div>
-                    <div class="upnext-content">
-                        <div class="kelas-badge">${kelas}</div>
-                        <div class="upnext-row">
-                            <div class="up-biru"><div class="up-nama">${nBiru}</div><div class="up-kon">${kBiru}</div></div>
-                            <div class="up-merah"><div class="up-nama">${nMerah}</div><div class="up-kon">${kMerah}</div></div>
+                <div class="upnext-box ${bg}" style="display: flex; flex-direction: column; padding: 15px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 8px; margin-bottom: 12px;">
+                        <div>
+                            <span style="background:#444; color:#fff; font-size:0.8rem; padding:3px 8px; border-radius:4px; font-weight:bold;">${lbl}</span>
+                            <span style="font-size:1.6rem; font-family:monospace; font-weight:bold; color:#ffc107; margin-left:8px;">PARTAI ${partai}</span>
                         </div>
+                        <div style="background:#222; color:#0dcaf0; font-size:1.1rem; padding:4px 12px; border-radius:4px; font-weight:bold; border:1px solid #444;">${kelas}</div>
+                    </div>
+                    <div style="font-size: 1.5rem; font-weight: bold; text-align: center;">
+                        <span class="text-primary">${nBiru}</span> <span class="text-warning mx-2" style="font-size:1rem;">VS</span> <span class="text-danger">${nMerah}</span>
                     </div>
                 </div>`;
             });
-
             wadah.innerHTML = htmlKiri;
         }
 
         function renderNormalTabelKanan() {
             let sumberData = (KATEGORI_TAMPILAN === 'jurus') ? dataGlobalJurus : dataGlobalTanding;
             let tersaring = sumberData.filter(x => isGelanggangCocok(x['Gelanggang'] || x['GELANGGANG'], GELANGGANG));
-
             let html = "";
-            if (tersaring.length === 0) {
-                html = `<tr><td colspan="4" class="text-danger py-5 text-center fw-bold">Jadwal Kosong.</td></tr>`;
-            } else {
+            if (tersaring.length === 0) html = `<tr><td colspan="4" class="text-danger py-5 text-center fw-bold">Jadwal Kosong.</td></tr>`;
+            else {
                 tersaring.forEach(item => {
                     let partai = item['Partai'] || item['PARTAI'] || "-";
                     let kelas  = item['Kelas'] || item['KELAS'] || "-"; 
@@ -405,33 +387,21 @@
                     </tr>`;
                 });
             }
-
             document.getElementById('isiTabelKanan').innerHTML = html;
-            
             let kontainer = document.querySelector('.scroll-container');
-            if (kontainer) {
-                let tinggiNyata = (kontainer.clientHeight + 60) + 'px';
-                kontainer.style.setProperty('--h-kontainer', tinggiNyata);
-            }
-
-            let durasi = Math.max(12, tersaring.length * 3.2);
-            document.getElementById('scrollWrapper').style.animationDuration = durasi + "s";
+            if (kontainer) kontainer.style.setProperty('--h-kontainer', (kontainer.clientHeight + 60) + 'px');
+            document.getElementById('scrollWrapper').style.animationDuration = Math.max(12, tersaring.length * 3.2) + "s";
         }
 
-        // =========================================================
-        // LAYOUT B: RENDER MASTER FIDS (SEMUA GELANGGANG DIET TEKS)
-        // =========================================================
+        // STRUKTUR KOTAK PRESISI (MODE SEMUA GELANGGANG)
         function renderMasterFIDS() {
             let container = document.getElementById('masterGridContainer');
             let sumberData = (KATEGORI_TAMPILAN === 'jurus') ? dataGlobalJurus : dataGlobalTanding;
             
-            // Deteksi Matras yang Aktif (Ada datanya)
             let matrasAktif = [];
             ['g1', 'g2', 'g3', 'g4', 'g5', 'g6'].forEach(gelKey => {
                 let panitia = livePanitiaMap[gelKey];
-                if (panitia && panitia.partai && panitia.partai !== "-") {
-                    matrasAktif.push(gelKey);
-                }
+                if (panitia && panitia.partai && panitia.partai !== "-") matrasAktif.push(gelKey);
             });
 
             if (matrasAktif.length === 0) {
@@ -440,7 +410,6 @@
                 return;
             }
 
-            // Ganti Kelas CSS Grid berdasarkan jumlah matras
             container.className = `master-grid grid-count-${matrasAktif.length}`;
             let htmlHTML = "";
 
@@ -455,9 +424,8 @@
 
                 let isiStrips = "";
 
-                if (limaPartai.length === 0) {
-                    isiStrips = `<div class="text-center text-secondary mt-5 fw-bold">Data Excel Kosong / Habis</div>`;
-                } else {
+                if (limaPartai.length === 0) isiStrips = `<div class="text-center text-secondary mt-5 fw-bold">Data Excel Kosong / Habis</div>`;
+                else {
                     limaPartai.forEach((item, idx) => {
                         let isNow = (idx === 0 && idKetemu !== -1);
                         let cls = isNow ? "match-now" : "match-next";
@@ -471,17 +439,18 @@
                         if (KATEGORI_TAMPILAN === 'tanding' || (nBiru !== "-" && nMerah !== "-")) {
                             matchTeks = `<span class="pesilat-biru">${nBiru}</span> <span class="vs-text">VS</span> <span class="pesilat-merah">${nMerah}</span>`;
                         } else {
-                            // Antisipasi kalau seni tunggal
                             let namaTunggal = item['Nama'] || item['NAMA PESILAT'] || nBiru;
                             matchTeks = `<span class="pesilat-name">${namaTunggal}</span>`;
                         }
 
                         isiStrips += `
                         <div class="match-strip ${cls}">
-                            <div class="ms-partai">${partai}</div>
-                            <div class="ms-detail">
-                                <div class="ms-fighters">${matchTeks}</div>
-                                <div class="ms-kelas">${kls}</div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 6px;">
+                                <span class="ms-partai">PARTAI ${partai}</span>
+                                <span class="ms-kelas">${kls}</span>
+                            </div>
+                            <div class="ms-fighters">
+                                ${matchTeks}
                             </div>
                         </div>`;
                     });
@@ -493,7 +462,6 @@
                     <div class="gb-body">${isiStrips}</div>
                 </div>`;
             });
-
             container.innerHTML = htmlHTML;
         }
     </script>

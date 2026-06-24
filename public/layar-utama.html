@@ -359,7 +359,16 @@
 
             const urlParams = new URLSearchParams(window.location.search);
             const gelParam = urlParams.get('gelanggang');
-            const modeParam = urlParams.get('kategori');
+            const modeParam = urlParams.get('kategori') || 'tanding';
+
+            // =================================================================
+            // 🔥 POLISI LALU LINTAS: PANTULKAN KE JADWAL JIKA KODENYA "JADWAL_"
+            // =================================================================
+            if (gelParam && gelParam.startsWith("JADWAL_")) {
+                let targetGel = gelParam.replace("JADWAL_", "");
+                window.location.replace(`jadwal-tv.html?gelanggang=${targetGel}&kategori=${modeParam}`);
+                return; // STOP! Matikan seluruh proses layar utama detik ini juga
+            }
 
             if (gelParam) {
                 window.isDiLayarTV = true; 
