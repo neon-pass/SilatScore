@@ -680,9 +680,16 @@
                     if(d.status === "PERTANDINGAN SELESAI" && state !== "SELESAI") { clearInterval(intervalUtama); clearInterval(intervalPause); state = "SELESAI"; setStatusTampilan("PERTANDINGAN SELESAI", "bg-danger"); setTemaTimer(false); document.getElementById('btnPlay').disabled = true; document.getElementById('btnPause').disabled = true; }
                     
                     // 🔥 CEK PERISAI DEBOUNCE 2 DETIK SINI 🔥
-                    if(d.timer_run === false && state === "RONDE") { 
-                        if (Date.now() - waktuKunciPlay > 2000) { window.pauseTimer(); setStatusTampilan("VERIFIKASI VAR", "bg-warning text-dark"); }
-                    }
+                    if (d.status === "PERSIAPAN" && state !== "PERSIAPAN") {
+    clearInterval(intervalUtama); clearInterval(intervalPause); state = "PERSIAPAN"; rondeSaatIni = 1; sisaDetik = 0; idPauseAktif = 0;
+    setStatusTampilan("PERSIAPAN", "bg-secondary"); setTemaTimer(false); alasanMenangGlobal = "";
+    document.getElementById('layarTimerLokal').innerText = (modeKategoriAktif === 'tanding' ? "02:00" : "00:00");
+    document.getElementById('btnPlay').disabled = true; document.getElementById('btnPause').disabled = true; document.getElementById('daftarPause').innerHTML = ""; updateTombolHasil();
+}
+if (d.ronde_aktif && d.ronde_aktif !== rondeSaatIni && state !== "PERSIAPAN") {
+    rondeSaatIni = d.ronde_aktif;
+    setStatusTampilan(`SIAP RONDE ${rondeSaatIni}`, "bg-info text-dark");
+}
                     updateTombolHasil();
                 }
             });
@@ -764,7 +771,9 @@
                     if (state === "RONDE") {
                         mainkanGong(); 
                         if (rondeSaatIni < totRonde) { state = "ISTIRAHAT"; sisaDetik = parseInt(document.getElementById('cfg_istirahat').value); setStatusTampilan("ISTIRAHAT", "bg-success"); setTemaTimer(true); updateLayarDanFirebase(konversiDetikKeMenit(sisaDetik)); jalankanHitungMundur(); } 
-                        else { state = "SELESAI"; setStatusTampilan("PERTANDINGAN SELESAI", "bg-danger"); setTemaTimer(false); document.getElementById('btnPlay').disabled = true; document.getElementById('btnPause').disabled = true; updateTombolHasil(); }
+                        else { 
+    state = "SELESAI"; setStatusTampilan("PERTANDINGAN SELESAI", "bg-danger"); setTemaTimer(false); document.getElementById('btnPlay').disabled = true; document.getElementById('btnPause').disabled = true; updateTombolHasil(); 
+    updateLayarDanFirebase("00:00"); }
                     } else if (state === "ISTIRAHAT") {
                         state = "SIAP_RONDE"; rondeSaatIni++; targetWaktuSekarang = hitungTotalDetikTanding(document.getElementById('cfg_waktu').value); sisaDetik = (modeKategoriAktif === 'tanding') ? targetWaktuSekarang : 0;
                         setStatusTampilan(`SIAP RONDE ${rondeSaatIni}`, "bg-info text-dark"); setTemaTimer(false); updateLayarDanFirebase(konversiDetikKeMenit(sisaDetik));

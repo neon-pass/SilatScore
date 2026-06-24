@@ -726,14 +726,10 @@
     }
 
     window.sahkanHasilKePanitia = function() {
-        if (session.pos !== 'dewan') return;
-        let gel = document.getElementById('lGelanggang').value || session.gel; 
+    if (session.pos !== 'dewan') return;
+    let gel = document.getElementById('lGelanggang').value || session.gel; 
 
-        set(ref(database, `pertandingan/${gel}/pemenang_keputusan`), null);
-        set(ref(database, `pertandingan/${gel}/alasan_menang`), null);
-        set(ref(database, `pertandingan/${gel}/pemenang_mutlak`), null);
-
-        set(ref(database, `pertandingan/${gel}/izin_simpan`), true)
+    set(ref(database, `pertandingan/${gel}/izin_simpan`), true)
             .then(() => {
                 modalPengesahanInstance.hide();
                 document.getElementById('btnPanggilModalSelesaiAtas').style.display = 'none';
@@ -853,8 +849,8 @@
         onValue(ref(database, `${baseRef}/status`), (snap) => {
             let status = snap.val() || "";
             
-            // 1. KETIKA ISTIRAHAT ATAU SELESAI -> KUNCI & MUNCUL POPUP
-            if (status === "ISTIRAHAT" || status === "SELESAI" || status === "PERTANDINGAN SELESAI") {
+            // 1. KETIKA ISTIRAHAT, SELESAI, ATAU PAUSE -> KUNCI & MUNCUL POPUP
+if (status === "ISTIRAHAT" || status === "SELESAI" || status === "PERTANDINGAN SELESAI" || status === "PAUSE" || status === "JEDA KOTOR") {
                 if(penundaKunciOtomatis) clearTimeout(penundaKunciOtomatis);
                 
                 // Jeda 1 detik saja agar tidak kaget
@@ -1050,6 +1046,8 @@
         
         // 🔥 Bersihkan juga popup hentikan laga
         if(typeof resetPopupHentikanLaga === "function") resetPopupHentikanLaga();
+
+        set(ref(database, `${baseRef}/status`), "PERSIAPAN");
     }
 </script>
 </body>
