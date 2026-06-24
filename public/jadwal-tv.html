@@ -34,7 +34,9 @@
             border-radius: 8px; letter-spacing: 1.5px; text-transform: uppercase;
         }
 
-        /* MODE NORMAL (1 GELANGGANG) */
+        /* ==================================================== */
+        /* LAYOUT A: MODE NORMAL (1 GELANGGANG)                 */
+        /* ==================================================== */
         #normalLayout { display: none; flex-grow: 1; overflow: hidden; }
 
         .left-panel { width: 45%; background: #0a0a0a; border-right: 2px solid #333; display: flex; flex-direction: column; padding: 15px; }
@@ -69,7 +71,9 @@
             to   { transform: translateY(calc(-100% - var(--h-kontainer, 75vh))); } 
         }
 
-        /* MODE MASTER FIDS (SEMUA GELANGGANG) */
+        /* ==================================================== */
+        /* LAYOUT B: MODE MASTER FIDS (SEMUA GELANGGANG)        */
+        /* ==================================================== */
         #masterLayout { display: none; flex-grow: 1; background: #050505; }
         .master-grid { display: grid; gap: 15px; padding: 15px; width: 100%; height: 100%; }
         
@@ -94,20 +98,20 @@
         .ms-kelas { font-size: 1.1rem; color: #0dcaf0; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; background: #222; padding: 4px 10px; border-radius: 4px; border: 1px solid #333; }
         .match-now .ms-kelas { color: #20c997; background: #022e1f; border-color: #198754; }
 
-        .ms-fighters { font-size: 1.35rem; font-weight: bold; text-align: center; white-space: normal; line-height: 1.3; }
-        .match-now .ms-fighters { font-size: 1.7rem; }
+        .ms-fighters { display: flex; justify-content: center; gap: 10px; font-size: 1.25rem; font-weight: bold; text-align: center; white-space: normal; line-height: 1.3; }
+        .match-now .ms-fighters { font-size: 1.6rem; }
 
         .pesilat-name { color: #fff; }
         .pesilat-biru { color: #0dcaf0; }
         .pesilat-merah { color: #ff4444; }
         .vs-text { color: #ffc107; font-size: 0.8em; margin: 0 10px; font-weight: 900; }
 
+        /* MODAL */
         .modal-content.dark-theme { background-color: #1a1a1a; border: 1px solid #555; color: white; }
     </style>
 </head>
 <body>
 
-    <!-- MODAL SETUP -->
     <div class="modal fade" id="modalSetupJadwal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content dark-theme p-4 position-relative">
@@ -137,6 +141,7 @@
     </div>
 
     <div id="mainAppUI" style="display: none; flex-direction: column; height: 100%;">
+        
         <div class="header-top">
             <div class="header-left">
                 <div class="gelanggang-badge" id="lblGelanggang" onclick="bukaModalRahasia()" title="Klik untuk buka pengaturan">GELANGGANG 1</div>
@@ -149,11 +154,10 @@
             </div>
         </div>
 
-        <!-- LAYOUT NORMAL (1 GELANGGANG) -->
         <div id="normalLayout">
             <div class="left-panel">
                 <div class="panel-title" id="judulPanelKiri">LIVE: SEDANG & AKAN MAIN</div>
-                <div id="wadahUpNext" style="display: flex; flex-direction: column; flex-grow: 1; overflow-y:auto;">
+                <div id="wadahUpNext" style="display: flex; flex-direction: column; gap: 5px; flex-grow: 1; overflow-y:auto;">
                     <div class="text-center text-secondary mt-5">Menunggu Koneksi...</div>
                 </div>
             </div>
@@ -179,10 +183,10 @@
             </div>
         </div>
 
-        <!-- LAYOUT MASTER GRID (SEMUA GELANGGANG) -->
         <div id="masterLayout">
             <div class="master-grid grid-count-1" id="masterGridContainer"></div>
         </div>
+
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -216,7 +220,7 @@
             const katParam = urlParams.get('kategori');
 
             if (gelParam && katParam) {
-                window.isDiLayarTV = true; // Kunci pemicu APK agar tidak looping
+                window.isDiLayarTV = true; 
                 document.getElementById('pilihGelanggang').value = gelParam;
                 document.getElementById('pilihKategori').value = katParam;
                 window.mulaiLayarJadwal();
@@ -235,15 +239,12 @@
             GELANGGANG = document.getElementById('pilihGelanggang').value;
             KATEGORI_TAMPILAN = document.getElementById('pilihKategori').value;
 
-            // =======================================================
-            // 🔥 MESIN PENGIRIM PERINTAH KE TV VIA APK
-            // =======================================================
+            // MESIN PENGIRIM PERINTAH KE TV VIA APK
             if (!window.isDiLayarTV && typeof AndroidApp !== "undefined" && AndroidApp.isTvConnected()) {
                 let btn = document.querySelector('#modalSetupJadwal .btn-warning');
                 btn.innerText = "MENGIRIM JADWAL KE TV..."; 
                 btn.disabled = true;
                 
-                // Kirimkan awalan "JADWAL_" agar ditangkap oleh router TV
                 AndroidApp.bukaDiTV("JADWAL_" + GELANGGANG, KATEGORI_TAMPILAN); 
 
                 setTimeout(() => { 
@@ -255,11 +256,10 @@
                     let modalSetup = bootstrap.Modal.getInstance(document.getElementById('modalSetupJadwal'));
                     if (modalSetup) modalSetup.hide();
                     window.isDiLayarTV = true; 
-                    window.mulaiLayarJadwal(); // Tayangkan juga di tablet panitia
+                    window.mulaiLayarJadwal(); 
                 }, 1500);
                 return; 
             }
-            // =======================================================
 
             let modalSetup = bootstrap.Modal.getInstance(document.getElementById('modalSetupJadwal'));
             if (modalSetup) modalSetup.hide();
@@ -321,7 +321,9 @@
             else { renderNormalPanelKiri(); renderNormalTabelKanan(); }
         }
 
-        // STRUKTUR KOTAK PRESISI (MODE 1 GELANGGANG)
+        // ====================================================================
+        // RENDER NORMAL (1 GELANGGANG) DENGAN STRUKTUR PARTAI ATAS, NAMA BAWAH
+        // ====================================================================
         function renderNormalPanelKiri() {
             let wadah = document.getElementById('wadahUpNext');
             let sumberData = (KATEGORI_TAMPILAN === 'jurus') ? dataGlobalJurus : dataGlobalTanding;
@@ -393,7 +395,9 @@
             document.getElementById('scrollWrapper').style.animationDuration = Math.max(12, tersaring.length * 3.2) + "s";
         }
 
-        // STRUKTUR KOTAK PRESISI (MODE SEMUA GELANGGANG)
+        // ====================================================================
+        // RENDER MASTER (SEMUA GELANGGANG) DENGAN STRUKTUR PARTAI ATAS, NAMA BAWAH
+        // ====================================================================
         function renderMasterFIDS() {
             let container = document.getElementById('masterGridContainer');
             let sumberData = (KATEGORI_TAMPILAN === 'jurus') ? dataGlobalJurus : dataGlobalTanding;
