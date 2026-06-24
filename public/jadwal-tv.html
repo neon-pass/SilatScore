@@ -353,7 +353,7 @@
             let jadwalLokal = sumberData.filter(x => isGelanggangCocok(x['Gelanggang'] || x['GELANGGANG'], GELANGGANG));
 
             if (jadwalLokal.length === 0) {
-                wadah.innerHTML = `<div class="text-center text-secondary mt-5">Belum ada data excel untuk matras ini.</div>`;
+                wadah.innerHTML = `<div class="text-center text-secondary mt-5">Belum ada data..</div>`;
                 return;
             }
 

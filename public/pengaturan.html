@@ -101,9 +101,9 @@
                     <div class="col-md-6">
                         <label class="text-info mb-2" style="font-size: 13px;">2. Pilih Tampilan Layar:</label>
                         <select id="pilihJenisLayarSkala" class="form-select bg-dark text-white fw-bold border-secondary" onchange="gantiKonteksSkala()">
-                            <option value="skala">⚔️ Layar Skor TANDING</option>
-                            <option value="skala_seni">🕺 Layar Skor SENI / JURUS</option>
-                            <option value="skala_jadwal">📋 Layar Papan JADWAL</option>
+                            <option value="skala">Layar Skor TANDING</option>
+                            <option value="skala_seni">Layar Skor SENI / JURUS</option>
+                            <option value="skala_jadwal">Layar Papan JADWAL</option>
                         </select>
                     </div>
                 </div>
@@ -126,7 +126,7 @@
                     <div class="d-flex align-items-center gap-2">
                         <input type="number" id="inputWaktuScreensaver" placeholder="60" value="60" min="10" class="text-center fw-bold text-warning" style="width: 80px; padding: 10px;">
                         <span class="text-secondary fw-bold me-2" style="font-size: 12px;">Detik</span>
-                        <button class="btn btn-kustom px-4 py-2" data-bs-toggle="modal" data-bs-target="#modalScreensaver">🖼️ UPLOAD GAMBAR</button>
+                        <button class="btn btn-kustom px-4 py-2" data-bs-toggle="modal" data-bs-target="#modalScreensaver">UPLOAD GAMBAR</button>
                     </div>
                 </div>
 
@@ -136,7 +136,7 @@
                         <small class="text-secondary d-block mt-1" style="text-transform: none;">Logo tampil di Kiri dan Kanan header Layar TV.</small>
                     </div>
                     <div>
-                        <button class="btn btn-kustom px-4 py-2" data-bs-toggle="modal" data-bs-target="#modalSponsor">🤝 ATUR SPONSOR</button>
+                        <button class="btn btn-kustom px-4 py-2" data-bs-toggle="modal" data-bs-target="#modalSponsor">ATUR SPONSOR</button>
                     </div>
                 </div>
 
@@ -146,21 +146,21 @@
                         <small class="text-secondary d-block mt-1" style="text-transform: none;">Sambungkan aplikasi ke TV/STB via Wireless Display/Cast bawaan HP.</small>
                     </div>
                     <div>
-                        <button class="btn btn-info px-4 py-2 fw-bold text-dark border-0 shadow-sm" onclick="panggilMenuCast()">📡 SAMBUNGKAN PERANGKAT NIRKABEL</button>
+                        <button class="btn btn-info px-4 py-2 fw-bold text-dark border-0 shadow-sm" onclick="panggilMenuCast()">SAMBUNGKAN PERANGKAT NIRKABEL</button>
                     </div>
                 </div>
 
             </div>
         </div>
 
-        <button class="btn btn-emas btn-save-master" onclick="simpanPengaturan()">💾 SIMPAN SEMUA PENGATURAN</button>
+        <button class="btn btn-emas btn-save-master" onclick="simpanPengaturan()">SIMPAN SEMUA PENGATURAN</button>
         <a href="index.html" class="btn-back-link">❮ KEMBALI KE MENU UTAMA</a>
     </div>
 
     <div class="modal fade" id="modalScreensaver" tabindex="-1">
         <div class="modal-dialog modal-xl modal-dialog-centered">
             <div class="modal-content dark-theme">
-                <div class="modal-header dark-theme"><h5 class="modal-title fw-bold text-warning">🖼️ MANAJER GAMBAR SCREENSAVER</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+                <div class="modal-header dark-theme"><h5 class="modal-title fw-bold text-warning">MANAJER GAMBAR SCREENSAVER</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
                 <div class="modal-body py-4 bg-dark">
                     <div class="row g-3 justify-content-center">
                         <script>
@@ -236,19 +236,19 @@
         // Kumpulan Blueprint untuk slider masing-masing tampilan
         const configSliders = {
             skala: [
-                { id: "global", label: "🔍 Zoom Keseluruhan", min: 8, max: 22, step: 0.5, def: 13, unit: "px" },
-                { id: "skor", label: "🔢 Angka Skor Besar", min: 10, max: 50, step: 0.5, def: 17.5, unit: "rem" },
-                { id: "ikon", label: "⚠️ Ikon Pelanggaran", min: 1, max: 5, step: 0.1, def: 1.5, unit: "rem" }
+                { id: "global", label: "Zoom Keseluruhan", min: 8, max: 22, step: 0.5, def: 13, unit: "px" },
+                { id: "skor", label: "Angka Skor Besar", min: 10, max: 50, step: 0.5, def: 17.5, unit: "rem" },
+                { id: "ikon", label: "Ikon Pelanggaran", min: 1, max: 5, step: 0.1, def: 1.5, unit: "rem" }
             ],
             skala_seni: [
-                { id: "global", label: "🔍 Zoom Keseluruhan", min: 8, max: 22, step: 0.5, def: 13, unit: "px" },
-                { id: "skor_juri", label: "📱 Angka Skor Juri (Biru)", min: 2, max: 15, step: 0.5, def: 4.5, unit: "rem" },
-                { id: "skor_akhir", label: "🏆 Angka Skor Final (Hijau)", min: 5, max: 25, step: 0.5, def: 9.5, unit: "rem" }
+                { id: "global", label: "Zoom Keseluruhan", min: 8, max: 22, step: 0.5, def: 13, unit: "px" },
+                { id: "skor_juri", label: "Angka Skor Juri (Biru)", min: 2, max: 15, step: 0.5, def: 4.5, unit: "rem" },
+                { id: "skor_akhir", label: "Angka Skor Final (Hijau)", min: 5, max: 25, step: 0.5, def: 9.5, unit: "rem" }
             ],
             skala_jadwal: [
-                { id: "global", label: "🔍 Zoom Keseluruhan", min: 8, max: 22, step: 0.5, def: 13, unit: "px" },
-                { id: "teks_partai", label: "🏷️ Ukuran Teks Partai & Kelas", min: 0.8, max: 5, step: 0.1, def: 1.5, unit: "rem" },
-                { id: "teks_nama", label: "👤 Ukuran Teks Nama Pesilat", min: 0.8, max: 5, step: 0.1, def: 1.4, unit: "rem" }
+                { id: "global", label: "Zoom Keseluruhan", min: 8, max: 22, step: 0.5, def: 13, unit: "px" },
+                { id: "teks_partai", label: "Ukuran Teks Partai & Kelas", min: 0.8, max: 5, step: 0.1, def: 1.5, unit: "rem" },
+                { id: "teks_nama", label: "Ukuran Teks Nama Pesilat", min: 0.8, max: 5, step: 0.1, def: 1.4, unit: "rem" }
             ]
         };
 
@@ -373,7 +373,7 @@
                         showCustomAlert("⚠️ Kosong", "File Excel tidak memiliki data jadwal sama sekali.", "text-warning"); resetBtn(); return;
                     }
 
-                    btn.innerHTML = "☁️ MENGUNGGAH...";
+                    btn.innerHTML = "MENGUNGGAH...";
                     Promise.all([
                         set(ref(database, 'pengaturan/jadwal_tanding'), jadwalTanding),
                         set(ref(database, 'pengaturan/jadwal_jurus'), jadwalJurus),
@@ -417,6 +417,7 @@
                 btn.innerText = teksAsli; btn.disabled = false;
             });
         }
+        
     </script>
 </body>
 </html>
