@@ -6,7 +6,19 @@
     <title>Papan Panggilan & Jadwal - Digital Silat</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
+        /* =================================================== */
+        /* 🔥 SISTEM SARAF PENERIMA SKALA JADWAL               */
+        /* =================================================== */
+        :root {
+            --skala-global: 13px;
+            --skala-partai: 1.5rem;
+            --skala-nama: 1.4rem;
+        }
+
         body { background-color: #080808; color: #fff; font-family: 'Arial', sans-serif; margin: 0; padding: 0; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
+        
+        /* TERhubung ke Tuas 1 (Zoom Keseluruhan) */
+        html { font-size: var(--skala-global); transition: font-size 0.15s ease-out; }
         
         /* HEADER 3-KOLOM PRESISI */
         .header-top { 
@@ -34,9 +46,7 @@
             border-radius: 8px; letter-spacing: 1.5px; text-transform: uppercase;
         }
 
-        /* ==================================================== */
-        /* LAYOUT A: MODE NORMAL (1 GELANGGANG)                 */
-        /* ==================================================== */
+        /* MODE NORMAL (1 GELANGGANG) */
         #normalLayout { display: none; flex-grow: 1; overflow: hidden; }
 
         .left-panel { width: 45%; background: #0a0a0a; border-right: 2px solid #333; display: flex; flex-direction: column; padding: 15px; }
@@ -53,12 +63,13 @@
         
         table { width: 100%; table-layout: fixed; border-collapse: separate; border-spacing: 0 8px; }
         th { color: #0dcaf0; font-size: 1rem; padding: 0 10px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #0dcaf0; text-align: center; height: 50px; vertical-align: middle; }
-        td { background: #111; padding: 10px; font-size: 1.1rem; font-weight: bold; text-transform: uppercase; border: 1px solid #222; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        td { background: #111; padding: 10px; font-weight: bold; text-transform: uppercase; border: 1px solid #222; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         
-        .td-biru { background: linear-gradient(90deg, #0b5ed7 0%, #111 100%); color: #fff; text-align: left !important; border-left: 4px solid #0dcaf0; }
-        .td-merah { background: linear-gradient(270deg, #dc3545 0%, #111 100%); color: #fff; text-align: right !important; border-right: 4px solid #ff4444; }
+        /* Menerapkan Skala pada Tabel Kanan */
+        .td-biru { font-size: var(--skala-nama); background: linear-gradient(90deg, #0b5ed7 0%, #111 100%); color: #fff; text-align: left !important; border-left: 4px solid #0dcaf0; transition: font-size 0.15s; }
+        .td-merah { font-size: var(--skala-nama); background: linear-gradient(270deg, #dc3545 0%, #111 100%); color: #fff; text-align: right !important; border-right: 4px solid #ff4444; transition: font-size 0.15s; }
         .td-vs { color: #ffc107; font-size: 0.9rem; font-weight: 900; background: #0a0a0a; border: none; }
-        .td-partai { background: #222; color: #ffc107; font-size: 1.3rem; font-family: monospace; border-radius: 6px 0 0 6px; line-height: 1.2; }
+        .td-partai { background: #222; color: #ffc107; font-size: var(--skala-partai); font-family: monospace; border-radius: 6px 0 0 6px; line-height: 1.2; transition: font-size 0.15s; }
         
         .sub-teks { display: block; font-size: 0.75rem; color: #aaa; font-weight: normal; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; }
         .kelas-teks { display: block; font-size: 0.7rem; color: #fff; font-family: sans-serif; letter-spacing: 0.5px; margin-top: 4px; background: #333; border-radius: 3px; padding: 2px;}
@@ -71,9 +82,7 @@
             to   { transform: translateY(calc(-100% - var(--h-kontainer, 75vh))); } 
         }
 
-        /* ==================================================== */
-        /* LAYOUT B: MODE MASTER FIDS (SEMUA GELANGGANG)        */
-        /* ==================================================== */
+        /* MODE MASTER FIDS (SEMUA GELANGGANG) */
         #masterLayout { display: none; flex-grow: 1; background: #050505; }
         .master-grid { display: grid; gap: 15px; padding: 15px; width: 100%; height: 100%; }
         
@@ -92,14 +101,15 @@
         .match-now { background: linear-gradient(180deg, #051b11 0%, #111 100%); border: 2px solid #198754; box-shadow: 0 0 10px rgba(25,135,84,0.3); }
         .match-next { background: #111; border: 1px solid #333; }
         
-        .ms-partai { font-family: monospace; font-size: 1.5rem; font-weight: 900; color: #ffc107; background: #000; padding: 2px 12px; border-radius: 4px; border: 1px solid #444; display: inline-block; }
-        .match-now .ms-partai { background: #198754; color: #fff; border-color: #20c997; font-size: 1.8rem; }
+        /* Menerapkan Skala pada Master Grid */
+        .ms-partai { font-family: monospace; font-size: var(--skala-partai); font-weight: 900; color: #ffc107; background: #000; padding: 2px 12px; border-radius: 4px; border: 1px solid #444; display: inline-block; transition: font-size 0.15s; }
+        .match-now .ms-partai { background: #198754; color: #fff; border-color: #20c997; font-size: calc(var(--skala-partai) * 1.2); }
 
-        .ms-kelas { font-size: 1.1rem; color: #0dcaf0; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; background: #222; padding: 4px 10px; border-radius: 4px; border: 1px solid #333; }
+        .ms-kelas { font-size: calc(var(--skala-partai) * 0.75); color: #0dcaf0; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; background: #222; padding: 4px 10px; border-radius: 4px; border: 1px solid #333; transition: font-size 0.15s; }
         .match-now .ms-kelas { color: #20c997; background: #022e1f; border-color: #198754; }
 
-        .ms-fighters { display: flex; justify-content: center; gap: 10px; font-size: 1.25rem; font-weight: bold; text-align: center; white-space: normal; line-height: 1.3; }
-        .match-now .ms-fighters { font-size: 1.6rem; }
+        .ms-fighters { display: flex; justify-content: center; gap: 10px; font-size: var(--skala-nama); font-weight: bold; text-align: center; white-space: normal; line-height: 1.3; transition: font-size 0.15s; }
+        .match-now .ms-fighters { font-size: calc(var(--skala-nama) * 1.25); }
 
         .pesilat-name { color: #fff; }
         .pesilat-biru { color: #0dcaf0; }
@@ -112,7 +122,6 @@
 </head>
 <body>
 
-    <!-- MODAL SETUP -->
     <div class="modal fade" id="modalSetupJadwal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content dark-theme p-4 position-relative">
@@ -155,11 +164,10 @@
             </div>
         </div>
 
-        <!-- LAYOUT NORMAL (1 GELANGGANG) -->
         <div id="normalLayout">
             <div class="left-panel">
                 <div class="panel-title" id="judulPanelKiri">LIVE: SEDANG & AKAN MAIN</div>
-                <div id="wadahUpNext" style="display: flex; flex-direction: column; gap: 5px; flex-grow: 1; overflow-y:auto;">
+                <div id="wadahUpNext" style="display: flex; flex-direction: column; flex-grow: 1; overflow-y:auto;">
                     <div class="text-center text-secondary mt-5">Menunggu Koneksi...</div>
                 </div>
             </div>
@@ -185,7 +193,6 @@
             </div>
         </div>
 
-        <!-- LAYOUT MASTER GRID (SEMUA GELANGGANG) -->
         <div id="masterLayout">
             <div class="master-grid grid-count-1" id="masterGridContainer"></div>
         </div>
@@ -223,7 +230,7 @@
             const katParam = urlParams.get('kategori');
 
             if (gelParam && katParam) {
-                window.isDiLayarTV = true; 
+                window.isDiLayarTV = true; // Kunci pemicu APK agar tidak looping
                 document.getElementById('pilihGelanggang').value = gelParam;
                 document.getElementById('pilihKategori').value = katParam;
                 window.mulaiLayarJadwal();
@@ -257,12 +264,11 @@
                     btn.classList.replace("btn-warning", "btn-success"); 
                 }, 500);
 
-                // Meniru persis Layar Utama: Usir tablet kembali ke beranda!
                 setTimeout(() => {
                     window.location.href = "index.html"; 
                 }, 2000);
 
-                return; // Proses tablet dimatikan di sini
+                return; 
             }
             // =======================================================
 
@@ -319,6 +325,20 @@
                     livePanitiaMap[gel] = snap.val() || {}; kalkulasiTampilan();
                 });
             });
+
+            // =======================================================
+            // 🔥 MESIN PENANGKAP SINYAL SKALA JADWAL DARI FIREBASE
+            // =======================================================
+            let targetPathSkala = (GELANGGANG === 'semua') ? 'pertandingan/g1/skala_jadwal' : `pertandingan/${GELANGGANG}/skala_jadwal`;
+            onValue(ref(database, targetPathSkala), (snap) => {
+                let s = snap.val();
+                if(s) {
+                    const r = document.documentElement.style;
+                    if (s.global) r.setProperty('--skala-global', `${s.global}px`);
+                    if (s.teks_partai) r.setProperty('--skala-partai', `${s.teks_partai}rem`);
+                    if (s.teks_nama) r.setProperty('--skala-nama', `${s.teks_nama}rem`);
+                }
+            });
         }
 
         function kalkulasiTampilan() {
@@ -352,17 +372,18 @@
                 let nBiru  = item['Nama Biru'] || item['SUDUT BIRU'] || "-";
                 let nMerah = item['Nama Merah'] || item['SUDUT MERAH'] || "-";
 
+                // Memasukkan variabel skala ke dalam inline style agar ikut bereaksi
                 htmlKiri += `
                 <div class="upnext-box ${bg}" style="display: flex; flex-direction: column; padding: 15px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 8px; margin-bottom: 12px;">
                         <div>
                             <span style="background:#444; color:#fff; font-size:0.8rem; padding:3px 8px; border-radius:4px; font-weight:bold;">${lbl}</span>
-                            <span style="font-size:1.6rem; font-family:monospace; font-weight:bold; color:#ffc107; margin-left:8px;">PARTAI ${partai}</span>
+                            <span style="font-size:var(--skala-partai); font-family:monospace; font-weight:bold; color:#ffc107; margin-left:8px; transition: font-size 0.15s;">PARTAI ${partai}</span>
                         </div>
-                        <div style="background:#222; color:#0dcaf0; font-size:1.1rem; padding:4px 12px; border-radius:4px; font-weight:bold; border:1px solid #444;">${kelas}</div>
+                        <div style="background:#222; color:#0dcaf0; font-size: calc(var(--skala-partai) * 0.75); padding:4px 12px; border-radius:4px; font-weight:bold; border:1px solid #444; transition: font-size 0.15s;">${kelas}</div>
                     </div>
-                    <div style="font-size: 1.5rem; font-weight: bold; text-align: center;">
-                        <span class="text-primary">${nBiru}</span> <span class="text-warning mx-2" style="font-size:1rem;">VS</span> <span class="text-danger">${nMerah}</span>
+                    <div style="font-size: var(--skala-nama); font-weight: bold; text-align: center; transition: font-size 0.15s;">
+                        <span class="text-primary">${nBiru}</span> <span class="text-warning mx-2" style="font-size:0.8em;">VS</span> <span class="text-danger">${nMerah}</span>
                     </div>
                 </div>`;
             });
