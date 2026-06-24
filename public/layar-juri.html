@@ -543,14 +543,24 @@
         }
     }
 
-    function kunciSeluruhTombol(isLocked) {
-        document.querySelectorAll('.btn-utama, .btn-kecil, .btn-dewan-foul, .btn-verif, .btn-undo').forEach(btn => {
+    function kunciSeluruhTombol(isLocked, statusSaatIni = "") {
+        // Kunci tombol Juri biasa dan Verifikasi
+        document.querySelectorAll('.btn-utama, .btn-kecil, .btn-verif, .btn-undo').forEach(btn => {
             btn.disabled = isLocked;
-            if (isLocked) {
-                btn.style.opacity = "0.4"; btn.style.pointerEvents = "none";
-            } else {
-                btn.style.opacity = "1"; btn.style.pointerEvents = "auto";
+            btn.style.opacity = isLocked ? "0.4" : "1";
+            btn.style.pointerEvents = isLocked ? "none" : "auto";
+        });
+        
+        // Kunci tombol Foul Dewan (Kecuali saat PAUSE)
+        document.querySelectorAll('.btn-dewan-foul').forEach(btn => {
+            let lockThis = isLocked;
+            // 🔥 KABEL 1 TERSAMBUNG: Buka gembok khusus Foul Dewan saat PAUSE / VAR 🔥
+            if (isLocked && session.pos === 'dewan' && (statusSaatIni === 'PAUSE' || statusSaatIni === 'JEDA KOTOR')) {
+                lockThis = false; 
             }
+            btn.disabled = lockThis;
+            btn.style.opacity = lockThis ? "0.4" : "1";
+            btn.style.pointerEvents = lockThis ? "none" : "auto";
         });
     }
 
@@ -705,9 +715,18 @@
         if (session.pos !== 'dewan') return;
         
         let teksPemenang = document.getElementById('teksPemenangDewan');
-        if (dataSkorDewan.biru > dataSkorDewan.merah) teksPemenang.innerHTML = "<span class='text-primary'>🏆 SUDUT BIRU MENANG</span>";
-        else if (dataSkorDewan.merah > dataSkorDewan.biru) teksPemenang.innerHTML = "<span class='text-danger'>🏆 SUDUT MERAH MENANG</span>";
-        else teksPemenang.innerHTML = "<span class='text-secondary'>🤝 HASIL SERI</span>";
+        
+        // Prioritaskan pembacaan status Mutlak / Diskualifikasi / TKO 
+        if (pemenangMutlak === 'biru') {
+            teksPemenang.innerHTML = "<span class='text-primary'>🏆 SUDUT BIRU MENANG (TKO/DISQ)</span>";
+        } else if (pemenangMutlak === 'merah') {
+            teksPemenang.innerHTML = "<span class='text-danger'>🏆 SUDUT MERAH MENANG (TKO/DISQ)</span>";
+        } else {
+            // Jika tidak ada pelanggaran mutlak, baru hitung skor
+            if (dataSkorDewan.biru > dataSkorDewan.merah) teksPemenang.innerHTML = "<span class='text-primary'>🏆 SUDUT BIRU MENANG</span>";
+            else if (dataSkorDewan.merah > dataSkorDewan.biru) teksPemenang.innerHTML = "<span class='text-danger'>🏆 SUDUT MERAH MENANG</span>";
+            else teksPemenang.innerHTML = "<span class='text-secondary'>🤝 HASIL SERI</span>";
+        }
 
         document.getElementById('skorBiruDewan').innerText = dataSkorDewan.biru;
         document.getElementById('skorMerahDewan').innerText = dataSkorDewan.merah;
@@ -855,7 +874,7 @@ if (status === "ISTIRAHAT" || status === "SELESAI" || status === "PERTANDINGAN S
                 
                 // Jeda 1 detik saja agar tidak kaget
                 penundaKunciOtomatis = setTimeout(() => {
-                    kunciSeluruhTombol(true); // Redupkan & Kunci total tombol Juri & Dewan
+                    kunciSeluruhTombol(true, status); // Redupkan & Kunci total tombol Juri & Dewan
 
                     if (status === "SELESAI" || status === "PERTANDINGAN SELESAI") {
                         if (session.pos === 'dewan') {

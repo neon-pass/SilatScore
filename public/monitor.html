@@ -233,19 +233,20 @@
         const app = initializeApp(firebaseConfig); 
         const database = getDatabase(app);
 
-        // Fitur Sync Real-time Status Gelanggang
         document.addEventListener("DOMContentLoaded", () => {
             for(let i = 1; i <= 7; i++) {
                 onValue(ref(database, `pertandingan/g${i}/locks/layar_utama`), (snap) => {
                     let optTanding = document.getElementById(`opt_t_g${i}`);
+                    let optSeni = document.getElementById(`opt_s_g${i}`); // 🔥 KABEL 3 TERSAMBUNG
+                    let isLocked = snap.exists() && snap.val() === true;
+                    
                     if(optTanding) {
-                        if(snap.exists() && snap.val() === true) {
-                            optTanding.innerText = `Gelanggang ${i} (Sedang Dipakai)`;
-                            optTanding.disabled = true;
-                        } else {
-                            optTanding.innerText = `Gelanggang ${i} (Tersedia)`;
-                            optTanding.disabled = false;
-                        }
+                        optTanding.innerText = isLocked ? `Gelanggang ${i} (Sedang Dipakai)` : `Gelanggang ${i} (Tersedia)`;
+                        optTanding.disabled = isLocked;
+                    }
+                    if(optSeni) {
+                        optSeni.innerText = isLocked ? `Gelanggang ${i} (Sedang Dipakai)` : `Gelanggang ${i} (Tersedia)`;
+                        optSeni.disabled = isLocked;
                     }
                 });
             }

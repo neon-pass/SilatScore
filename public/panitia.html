@@ -81,6 +81,8 @@
                     <option value="g3" id="opt_g3">Gelanggang 3</option>
                     <option value="g4" id="opt_g4">Gelanggang 4</option>
                     <option value="g5" id="opt_g5">Gelanggang 5</option>
+                    <option value="g6" id="opt_g6">Gelanggang 6</option>
+                    <option value="g7" id="opt_g7">Gelanggang 7</option>
                 </select>
 
                 <label class="form-label mb-1 text-light fs-6 fw-bold">2. Sesi Pertandingan Saat Ini:</label>
@@ -416,15 +418,17 @@
         });
 
         function pantauLockSemuaGelanggang() {
-            for (let i = 1; i <= 5; i++) {
+            for (let i = 1; i <= 7; i++) {
                 let gel = `g${i}`;
-                onValue(ref(database, `pertandingan/${gel}/locks/panitia`), (snap) => {
-                    let isLocked = snap.val(); let opt = document.getElementById(`opt_${gel}`);
-                    if (opt) {
-                        if (isLocked && myCurrentGelanggang !== gel) { opt.disabled = true; opt.innerText = `Gelanggang ${i} (Terpakai)`; } 
-                        else { opt.disabled = false; opt.innerText = `Gelanggang ${i}`; }
-                    }
-                });
+                onValue(ref(database, `pertandingan/${gel}/status_screensaver`), (snap) => {
+                isScreensaverNyala = snap.val() || false; 
+                let btnSS = document.getElementById('btnToggleSS');
+                if(btnSS) {
+                    btnSS.className = isScreensaverNyala ? "btn btn-sm btn-info text-dark fw-bold px-3 py-2" : "btn btn-sm btn-outline-info fw-bold px-3 py-2";
+                    // 🔥 KABEL 4 TERSAMBUNG: Ubah teks tombol sesuai status 🔥
+                    btnSS.innerText = isScreensaverNyala ? "SCREENSAVER (NYALA)" : "SCREENSAVER (MATI)";
+                }
+            });
             }
         }
 
