@@ -85,36 +85,31 @@
             <div class="panel-header">3. KONTROL SKALA MONITOR TV (LIVE REAL-TIME)</div>
             <div class="panel-body" style="padding-bottom: 10px;">
                 
-                <div class="mb-4 pb-3 border-bottom border-secondary">
-                    <label class="text-info mb-2" style="font-size: 13px;">Pilih Gelanggang TV yang ingin diatur resolusinya:</label>
-                    <select id="pilihGelanggangSkala" class="form-select bg-dark text-warning fw-bold border-secondary" onchange="gantiGelanggangSkala()">
-                        <option value="g1">Gelanggang 1</option>
-                        <option value="g2">Gelanggang 2</option>
-                        <option value="g3">Gelanggang 3</option>
-                        <option value="g4">Gelanggang 4</option>
-                        <option value="g5">Gelanggang 5</option>
-                        <option value="g6">Gelanggang 6</option>
-                        <option value="g7">Gelanggang 7</option>
-                    </select>
+                <div class="row mb-4 pb-3 border-bottom border-secondary g-3">
+                    <div class="col-md-6">
+                        <label class="text-info mb-2" style="font-size: 13px;">1. Pilih Gelanggang TV:</label>
+                        <select id="pilihGelanggangSkala" class="form-select bg-dark text-warning fw-bold border-secondary" onchange="gantiKonteksSkala()">
+                            <option value="g1">Gelanggang 1</option>
+                            <option value="g2">Gelanggang 2</option>
+                            <option value="g3">Gelanggang 3</option>
+                            <option value="g4">Gelanggang 4</option>
+                            <option value="g5">Gelanggang 5</option>
+                            <option value="g6">Gelanggang 6</option>
+                            <option value="semua">Semua Gelanggang (Khusus Jadwal)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-info mb-2" style="font-size: 13px;">2. Pilih Tampilan Layar:</label>
+                        <select id="pilihJenisLayarSkala" class="form-select bg-dark text-white fw-bold border-secondary" onchange="gantiKonteksSkala()">
+                            <option value="skala">⚔️ Layar Skor TANDING</option>
+                            <option value="skala_seni">🕺 Layar Skor SENI / JURUS</option>
+                            <option value="skala_jadwal">📋 Layar Papan JADWAL</option>
+                        </select>
+                    </div>
                 </div>
 
-                <div class="slider-row">
-                    <label class="slider-label">🔍 Zoom Keseluruhan</label>
-                    <input type="range" class="slider-input" id="slideGlobal" min="8" max="22" step="0.5" value="13" oninput="updateSkalaLive('global', this.value, 'px')">
-                    <span class="slider-val" id="valGlobal">13 px</span>
-                </div>
-
-                <div class="slider-row">
-                    <label class="slider-label">🔢 Angka Skor Besar</label>
-                    <input type="range" class="slider-input" id="slideSkor" min="10" max="50" step="0.5" value="17.5" oninput="updateSkalaLive('skor', this.value, 'rem')">
-                    <span class="slider-val" id="valSkor">17.5 rem</span>
-                </div>
-
-                <div class="slider-row">
-                    <label class="slider-label">⚠️ Ikon Pelanggaran</label>
-                    <input type="range" class="slider-input" id="slideIkon" min="1" max="5" step="0.1" value="1.5" oninput="updateSkalaLive('ikon', this.value, 'rem')">
-                    <span class="slider-val" id="valIkon">1.5 rem</span>
-                </div>
+                <div id="wadahSlidersSkala">
+                    </div>
 
             </div>
         </div>
@@ -232,55 +227,93 @@
         }
 
         // =======================================================
-        // 🔥 LOGIKA SKALA PER-GELANGGANG (BARU) 🔥
+        // 🔥 LOGIKA SKALA DINAMIS (TANDING, SENI, JADWAL) 🔥
         // =======================================================
-        let targetSkalaGelanggang = "g1"; 
+        let targetGelSkala = "g1"; 
+        let targetJenisSkala = "skala"; // Bisa 'skala', 'skala_seni', atau 'skala_jadwal'
         let unsubSkala = null; 
 
-        window.gantiGelanggangSkala = function() {
-            targetSkalaGelanggang = document.getElementById('pilihGelanggangSkala').value;
-            pantauSkalaFirebase(targetSkalaGelanggang);
+        // Kumpulan Blueprint untuk slider masing-masing tampilan
+        const configSliders = {
+            skala: [
+                { id: "global", label: "🔍 Zoom Keseluruhan", min: 8, max: 22, step: 0.5, def: 13, unit: "px" },
+                { id: "skor", label: "🔢 Angka Skor Besar", min: 10, max: 50, step: 0.5, def: 17.5, unit: "rem" },
+                { id: "ikon", label: "⚠️ Ikon Pelanggaran", min: 1, max: 5, step: 0.1, def: 1.5, unit: "rem" }
+            ],
+            skala_seni: [
+                { id: "global", label: "🔍 Zoom Keseluruhan", min: 8, max: 22, step: 0.5, def: 13, unit: "px" },
+                { id: "skor_juri", label: "📱 Angka Skor Juri (Biru)", min: 2, max: 15, step: 0.5, def: 4.5, unit: "rem" },
+                { id: "skor_akhir", label: "🏆 Angka Skor Final (Hijau)", min: 5, max: 25, step: 0.5, def: 9.5, unit: "rem" }
+            ],
+            skala_jadwal: [
+                { id: "global", label: "🔍 Zoom Keseluruhan", min: 8, max: 22, step: 0.5, def: 13, unit: "px" },
+                { id: "teks_partai", label: "🏷️ Ukuran Teks Partai & Kelas", min: 0.8, max: 5, step: 0.1, def: 1.5, unit: "rem" },
+                { id: "teks_nama", label: "👤 Ukuran Teks Nama Pesilat", min: 0.8, max: 5, step: 0.1, def: 1.4, unit: "rem" }
+            ]
+        };
+
+        window.gantiKonteksSkala = function() {
+            targetGelSkala = document.getElementById('pilihGelanggangSkala').value;
+            targetJenisSkala = document.getElementById('pilihJenisLayarSkala').value;
+            
+            // Render ulang slider sesuai mode yang dipilih
+            renderUI_Sliders();
+            // Sambungkan pipa Firebase ke folder yang baru
+            pantauSkalaFirebase(targetGelSkala, targetJenisSkala);
         }
 
-        function pantauSkalaFirebase(gelId) {
-            if (unsubSkala) unsubSkala(); // Putus pantauan gelanggang sebelumnya
+        function renderUI_Sliders() {
+            let conf = configSliders[targetJenisSkala];
+            let html = "";
+            conf.forEach(c => {
+                html += `
+                <div class="slider-row">
+                    <label class="slider-label">${c.label}</label>
+                    <input type="range" class="slider-input" id="slide_${c.id}" min="${c.min}" max="${c.max}" step="${c.step}" oninput="updateSkalaLive('${c.id}', this.value, '${c.unit}')">
+                    <span class="slider-val" id="val_${c.id}">-</span>
+                </div>`;
+            });
+            document.getElementById('wadahSlidersSkala').innerHTML = html;
+        }
 
-            unsubSkala = onValue(ref(database, `pertandingan/${gelId}/skala`), (snap) => {
-                let data = snap.val() || { global: 13, skor: 17.5, ikon: 1.5 }; // Nilai default kalau masih kosong
+        function pantauSkalaFirebase(gelId, jenisId) {
+            if (unsubSkala) unsubSkala(); 
+            unsubSkala = onValue(ref(database, `pertandingan/${gelId}/${jenisId}`), (snap) => {
+                let data = snap.val() || {}; 
+                let conf = configSliders[jenisId];
                 
-                document.getElementById('slideGlobal').value = data.global; document.getElementById('valGlobal').innerText = data.global + ' px';
-                document.getElementById('slideSkor').value = data.skor; document.getElementById('valSkor').innerText = data.skor + ' rem';
-                document.getElementById('slideIkon').value = data.ikon; document.getElementById('valIkon').innerText = data.ikon + ' rem';
+                // Setel nilai tiap tuas berdasarkan data dari Firebase atau default
+                conf.forEach(c => {
+                    let val = data[c.id] !== undefined ? data[c.id] : c.def;
+                    let elSlide = document.getElementById(`slide_${c.id}`);
+                    let elVal = document.getElementById(`val_${c.id}`);
+                    
+                    if(elSlide) elSlide.value = val;
+                    if(elVal) elVal.innerText = val + ' ' + c.unit;
+                });
             });
         }
 
         let timerDebounce = null;
-        window.updateSkalaLive = function(jenis, nilai, satuan) {
-            let elLabel = null;
-            if(jenis === 'global') elLabel = document.getElementById('valGlobal');
-            if(jenis === 'skor') elLabel = document.getElementById('valSkor');
-            if(jenis === 'ikon') elLabel = document.getElementById('valIkon');
-            if(elLabel) elLabel.innerText = `${nilai} ${satuan}`;
+        window.updateSkalaLive = function(kunciVar, nilai, satuan) {
+            // Langsung update angka di layar
+            document.getElementById(`val_${kunciVar}`).innerText = `${nilai} ${satuan}`;
 
+            // Debounce ke Firebase agar tidak spam kuota saat digeser cepat
             clearTimeout(timerDebounce);
             timerDebounce = setTimeout(() => {
-                let sGlob = document.getElementById('slideGlobal').value;
-                let sSkor = document.getElementById('slideSkor').value;
-                let sIkon = document.getElementById('slideIkon').value;
-                
-                // Menembak data ke folder Gelanggang spesifik!
-                update(ref(database, `pertandingan/${targetSkalaGelanggang}/skala`), {
-                    global: sGlob,
-                    skor: sSkor,
-                    ikon: sIkon
+                update(ref(database, `pertandingan/${targetGelSkala}/${targetJenisSkala}`), {
+                    [kunciVar]: parseFloat(nilai)
                 });
             }, 100); 
         }
 
-        // Pemuatan Awal Data (GLOBAL)
+        // =======================================================
+        // PEMUATAN AWAL
+        // =======================================================
         document.addEventListener("DOMContentLoaded", () => {
-            // Nyalakan pantauan skala untuk G1 saat web pertama kali di-load
-            pantauSkalaFirebase('g1');
+            // Nyalakan slider mode Tanding untuk G1 saat web pertama kali di-load
+            gantiKonteksSkala();
 
             onValue(ref(database, 'pengaturan'), (snap) => {
                 let data = snap.val() || {};
