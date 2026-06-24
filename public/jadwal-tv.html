@@ -45,7 +45,14 @@
 
         /* PANEL KIRI */
         .left-panel { width: 50%; background: #0a0a0a; border-right: 2px solid #333; display: flex; flex-direction: column; padding: 15px; }
-        .panel-title { color: #0dcaf0; font-size: 1.4rem; font-weight: 900; text-align: center; margin-bottom: 15px; letter-spacing: 2px; border-bottom: 1px dashed #0dcaf0; padding-bottom: 10px; }
+        
+        /* KUNCI TINGGI JUDUL KIRI AGAR SEJAJAR DENGAN KANAN */
+        .panel-title { 
+            color: #0dcaf0; font-size: 1.4rem; font-weight: 900; text-align: center; 
+            margin-bottom: 15px; letter-spacing: 2px; 
+            border-bottom: 2px dashed #0dcaf0; /* Ditebalkan jadi 2px biar seimbang */
+            height: 50px; display: flex; align-items: center; justify-content: center; 
+        }
         
         .upnext-box { background: #111; border: 1px solid #333; border-radius: 10px; margin-bottom: 10px; display: flex; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.5); }
         .upnext-box.sedang-main { border: 2px solid #198754; background: linear-gradient(90deg, #051b11 0%, #111 100%); box-shadow: 0 0 15px rgba(25, 135, 84, 0.4); transform: scale(1.01); margin-bottom: 15px; margin-top: 5px; }
@@ -69,7 +76,15 @@
         .right-panel { width: 50%; display: flex; flex-direction: column; background: #050505; }
         
         table { width: 100%; table-layout: fixed; border-collapse: separate; border-spacing: 0 8px; }
-        th { color: #0dcaf0; font-size: 1rem; padding: 12px 10px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #0dcaf0; text-align: center; }
+        
+        /* KUNCI TINGGI HEADER TABEL KANAN AGAR SEJAJAR DENGAN KIRI */
+        th { 
+            color: #0dcaf0; font-size: 1rem; padding: 0 10px; 
+            text-transform: uppercase; letter-spacing: 1px; 
+            border-bottom: 2px solid #0dcaf0; text-align: center; 
+            height: 50px; vertical-align: middle; 
+        }
+        
         td { background: #111; padding: 10px; font-size: 1.1rem; font-weight: bold; text-transform: uppercase; border: 1px solid #222; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         
         .td-biru { background: linear-gradient(90deg, #0b5ed7 0%, #111 100%); color: #fff; text-align: left !important; border-left: 4px solid #0dcaf0; }
@@ -93,7 +108,6 @@
 </head>
 <body>
 
-    <!-- MODAL SETUP -->
     <div class="modal fade" id="modalSetupJadwal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content dark-theme p-4 position-relative">
@@ -122,7 +136,6 @@
         </div>
     </div>
 
-    <!-- UI UTAMA -->
     <div id="mainAppUI" style="display: none; flex-direction: column; height: 100%;">
         
         <div class="header-top">
@@ -146,9 +159,8 @@
             </div>
 
             <div class="right-panel">
-                <!-- BARIS SUB-JUDUL DIHAPUS TOTAL SESUAI PERMINTAAN -->
                 <div style="padding: 15px 15px 0 15px; background: #050505; z-index: 5;">
-                    <table style="margin-bottom: 0;">
+                    <table style="margin-bottom: 0; border-collapse: collapse; border-spacing: 0;">
                         <thead>
                             <tr>
                                 <th style="width: 15%;">PARTAI</th>
@@ -252,7 +264,6 @@
         }
 
         function jalankanRadarJadwal() {
-            // MENYEDOT NAMA KEJUARAAN DARI FIREBASE PENGATURAN
             onValue(ref(database, 'pengaturan/nama_kejuaraan'), (snap) => {
                 if(snap.exists()) document.getElementById('judulKejuaraan').innerText = snap.val().toUpperCase();
             });
