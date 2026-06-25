@@ -698,6 +698,10 @@
                     
                     // 🔥 CEK PERISAI DEBOUNCE 2 DETIK SINI 🔥
                     if (d.status === "PERSIAPAN" && state !== "PERSIAPAN") {
+                    if (d.status === "PAUSE" && state === "RONDE") {
+    window.pauseTimer(); // Fungsi bawaan panitia untuk menghentikan setInterval
+    setStatusTampilan("JEDA LAGA (VAR / KETUA)", "bg-warning text-dark");
+}
     clearInterval(intervalUtama); clearInterval(intervalPause); state = "PERSIAPAN"; rondeSaatIni = 1; sisaDetik = 0; idPauseAktif = 0;
     setStatusTampilan("PERSIAPAN", "bg-secondary"); setTemaTimer(false); alasanMenangGlobal = "";
     document.getElementById('layarTimerLokal').innerText = (modeKategoriAktif === 'tanding' ? "02:00" : "00:00");
@@ -833,11 +837,16 @@ if (d.ronde_aktif && d.ronde_aktif !== rondeSaatIni && state !== "PERSIAPAN") {
             let gel = document.getElementById('pilihGelanggang').value; let base = `pertandingan/${gel}`;
             
             updateLayarDanFirebase(modeKategoriAktif === 'tanding' ? "02:00" : "00:00");
-            set(ref(database, `${base}/biru`), { r1:0, r2:0, r3:0 }); 
-            set(ref(database, `${base}/merah`), { r1:0, r2:0, r3:0 }); 
+            set(ref(database, `${base}/biru`), { r1:0, r2:0, r3:0, r1_log:[], r2_log:[], r3_log:[] }); 
+            set(ref(database, `${base}/merah`), { r1:0, r2:0, r3:0, r1_log:[], r2_log:[], r3_log:[] }); 
+            set(ref(database, `${base}/pemenang_keputusan`), null);
+            set(ref(database, `${base}/pemenang_mutlak`), null);
+            set(ref(database, `${base}/alasan_menang`), null);
+            set(ref(database, `${base}/logs`), null);
+            set(ref(database, `${base}/sinyal_dewan`), null);
+            set(ref(database, `${base}/verifikasi`), null);
+            set(ref(database, `${base}/izin_play`), null);
             set(ref(database, `${base}/ronde_aktif`), 1);
-
-            // 🔥 PENYAMBUNG SERAT KABEL SENI YANG PUTUS 🔥
             set(ref(database, `${base}/seni`), {
                 skor: { j1: 10, j2: 10, j3: 10, j4: 10, j5: 10, j6: 10 },
                 hukuman: 0,
