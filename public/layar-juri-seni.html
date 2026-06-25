@@ -229,6 +229,7 @@
                             <div class="result-title text-success">SKOR AKHIR FINAL</div>
                             <div class="result-value text-success" style="font-size: 70px;" id="skorAkhirFinal">0.000</div>
                         </div>
+                        <button class="btn btn-success w-100 fw-bold mt-3 py-3 fs-5 text-dark shadow" id="btnSahkanSeni" onclick="sahkanNilaiSeni()">✅ SAHKAN NILAI KE PANITIA</button>
                     </div>
                 </div>
             </div>
@@ -410,6 +411,9 @@
             updateLayarJuri(); 
         }
 
+        // 🔥 INI DIA POSISI YANG BENAR: Mengaktifkan Telinga Sensor sebelum UI dimunculkan
+        pantauStatusDanResetSeni(); 
+
         document.getElementById('mainApp').style.display = "flex";
         bootstrap.Modal.getInstance(document.getElementById('modalLogin')).hide();
         btnLogin.innerText = "MASUK GELANGGANG";
@@ -495,12 +499,18 @@
             kalkulasiSkorDewan();
         });
 
-        // Ambil Data Atlet dari Setup (Opsional jika setup diisi Panitia)
+        // Ambil Data Atlet dari Setup
         onValue(ref(database, `pertandingan/${sessionSeni.gel}/setup`), (snap) => {
             let data = snap.val();
             if(data) {
-                document.getElementById('namaAtlet').innerText = data.nama_biru || "NAMA PESILAT"; // Asumsi atlet 1
-                document.getElementById('kontingenAtlet').innerText = data.kontingen_biru || "KONTINGEN DAERAH";
+                // 🔥 KABEL 2 TERSAMBUNG: Tablet Dewan & Juri pintar mendeteksi sudut Merah
+                let nB = data.nama_biru || "SUDUT BIRU"; let nM = data.nama_merah || "SUDUT MERAH";
+                let n = (nB !== "-" && nB !== "SUDUT BIRU") ? nB : ((nM !== "-" && nM !== "SUDUT MERAH") ? nM : "NAMA PESILAT SENI");
+                let kB = data.kontingen_biru || "-"; let kM = data.kontingen_merah || "-";
+                let k = (nB !== "-" && nB !== "SUDUT BIRU") ? kB : ((nM !== "-" && nM !== "SUDUT MERAH") ? kM : "KONTINGEN DAERAH");
+
+                document.getElementById('namaAtlet').innerText = n;
+                document.getElementById('kontingenAtlet').innerText = k;
             }
         });
     }
@@ -537,6 +547,62 @@
         // PUSH SKOR AKHIR FINAL KE FIREBASE (Untuk Layar Monitor)
         set(ref(database, `pertandingan/${sessionSeni.gel}/seni/hasil_akhir`), parseFloat(skorAkhir.toFixed(3)));
     }
+
+
+    // 🔥 KABEL 4 LANJUTAN: Logika Pengesahan
+    window.sahkanNilaiSeni = function() {
+        set(ref(database, `pertandingan/${sessionSeni.gel}/status`), "PERTANDINGAN SELESAI");
+        set(ref(database, `pertandingan/${sessionSeni.gel}/timer`), "00:00");
+        set(ref(database, `pertandingan/${sessionSeni.gel}/izin_simpan`), true).then(() => {
+            showCustomAlert("✅ PENGESAHAN BERHASIL", "Skor akhir telah disahkan. Panitia sekarang dapat merekam data ke sistem.", "text-success");
+        });
+    }
+
+    // 🔥 KABEL 1 & 5 TERSAMBUNG: Sensor Waktu Juri & Sinkronisasi Reset Panitia
+    function pantauStatusDanResetSeni() {
+        onValue(ref(database, `pertandingan/${sessionSeni.gel}/status`), (snap) => {
+            let status = snap.val() || "PERSIAPAN";
+            
+            // Mengunci Juri Seni saat Jeda / Belum Main
+            let lockJuri = (status !== "RONDE");
+            document.querySelectorAll('.btn-kesalahan, .btn-undo').forEach(btn => {
+                btn.disabled = lockJuri;
+                btn.style.opacity = lockJuri ? "0.4" : "1";
+                btn.style.pointerEvents = lockJuri ? "none" : "auto";
+            });
+
+            // Mengunci Hukuman Dewan saat Jeda / Selesai
+            let lockDewan = (status !== "RONDE");
+            document.querySelectorAll('.btn-hukuman').forEach(btn => {
+                btn.disabled = lockDewan;
+                btn.style.opacity = lockDewan ? "0.4" : "1";
+                btn.style.pointerEvents = lockDewan ? "none" : "auto";
+            });
+
+            // Mengunci Tombol Sahkan (Hanya aktif saat Selesai Ronde)
+            let lockSahkan = (status === "PERSIAPAN" || status === "PERTANDINGAN SELESAI"); 
+            let btnSahkan = document.getElementById('btnSahkanSeni');
+            if (btnSahkan) {
+                btnSahkan.disabled = lockSahkan;
+                btnSahkan.style.opacity = lockSahkan ? "0.4" : "1";
+                btnSahkan.style.pointerEvents = lockSahkan ? "none" : "auto";
+            }
+
+            // MENDENGAR TOMBOL RESET PANITIA
+            if (status === "PERSIAPAN") {
+                // Reset Memori Lokal Juri
+                skorAwalJuri = 10.00; totalPotonganJuri = 0; riwayatPotonganJuri = [];
+                if (sessionSeni.pos === 'juri') updateLayarJuri();
+
+                // Reset Memori Lokal Dewan
+                totalHukumanDewan = 0; listHukumanDewan = [];
+                if (sessionSeni.pos === 'dewan') { updateLogHukumanDewan(); kalkulasiSkorDewan(); }
+            }
+        });
+    }
+
+
+
 </script>
 </body>
 </html>

@@ -320,9 +320,17 @@
             onValue(ref(database, `${baseRefPath}/setup`), (snap) => {
                 let d = snap.val();
                 if(d) {
-                    let n = d.nama_biru || "NAMA PESILAT SENI";
+                    // 🔥 KABEL 2 TERSAMBUNG: TV bisa mendeteksi nama & asal sudut Merah jika Biru kosong
+                    let nB = d.nama_biru || "SUDUT BIRU";
+                    let nM = d.nama_merah || "SUDUT MERAH";
+                    let n = (nB !== "-" && nB !== "SUDUT BIRU") ? nB : ((nM !== "-" && nM !== "SUDUT MERAH") ? nM : "NAMA PESILAT SENI");
+                    
+                    let kB = d.kontingen_biru || "-";
+                    let kM = d.kontingen_merah || "-";
+                    let k = (nB !== "-" && nB !== "SUDUT BIRU") ? kB : ((nM !== "-" && nM !== "SUDUT MERAH") ? kM : "KONTINGEN DAERAH");
+
                     document.getElementById('s_nama_atlet').innerText = n;
-                    document.getElementById('s_kon_atlet').innerText = d.kontingen_biru || "KONTINGEN DAERAH";
+                    document.getElementById('s_kon_atlet').innerText = k;
                     document.getElementById('pemenangSeniNama').innerText = n;
                 }
             });
