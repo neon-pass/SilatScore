@@ -547,7 +547,7 @@
         
         <!-- Teks Emas Dibungkus Card -->
         <div class="var-text-card">
-            <h1 class="var-title" style="margin-bottom: 0;">PROSES VERIFIKASI</h1>
+            <h1 class="var-title" style="margin-bottom: 0;">VERIFIKASI</h1>
             <h2 id="tvVerifTipe" class="var-subtitle" style="margin-bottom: 10px; margin-top: 10px;">TIPE REVIEW</h2>
         </div>
         
@@ -910,7 +910,7 @@
                     }
 
                     // 3. SET TEKS & KOTAK IDENTITAS MENGKILAP
-                    let tipeTeks = data.tipe === 'jatuhan' ? 'KEABSAHAN JATUHAN' : 'PELANGGARAN MATRAS';
+                    let tipeTeks = data.tipe === 'jatuhan' ? 'KEABSAHAN JATUHAN' : 'PELANGGARAN';
                     document.getElementById('tvVerifTipe').innerText = tipeTeks;
                     
                     let elSudut = document.getElementById('tvVerifSudut');

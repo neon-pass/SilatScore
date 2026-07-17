@@ -1075,21 +1075,21 @@
 
         onValue(ref(database, baseRef), (snap) => {
             let dataFirebase = snap.val();
-            if(dataFirebase) {
-                sudahDisahkan = dataFirebase.izin_simpan || false;
-                pemenangMutlak = dataFirebase.pemenang_keputusan || null;
-                dataSkorDewan.biru = (dataFirebase.biru?.r1||0) + (dataFirebase.biru?.r2||0) + (dataFirebase.biru?.r3||0);
-                dataSkorDewan.merah = (dataFirebase.merah?.r1||0) + (dataFirebase.merah?.r2||0) + (dataFirebase.merah?.r3||0);
-                
-                let data = dataFirebase.setup;
-                if(data) {
-                    elNamaBiru.innerText = data.nama_biru || "SUDUT BIRU"; elKonBiru.innerText = data.kontingen_biru || "-";
-                    elNamaMerah.innerText = data.nama_merah || "SUDUT MERAH"; elKonMerah.innerText = data.kontingen_merah || "-";
-                    elBabak.innerText = data.babak || "BABAK -"; elPartaiKelas.innerText = `P: ${data.partai || "-"} | KLS: ${data.kelas || "-"}`;
-                    elJNamaWasit.innerText = data.wasit || "-"; elJNamaJ1.innerText = data.juri1 || "-";
-                    elJNamaJ2.innerText = data.juri2 || "-"; elJNamaJ3.innerText = data.juri3 || "-";
-                }
-            }
+            let data = dataFirebase.setup;
+if(data) {
+    // Gunakan nama variabel yang SAMA PERSIS dengan deklarasi di bagian atas script
+    elJNamaBiru.innerText = data.nama_biru || "SUDUT BIRU"; 
+    elJKonBiru.innerText = data.kontingen_biru || "-";
+    elJNamaMerah.innerText = data.nama_merah || "SUDUT MERAH"; 
+    elJKonMerah.innerText = data.kontingen_merah || "-";
+    
+    elJBabak.innerText = data.babak || "BABAK -"; 
+    elJPartaiKelas.innerText = `P: ${data.partai || "-"} | KLS: ${data.kelas || "-"}`;
+    elJNamaWasit.innerText = data.wasit || "-"; 
+    elJNamaJ1.innerText = data.juri1 || "-";
+    elJNamaJ2.innerText = data.juri2 || "-"; 
+    elJNamaJ3.innerText = data.juri3 || "-";
+}
         });
 
         onValue(rondeRef, (snap) => { 
