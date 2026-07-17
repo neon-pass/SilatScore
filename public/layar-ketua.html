@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Master Monitor Ketua - Digital Scoring Silat</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { 
+            background: linear-gradient(180deg, #222222 0%, #0f0f0f 100%); 
+            color: #fff; 
+            min-height: 100vh; 
+            touch-action: manipulation; 
+            user-select: none; 
+            font-family: 'Arial', sans-serif; 
+            overflow-x: hidden;
+        }
+        .form-select, .form-control { background-color: #333 !important; color: #fff !important; border: 1px solid #555 !important; }
+        
+        /* HEADER STYLE */
+        .event-header { background: #1a1a1a; border-bottom: 3px solid #ffc107; padding: 6px 0; }
+        .event-title { font-size: 13px; font-weight: bold; letter-spacing: 2px; color: #aaa; margin: 0; text-transform: uppercase; }
+        .event-subtitle { font-size: 16px; font-weight: bold; color: #fff; margin: 2px 0 0 0; }
+
+        /* TOP SCORE BAR */
+        .score-bar { background-color: #111; padding: 12px 0; border-bottom: 1px solid #444; }
+        .nama-pesilat { font-size: 22px; font-weight: bold; letter-spacing: 1px; }
+        .kontingen { font-size: 12px; color: #ffc107; font-weight: bold; text-transform: uppercase; }
+        .text-blue-side { color: #3b82f6; text-shadow: 0 0 10px rgba(59,130,246,0.3); }
+        .text-red-side { color: #ef4444; text-shadow: 0 0 10px rgba(239,68,68,0.3); }
+        
+        .center-score-box { font-size: 55px; font-weight: bold; font-family: monospace; line-height: 1; min-width: 60px; }
+        .timer-box { font-size: 34px; color: #fff; background: #222; padding: 2px 18px; border-radius: 6px; border: 1px solid #555; font-weight: bold; margin: 0 20px; font-family: monospace; }
+
+        /* 🔥 TABEL SUDAH DIGEMBOK BAJA (ANTI GEPENG) 🔥 */
+        .matrix-table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            background-color: #161616; 
+            text-align: center; 
+            table-layout: fixed; 
+        }
+        .matrix-table th, .matrix-table td { border: 1px solid #333; padding: 6px 4px; vertical-align: middle; height: 44px; }
+        .matrix-table th { background-color: #1f1f1f; color: #999; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .side-title-blue { background: linear-gradient(90deg, #003366, #004494) !important; color: white !important; }
+        .side-title-red { background: linear-gradient(90deg, #8c0000, #660000) !important; color: white !important; }
+        
+        .total-col { font-size: 22px; font-weight: bold; background-color: #111; width: 50px; }
+        .label-row { font-weight: bold; text-align: left; padding-left: 8px !important; width: 80px; background: #1a1a1a; color: #bbb; font-size: 11px; }
+        
+        .score-row-highlight { background-color: #1f2937; font-weight: bold; }
+        .score-row-highlight .label-row { color: #00f0ff; background-color: #111827; }
+        
+        /* CONTAINER ALIRAN POIN SINKRON */
+        .points-timeline-container { 
+            display: flex; 
+            gap: 6px; 
+            overflow-x: auto; 
+            padding: 2px 5px; 
+            width: 100%;
+            min-height: 28px;
+            align-items: center;
+            scroll-behavior: auto !important; 
+        }
+        .points-timeline-container::-webkit-scrollbar { height: 4px; }
+        .points-timeline-container::-webkit-scrollbar-thumb { background: #444; border-radius: 10px; }
+
+        .log-cell { 
+            display: inline-flex; align-items: center; justify-content: center; 
+            font-weight: bold; font-family: monospace; font-size: 14px; min-width: 12px; 
+            flex-shrink: 0; /* Mencegah poin gepeng saat membeludak */
+        }
+        .tx-putih { color: #ffffff; font-size: 14px; }
+        .tx-abu { color: #555; font-weight: normal; font-size: 14px; }
+        .tx-kuning { color: #ffc107; font-size: 14px;}
+        .tx-biru { color: #00e1ff; font-size: 15px; text-shadow: 0 0 6px rgba(0,225,255,0.6); }
+        .tx-merah { color: #ff3c3c; font-size: 15px; text-shadow: 0 0 6px rgba(255,60,60,0.6); }
+
+        .babak-divider { background: #1a1a1a; border: 1px solid #333; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 310px; }
+        .babak-number { font-size: 38px; font-weight: bold; color: #ffc107; font-family: monospace; line-height: 1; }
+
+        .modal-content.dark-theme { background-color: #1a1a1a; border: 1px solid #555; color: white; }
+    </style>
+</head>
+<body>
+
+<div id="mainApp" style="display:none; flex-direction: column; min-height: 100vh;">
+    
+    <div class="event-header text-center">
+        <p class="event-title" id="liveEventName">MONITORING SYSTEM</p>
+        <p class="event-subtitle" id="liveMatchInfo">MEMUAT DATA PERTANDINGAN...</p>
+    </div>
+
+    <div class="score-bar container-fluid px-4">
+        <div class="row align-items-center text-center">
+            <div class="col-4 text-start">
+                <div class="kontingen" id="liveKonBiru">KONTINGEN</div>
+                <div class="nama-pesilat text-blue-side text-truncate" id="liveNamaBiru">SUDUT BIRU</div>
+            </div>
+            <div class="col-4 d-flex align-items-center justify-content-center">
+                <span class="center-score-box text-blue-side" id="liveSkorBiru">0</span>
+                <span class="timer-box" id="liveTimer">00:00</span>
+                <span class="center-score-box text-red-side" id="liveSkorMerah">0</span>
+            </div>
+            <div class="col-4 text-end">
+                <div class="kontingen" id="liveKonMerah">KONTINGEN</div>
+                <div class="nama-pesilat text-red-side text-truncate" id="liveNamaMerah">SUDUT MERAH</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid p-1 flex-grow-1">
+        <div class="row g-1 align-items-stretch justify-content-center mx-0">
+            
+            <div class="col" style="flex: 0 0 46%; max-width: 46%;">
+                <table class="matrix-table">
+                    <thead>
+                        <tr>
+                            <th class="side-title-blue" style="width: 50px;">Tot</th>
+                            <th class="side-title-blue">Detail Point (Sudut Biru)</th>
+                            <th class="side-title-blue" style="width: 80px;">Kategori</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td rowspan="4" class="total-col text-blue-side" id="mTotalBiru">0</td>
+                            <td><div class="points-timeline-container" id="timeline-j1-biru"></div></td>
+                            <td class="label-row">Jury 1</td>
+                        </tr>
+                        <tr>
+                            <td><div class="points-timeline-container" id="timeline-j2-biru"></div></td>
+                            <td class="label-row">Jury 2</td>
+                        </tr>
+                        <tr>
+                            <td><div class="points-timeline-container" id="timeline-j3-biru"></div></td>
+                            <td class="label-row">Jury 3</td>
+                        </tr>
+                        <tr class="score-row-highlight">
+                            <td><div class="points-timeline-container" id="timeline-score-biru"></div></td>
+                            <td class="label-row">Score</td>
+                        </tr>
+                        <tr>
+                            <td class="total-col text-warning" id="totJatuhanBiru">0</td>
+                            <td><div class="points-timeline-container" id="timeline-jatuhan-biru"></div></td>
+                            <td class="label-row">Jatuhan</td>
+                        </tr>
+                        <tr>
+                            <td class="total-col text-danger" id="totHukumanBiru">0</td>
+                            <td><div class="points-timeline-container" id="timeline-hukuman-biru"></div></td>
+                            <td class="label-row">Hukuman</td>
+                        </tr>
+                        <tr>
+                            <td class="total-col text-info" id="totBinaanBiru">0</td>
+                            <td><div class="points-timeline-container" id="timeline-binaan-biru"></div></td>
+                            <td class="label-row">Binaan</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="col text-center px-0" style="flex: 0 0 8%; max-width: 8%;">
+                <div class="babak-divider">
+                    <span class="text-secondary fw-bold" style="font-size: 10px; letter-spacing: 1px;">BABAK</span>
+                    <div class="babak-number" id="liveBabak">1</div>
+                    <span id="liveStatus" class="badge bg-danger mt-1 px-2 py-1" style="font-size: 10px;">READY</span>
+                </div>
+            </div>
+
+            <div class="col" style="flex: 0 0 46%; max-width: 46%;">
+                <table class="matrix-table">
+                    <thead>
+                        <tr>
+                            <th class="side-title-red" style="width: 80px;">Kategori</th>
+                            <th class="side-title-red">Detail Point (Sudut Merah)</th>
+                            <th class="side-title-red" style="width: 50px;">Tot</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="label-row">Jury 1</td>
+                            <td><div class="points-timeline-container" id="timeline-j1-merah"></div></td>
+                            <td rowspan="4" class="total-col text-red-side" id="mTotalMerah">0</td>
+                        </tr>
+                        <tr>
+                            <td class="label-row">Jury 2</td>
+                            <td><div class="points-timeline-container" id="timeline-j2-merah"></div></td>
+                        </tr>
+                        <tr>
+                            <td class="label-row">Jury 3</td>
+                            <td><div class="points-timeline-container" id="timeline-j3-merah"></div></td>
+                        </tr>
+                        <tr class="score-row-highlight">
+                            <td class="label-row">Score</td>
+                            <td><div class="points-timeline-container" id="timeline-score-merah"></div></td>
+                        </tr>
+                        <tr>
+                            <td class="label-row">Jatuhan</td>
+                            <td><div class="points-timeline-container" id="timeline-jatuhan-merah"></div></td>
+                            <td class="total-col text-warning" id="totJatuhanMerah">0</td>
+                        </tr>
+                        <tr>
+                            <td class="label-row">Hukuman</td>
+                            <td><div class="points-timeline-container" id="timeline-hukuman-merah"></div></td>
+                            <td class="total-col text-danger" id="totHukumanMerah">0</td>
+                        </tr>
+                        <tr>
+                            <td class="label-row">Binaan</td>
+                            <td><div class="points-timeline-container" id="timeline-binaan-merah"></div></td>
+                            <td class="total-col text-info" id="totBinaanMerah">0</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="p-2 bg-dark d-flex justify-content-between border-top border-secondary align-items-center">
+        <span id="sessionInfo" class="text-secondary small fw-bold px-2"></span>
+        <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-warning fw-bold text-dark px-3" data-bs-toggle="modal" data-bs-target="#modalSetupLaga">⚙️ PANEL SETUP & RESET</button>
+            <button class="btn btn-sm btn-outline-danger fw-bold" onclick="eksekusiLogout()">🚪 KELUAR</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalSetupLaga" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content dark-theme border-secondary">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title text-warning fw-bold">⚙️ MANAJEMEN PERTANDINGAN</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-3">
+                <form id="formSetupPartai" onsubmit="event.preventDefault(); kirimSetupLaga();">
+                    <div class="row g-2 mb-2">
+                        <div class="col-4">
+                            <label class="small text-secondary">Event / Kejuaraan:</label>
+                            <input type="text" id="inEvent" class="form-control form-control-sm" required>
+                        </div>
+                        <div class="col-4">
+                            <label class="small text-secondary">Partai / Match:</label>
+                            <input type="text" id="inPartai" class="form-control form-control-sm" required>
+                        </div>
+                        <div class="col-4">
+                            <label class="small text-secondary">Kelas / Kategori:</label>
+                            <input type="text" id="inKelas" class="form-control form-control-sm" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="small text-secondary">Babak Active:</label>
+                        <select id="inBabak" class="form-select form-select-sm">
+                            <option value="1">BABAK 1</option>
+                            <option value="2">BABAK 2</option>
+                            <option value="3">BABAK 3</option>
+                        </select>
+                    </div>
+                    <div class="row g-3 mb-3 border-top border-bottom border-secondary py-2 my-1">
+                        <div class="col-6 border-end border-secondary">
+                            <span class="badge bg-primary w-100 mb-1">SUDUT BIRU</span>
+                            <input type="text" id="inNamaBiru" class="form-control form-control-sm mb-1" required>
+                            <input type="text" id="inKontingenBiru" class="form-control form-control-sm" required>
+                        </div>
+                        <div class="col-6">
+                            <span class="badge bg-danger w-100 mb-1">SUDUT MERAH</span>
+                            <input type="text" id="inNamaMerah" class="form-control form-control-sm mb-1" required>
+                            <input type="text" id="inKontingenMerah" class="form-control form-control-sm" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-warning w-100 fw-bold text-dark mb-2">🚀 PERBARUI DATA ARENA</button>
+                </form>
+                
+                <h6 class="text-danger border-top border-secondary pt-2 fw-bold small">🚨 KOSONGKAN ARENA (MANDATORY APABILA GANTI PARTAI)</h6>
+                <button class="btn btn-sm btn-danger w-100 fw-bold mb-3" onclick="tampilkanKonfirmasiReset()">🧹 KOSONGKAN LOG & RESET SKOR ARENA</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalKonfirmasiResetKetua" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content dark-theme shadow-lg" style="border: 2px solid #dc3545;">
+            <div class="modal-header dark-theme border-bottom-0">
+                <h5 class="modal-title fw-bold text-danger w-100 text-center">⚠️ PERINGATAN RESET</h5>
+            </div>
+            <div class="modal-body text-center py-4 fs-5">
+                Ini akan mengosongkan <strong class="text-warning">seluruh riwayat log poin</strong> Juri & Dewan di gelanggang ini.<br><br>Apakah Anda yakin ingin melanjutkan?
+            </div>
+            <div class="modal-footer dark-theme border-top-0 justify-content-center gap-3">
+                <button type="button" class="btn btn-outline-light px-4 fw-bold w-25" data-bs-dismiss="modal">BATAL</button>
+                <button type="button" class="btn btn-danger px-4 fw-bold w-50" onclick="eksekusiResetTotal()" data-bs-dismiss="modal">YA, RESET SEMUA!</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
+    import { getDatabase, ref, set, onValue, get, onDisconnect, update } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCNsOk8MsIhBoZ44Nd9WGGl6eBJOEKu3nI",
+        authDomain: "tesapksilat99.firebaseapp.com",
+        databaseURL: "https://tesapksilat99-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "tesapksilat99",
+        storageBucket: "tesapksilat99.firebasestorage.app",
+        messagingSenderId: "747533449255",
+        appId: "1:747533449255:web:358edf3c6032c22cdbb602"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+    let session = {};
+    let rondeAktif = 1; 
+    let skorBiru = { 1: 0, 2: 0, 3: 0 }; 
+    let skorMerah = { 1: 0, 2: 0, 3: 0 };
+    let riwayatBiru = { 1: [], 2: [], 3: [] }; 
+    let riwayatMerah = { 1: [], 2: [], 3: [] };
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const gelDariURL = urlParams.get('gel');
+
+        if (gelDariURL) {
+            initAppKetua(gelDariURL);
+        } else {
+            window.location.href = 'layar-juri.html';
+        }
+
+        // 🔥 MESIN PENGIKAT 7 BARIS SINKRON SECARA SERENTAK 🔥
+        aktifkanSinkronisasiScroll(['j1-biru', 'j2-biru', 'j3-biru', 'score-biru', 'jatuhan-biru', 'hukuman-biru', 'binaan-biru']);
+        aktifkanSinkronisasiScroll(['j1-merah', 'j2-merah', 'j3-merah', 'score-merah', 'jatuhan-merah', 'hukuman-merah', 'binaan-merah']);
+    });
+
+    // FUNGSI INTI SINKRONISASI 7 JALUR
+    function aktifkanSinkronisasiScroll(kelompokIds) {
+        let sedangSinkron = false;
+        kelompokIds.forEach(id => {
+            let el = document.getElementById(`timeline-${id}`);
+            if(!el) return;
+            el.addEventListener('scroll', (e) => {
+                if(sedangSinkron) return; 
+                sedangSinkron = true;
+                let posisiKiri = e.target.scrollLeft;
+
+                kelompokIds.forEach(saudara => {
+                    if(saudara !== id) {
+                        let target = document.getElementById(`timeline-${saudara}`);
+                        if(target && target.scrollLeft !== posisiKiri) {
+                            target.scrollLeft = posisiKiri;
+                        }
+                    }
+                });
+                requestAnimationFrame(() => { sedangSinkron = false; });
+            }, { passive: true });
+        });
+    }
+
+    window.initAppKetua = async function(gel) {
+        let lockRef = ref(database, `pertandingan/${gel}/locks/ketua`);
+        let snap = await get(lockRef);
+
+        if(snap.exists() && snap.val() === true) {
+            alert(`❌ Sesi Ketua di arena ${gel.toUpperCase()} sedang terbuka di perangkat lain!`);
+            window.location.href = 'layar-juri.html';
+            return;
+        }
+
+        await set(lockRef, true);
+        onDisconnect(lockRef).remove();
+
+        session.gel = gel;
+        document.getElementById('sessionInfo').innerText = `MONITOR UTAMA KETUA | ${session.gel.toUpperCase()}`;
+        document.getElementById('mainApp').style.display = 'flex';
+
+        pasangMasterMonitor();
+    };
+
+    function pasangMasterMonitor() {
+        let baseRef = `pertandingan/${session.gel}`;
+
+        onValue(ref(database, `${baseRef}/setup`), (snap) => {
+            let data = snap.val();
+            if(data) {
+                document.getElementById('liveEventName').innerText = data.event || "PORPROV SILAT DIGITAL";
+                document.getElementById('liveMatchInfo').innerText = `${data.kelas || "-"} - Match ${data.partai || "-"}`;
+                document.getElementById('liveNamaBiru').innerText = data.nama_biru || "-";
+                document.getElementById('liveKonBiru').innerText = data.kontingen_biru || "-";
+                document.getElementById('liveNamaMerah').innerText = data.nama_merah || "-";
+                document.getElementById('liveKonMerah').innerText = data.kontingen_merah || "-";
+            }
+        });
+
+        onValue(ref(database, `${baseRef}/status`), (snap) => {
+            let st = snap.val() || "READY";
+            document.getElementById('liveStatus').innerText = st;
+            document.getElementById('liveStatus').className = st === "PLAY" ? "badge bg-success mt-1 px-2 py-1" : "badge bg-danger mt-1 px-2 py-1";
+        });
+        
+        onValue(ref(database, `${baseRef}/timer`), (snap) => { document.getElementById('liveTimer').innerText = snap.val() || "00:00"; });
+        
+        onValue(ref(database, `${baseRef}/ronde_aktif`), (snap) => { 
+            rondeAktif = snap.val() || 1; 
+            document.getElementById('liveBabak').innerText = rondeAktif;
+        });
+
+        [1, 2, 3].forEach(r => {
+            onValue(ref(database, `${baseRef}/biru/r${r}_log`), (snap) => { riwayatBiru[r] = snap.val() || []; skorBiru[r] = riwayatBiru[r].reduce((a,b) => a+b, 0); updateSkorLayarMata(); });
+            onValue(ref(database, `${baseRef}/merah/r${r}_log`), (snap) => { riwayatMerah[r] = snap.val() || []; skorMerah[r] = riwayatMerah[r].reduce((a,b) => a+b, 0); updateSkorLayarMata(); });
+        });
+
+        let timeoutRender = null;
+        onValue(ref(database, `${baseRef}/logs`), (snap) => {
+            if (timeoutRender) clearTimeout(timeoutRender);
+            timeoutRender = setTimeout(() => {
+                renderPoinDetail(snap.val());
+            }, 60); 
+        });
+    }
+
+    function updateSkorLayarMata() {
+        let tb = skorBiru[1] + skorBiru[2] + skorBiru[3];
+        let tm = skorMerah[1] + skorMerah[2] + skorMerah[3];
+        
+        document.getElementById('liveSkorBiru').innerText = tb;
+        document.getElementById('liveSkorMerah').innerText = tm;
+        document.getElementById('mTotalBiru').innerText = tb;
+        document.getElementById('mTotalMerah').innerText = tm;
+
+        let sP_B = riwayatBiru[1].concat(riwayatBiru[2], riwayatBiru[3]);
+        let sP_M = riwayatMerah[1].concat(riwayatMerah[2], riwayatMerah[3]);
+
+        document.getElementById('totJatuhanBiru').innerText = sP_B.filter(v => v === 3).length * 3;
+        document.getElementById('totJatuhanMerah').innerText = sP_M.filter(v => v === 3).length * 3;
+        
+        document.getElementById('totHukumanBiru').innerText = sP_B.filter(v => v < 0 && v !== -99).reduce((a,b)=>a+b, 0);
+        document.getElementById('totHukumanMerah').innerText = sP_M.filter(v => v < 0 && v !== -99).reduce((a,b)=>a+b, 0);
+
+        document.getElementById('totBinaanBiru').innerText = sP_B.filter(v => v === 0).length;
+        document.getElementById('totBinaanMerah').innerText = sP_M.filter(v => v === 0).length;
+    }
+
+    // 🔥 MESIN PENCETAK SINKRON BIRU-MERAH 🔥
+    function renderPoinDetail(logsData) {
+        const targetIds = [
+            'j1-biru', 'j2-biru', 'j3-biru', 'score-biru', 'jatuhan-biru', 'hukuman-biru', 'binaan-biru',
+            'j1-merah', 'j2-merah', 'j3-merah', 'score-merah', 'jatuhan-merah', 'hukuman-merah', 'binaan-merah'
+        ];
+        
+        let htmlArrays = {};
+        targetIds.forEach(id => htmlArrays[id] = []);
+
+        if (!logsData) {
+            targetIds.forEach(id => { document.getElementById(`timeline-${id}`).innerHTML = ''; });
+            return;
+        }
+
+        let logArray = Object.keys(logsData).map(key => ({ id: key, ...logsData[key] }));
+        logArray.sort((a, b) => a.time_millis - b.time_millis);
+
+        let suppressedLogs = new Set();
+        let sahLogs = logArray.filter(l => l.type === 'juri_hit_sah');
+        
+        sahLogs.forEach(sah => {
+            let hits = sah.juri_hits || [];
+            logArray.forEach(mentah => {
+                if (mentah.type === 'juri_hit_mentah' && mentah.sudut === sah.sudut && mentah.poin === sah.poin) {
+                    if (hits.includes(mentah.juri)) {
+                        let diff = sah.time_millis - mentah.time_millis;
+                        if (diff >= -500 && diff <= 4000) { suppressedLogs.add(mentah.id); }
+                    }
+                }
+            });
+        });
+
+        function pushHTML(id, className, text) {
+            htmlArrays[id].push(`<span class="log-cell ${className}">${text}</span>`);
+        }
+
+        logArray.forEach(log => {
+            if (suppressedLogs.has(log.id)) return; 
+
+            let sdt = log.sudut; 
+            let jenis = log.type;
+
+            if (jenis === 'juri_hit_sah') {
+                let poin = log.poin; let hits = log.juri_hits || [];
+                ['j1', 'j2', 'j3'].forEach(j => {
+                    if (hits.includes(j)) pushHTML(`${j}-${sdt}`, 'tx-putih', poin);
+                    else pushHTML(`${j}-${sdt}`, 'tx-abu', '/');
+                });
+                pushHTML(`score-${sdt}`, (sdt === 'biru' ? 'tx-biru' : 'tx-merah'), poin);
+                ['jatuhan', 'hukuman', 'binaan'].forEach(kat => pushHTML(`${kat}-${sdt}`, 'tx-abu', '/'));
+            } 
+            else if (jenis === 'juri_hit_mentah') {
+                let jNum = log.juri; let poin = log.poin;
+                ['j1', 'j2', 'j3'].forEach(j => {
+                    if (j === jNum) pushHTML(`${j}-${sdt}`, 'tx-putih', poin);
+                    else pushHTML(`${j}-${sdt}`, 'tx-abu', '/');
+                });
+                pushHTML(`score-${sdt}`, 'tx-abu', '/');
+                ['jatuhan', 'hukuman', 'binaan'].forEach(kat => pushHTML(`${kat}-${sdt}`, 'tx-abu', '/'));
+            }
+            else {
+                ['j1', 'j2', 'j3', 'score'].forEach(j => pushHTML(`${j}-${sdt}`, 'tx-abu', '/'));
+                ['jatuhan', 'hukuman', 'binaan'].forEach(kat => {
+                    if (kat === jenis) {
+                        let txt = (jenis === 'jatuhan' ? '+3' : (jenis === 'hukuman' ? log.poin : 'B'));
+                        let warna = (jenis === 'jatuhan') ? 'tx-kuning' : (jenis === 'hukuman' ? 'tx-merah' : 'tx-putih');
+                        pushHTML(`${kat}-${sdt}`, warna, txt);
+                    } else { pushHTML(`${kat}-${sdt}`, 'tx-abu', '/'); }
+                });
+            }
+        });
+
+        // 🔥 KEAJAIBAN CERMIN SIMETRIS 🔥
+        targetIds.forEach(id => {
+            let isBlue = id.includes('biru');
+            let finalHtml = "";
+            
+            if (isBlue) {
+                // Kubu Biru dibalik urutannya agar tumbuh ke kiri
+                let reversed = htmlArrays[id].slice().reverse();
+                // Dan elemen poin terbarunya didorong menempel ke garis tengah Kategori
+                if(reversed.length > 0) {
+                    reversed[0] = reversed[0].replace('class="log-cell', 'class="log-cell ms-auto"');
+                }
+                finalHtml = reversed.join('');
+            } else {
+                // Kubu Merah dibiarkan alami (tumbuh ke kanan)
+                finalHtml = htmlArrays[id].join('');
+            }
+
+            let el = document.getElementById(`timeline-${id}`);
+            if(el && el.innerHTML !== finalHtml) { 
+                el.innerHTML = finalHtml; 
+            }
+        });
+
+        // 🔥 SCROLL OTOMATIS MENYESUAIKAN ARAH MASING-MASING 🔥
+        ['score-merah'].forEach(id => {
+            let el = document.getElementById(`timeline-${id}`);
+            if(el) el.scrollLeft = el.scrollWidth; // Merah mentok kanan
+        });
+        
+        ['score-biru'].forEach(id => {
+            let el = document.getElementById(`timeline-${id}`);
+            if(el) el.scrollLeft = 0; // Biru mentok kiri (karena elemen terbarunya ada di indeks 0)
+        });
+    }
+
+    window.kirimSetupLaga = function() {
+        let payload = {
+            event: document.getElementById('inEvent').value,
+            partai: document.getElementById('inPartai').value,
+            kelas: document.getElementById('inKelas').value,
+            babak: document.getElementById('inBabak').value,
+            nama_biru: document.getElementById('inNamaBiru').value,
+            kontingen_biru: document.getElementById('inKontingenBiru').value,
+            nama_merah: document.getElementById('inNamaMerah').value,
+            kontingen_merah: document.getElementById('inKontingenMerah').value
+        };
+        set(ref(database, `pertandingan/${session.gel}/setup`), payload).then(() => {
+            set(ref(database, `pertandingan/${session.gel}/ronde_aktif`), parseInt(payload.babak));
+            bootstrap.Modal.getInstance(document.getElementById('modalSetupLaga')).hide();
+        });
+    };
+
+    window.tampilkanKonfirmasiReset = function() {
+        let setupModal = bootstrap.Modal.getInstance(document.getElementById('modalSetupLaga'));
+        if(setupModal) setupModal.hide();
+        let resetModalEl = document.getElementById('modalKonfirmasiResetKetua');
+        let resetModal = bootstrap.Modal.getInstance(resetModalEl) || new bootstrap.Modal(resetModalEl);
+        resetModal.show();
+    };
+
+    window.eksekusiResetTotal = function() {
+        let baseRef = `pertandingan/${session.gel}`;
+        let updates = {};
+        updates[`${baseRef}/logs`] = null;
+        updates[`${baseRef}/biru`] = { r1: 0, r2: 0, r3: 0, r1_log: [], r2_log: [], r3_log: [] };
+        updates[`${baseRef}/merah`] = { r1: 0, r2: 0, r3: 0, r1_log: [], r2_log: [], r3_log: [] };
+        updates[`${baseRef}/timer`] = "02:00";
+        updates[`${baseRef}/status`] = "READY";
+        update(ref(database), updates).then(() => {});
+    };
+
+    window.eksekusiLogout = function() {
+        if(session.gel) set(ref(database, `pertandingan/${session.gel}/locks/ketua`), null);
+        setTimeout(() => { window.location.href = 'layar-juri.html'; }, 200);
+    };
+</script>
+</body>
+</html>

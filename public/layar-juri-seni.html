@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sistem Penilaian Seni - Digital Scoring</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { 
+            background: linear-gradient(180deg, #222 0%, #000 100%); 
+            color: #fff; 
+            min-height: 100vh; 
+            user-select: none; 
+            font-family: 'Arial', sans-serif; 
+            display: flex; 
+            flex-direction: column; 
+        }
+        
+        /* GENERAL STYLES */
+        .modal-content.dark-theme { background-color: #1a1a1a; border: 1px solid #555; color: white; box-shadow: 0 10px 25px rgba(0,0,0,0.8); }
+        .form-select, .form-control { background-color: #333 !important; color: #fff !important; border: 1px solid #555 !important; }
+        .form-select:focus, .form-control:focus { border-color: #ffc107 !important; box-shadow: 0 0 5px rgba(255, 193, 7, 0.5); }
+        
+        /* TOMBOL KEMBALI DI MODAL */
+        .btn-back-modal { position: absolute; top: 15px; left: 15px; text-decoration: none; color: #888; font-size: 22px; font-weight: bold; transition: 0.2s; z-index: 10; }
+        .btn-back-modal:active { color: #fff; transform: scale(0.9); }
+
+        /* HEADER BERSAMA */
+        .header-box { 
+            background-color: #111; 
+            border-bottom: 2px solid #ffc107; 
+            padding: 12px 15px; 
+            text-align: center; 
+            position: relative;
+        }
+        .nama-pesilat { font-size: 24px; font-weight: bold; color: #0dcaf0; letter-spacing: 1px; line-height: 1.1; }
+        .asal-kontingen { font-size: 12px; color: #aaa; letter-spacing: 2px; text-transform: uppercase; margin-top: 3px; }
+        .btn-keluar { 
+            position: absolute; 
+            top: 15px; 
+            left: 20px; 
+            font-size: 11px; 
+            font-weight: bold; 
+            z-index: 10;
+        }
+
+        /* STYLING JURI SENI */
+        .skor-utama-juri { font-size: 100px; font-weight: bold; color: #fff; text-shadow: 0px 4px 10px rgba(255,255,255,0.2); text-align: center; margin: 10px 0; line-height: 1; font-family: monospace; }
+        .btn-kesalahan { height: 85px; font-size: 18px; font-weight: bold; border-radius: 12px; margin-bottom: 15px; width: 100%; box-shadow: 0px 4px 6px rgba(0,0,0,0.5); transition: 0.1s; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px solid #dc3545; background-color: #111; color: #fff; }
+        .btn-kesalahan:active { transform: scale(0.95); background-color: #dc3545 !important; color: white !important; }
+        .btn-kesalahan.warning-type { border-color: #ffc107; }
+        .btn-kesalahan.warning-type:active { background-color: #ffc107 !important; color: #000 !important; }
+        .badge-minus { background: #fff; color: #dc3545; font-size: 14px; padding: 2px 8px; border-radius: 10px; margin-top: 5px; font-weight: 900; }
+        .btn-undo { background: #333; color: #ffc107; border: 1px solid #555; height: 50px; font-weight: bold; font-size: 16px; border-radius: 8px; }
+        .btn-undo:active { background: #ffc107; color: #000; }
+        .log-box-juri { background: #111; border: 1px solid #333; height: 100px; border-radius: 8px; padding: 10px; overflow-y: auto; font-size: 13px; color: #888; }
+
+        /* STYLING DEWAN SENI */
+        .card-custom { background-color: #222; border: 1px solid #444; border-radius: 10px; padding: 15px; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        .juri-box { background: linear-gradient(180deg, #0b5ed7 0%, #084298 100%); border-radius: 8px; padding: 8px; text-align: center; border: 1px solid #0d6efd; transition: 0.3s; }
+        .juri-box.highlight { box-shadow: 0 0 15px rgba(13, 110, 253, 0.8); border-color: #fff; }
+        .juri-title { font-size: 13px; font-weight: bold; color: #fff; margin-bottom: 5px; }
+        
+        .display-skor-juri { 
+            background-color: #333; 
+            color: #fff; 
+            border: 1px solid #555; 
+            border-radius: 5px;
+            font-size: 22px; 
+            font-weight: bold; 
+            text-align: center; 
+            height: 50px; 
+            line-height: 48px; 
+            font-family: monospace; 
+        }
+
+        .result-box { background: #000; border: 2px solid #ffc107; border-radius: 10px; padding: 15px; text-align: center; }
+        .result-title { color: #ffc107; font-size: 15px; font-weight: bold; letter-spacing: 2px; }
+        .result-value { font-size: 50px; font-weight: bold; line-height: 1; color: #fff; font-family: monospace;}
+        .btn-hukuman { height: 65px; font-weight: bold; font-size: 13px; border-radius: 8px; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: 0.1s; background: #111; color: #fff; border: 1px solid #dc3545;}
+        .btn-hukuman:active { transform: scale(0.95); background: #dc3545; }
+        .btn-hukuman.warning-hukuman { border-color: #ffc107; }
+        .btn-hukuman.warning-hukuman:active { background: #ffc107; color: #000; }
+        .badge-hukuman { font-size: 11px; background: #fff; color: #dc3545; padding: 2px 6px; border-radius: 5px; margin-top: 3px; font-weight: 900;}
+        
+        .log-hukuman-dewan { background: #1a1a1a; border: 1px dashed #dc3545; padding: 10px; border-radius: 8px; height: 100%; display: flex; flex-direction: column; }
+        .log-isi { flex-grow: 1; overflow-y: auto; max-height: 115px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="modal" id="modalLogin" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content p-4 position-relative dark-theme">
+            <a href="index.html" class="btn-back-modal">❮</a>
+            <h4 class="text-warning text-center mb-4 fw-bold">PORTAL JURUS</h4>
+            
+            <label class="form-label mb-1 text-secondary" style="font-size: 12px;">1. Pilih Gelanggang:</label>
+            <select id="lGelanggang" class="form-select mb-3" onchange="pantauLockGelanggang()">
+                <option value="" disabled selected>-- Pilih Gelanggang --</option>
+                <option value="g1">Gelanggang 1</option>
+                <option value="g2">Gelanggang 2</option>
+                <option value="g3">Gelanggang 3</option>
+                <option value="g4">Gelanggang 4</option>
+                <option value="g5">Gelanggang 5</option>
+                <option value="g6">Gelanggang 6</option>
+            </select>
+            
+            <label class="form-label mb-1 text-secondary" style="font-size: 12px;">2. Pilih Jabatan Anda:</label>
+            <select id="lPosisi" class="form-select mb-3" onchange="toggleJuriDropdown()">
+                <option value="" disabled selected>-- Pilih Jabatan --</option>
+                <option value="dewan" id="optDewan">Dewan Jurus (Ketua / Penilai Hukuman)</option>
+                <option value="juri">Juri Seni (Penilai Gerak)</option>
+            </select>
+            
+            <div id="containerJuri" style="display: none;">
+                <label class="form-label mb-1 text-secondary" style="font-size: 12px;">3. Pilih Nomor Juri:</label>
+                <select id="lJuri" class="form-select mb-3">
+                    <option value="" disabled selected>-- Tentukan Nomor Juri --</option>
+                    <option value="j1" id="optJ1">Tablet Juri 1</option>
+                    <option value="j2" id="optJ2">Tablet Juri 2</option>
+                    <option value="j3" id="optJ3">Tablet Juri 3</option>
+                    <option value="j4" id="optJ4">Tablet Juri 4</option>
+                    <option value="j5" id="optJ5">Tablet Juri 5</option>
+                    <option value="j6" id="optJ6">Tablet Juri 6</option>
+                </select>
+            </div>
+
+            <label class="form-label mb-1 text-secondary" style="font-size: 12px;" id="labelPass">3. Masukkan Password Aplikasi:</label>
+            <input type="password" id="adminPass" class="form-control mb-2 text-center" placeholder="Password">
+            
+            <div id="loginError" class="text-danger fw-bold mb-3 text-center" style="display: none; font-size: 13px;"></div>
+            <button class="btn btn-warning w-100 fw-bold mt-2 text-dark" id="btnLoginApp" onclick="initAppSeni()">MASUK GELANGGANG</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalInfo" tabindex="-1" aria-hidden="true" style="z-index: 9999;">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content dark-theme shadow-lg" style="border: 2px solid #0dcaf0;">
+            <div class="modal-header dark-theme justify-content-center py-2">
+                <h5 class="modal-title fw-bold text-info" id="modalInfoTitle">INFORMASI</h5>
+            </div>
+            <div class="modal-body text-center py-3 fs-6" id="modalInfoBody">
+                Pesan di sini...
+            </div>
+            <div class="modal-footer dark-theme py-1 border-0 justify-content-center">
+                <button type="button" class="btn btn-sm btn-outline-info px-4 fw-bold" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="mainApp" style="display: none; flex-direction: column; flex-grow: 1;">
+    
+    <div class="header-box">
+        <button class="btn btn-outline-danger btn-keluar" onclick="logoutSeni()">🚪 KELUAR</button>
+        <div id="labelJabatanTeks" class="text-warning fw-bold mb-1" style="font-size: 12px; letter-spacing: 2px;">-</div>
+        <div class="nama-pesilat" id="namaAtlet">NAMA PESILAT</div>
+        <div class="asal-kontingen" id="kontingenAtlet">KONTINGEN DAERAH</div>
+    </div>
+
+    <div class="container-fluid mt-3 px-3">
+        
+        <div id="panelDewan" style="display: none;">
+            <div class="row">
+                <div class="col-md-7">
+                    <div class="card-custom">
+                        <h6 class="text-info border-bottom border-secondary pb-2 mb-3">💻 LIVE SKOR TABLET JURI</h6>
+
+                        <div class="row g-2 mb-2">
+                            <div class="col-4"><div class="juri-box" id="boxJ1"><div class="juri-title">JURI 1</div><div id="skorJ1" class="display-skor-juri text-secondary">---</div></div></div>
+                            <div class="col-4"><div class="juri-box" id="boxJ2"><div class="juri-title">JURI 2</div><div id="skorJ2" class="display-skor-juri text-secondary">---</div></div></div>
+                            <div class="col-4"><div class="juri-box" id="boxJ3"><div class="juri-title">JURI 3</div><div id="skorJ3" class="display-skor-juri text-secondary">---</div></div></div>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-4"><div class="juri-box" id="boxJ4" style="background: linear-gradient(180deg, #dc3545 0%, #9e1c28 100%); border-color: #dc3545;"><div class="juri-title">JURI 4</div><div id="skorJ4" class="display-skor-juri text-secondary">---</div></div></div>
+                            <div class="col-4"><div class="juri-box" id="boxJ5" style="background: linear-gradient(180deg, #dc3545 0%, #9e1c28 100%); border-color: #dc3545;"><div class="juri-title">JURI 5</div><div id="skorJ5" class="display-skor-juri text-secondary">---</div></div></div>
+                            <div class="col-4"><div class="juri-box" id="boxJ6" style="background: linear-gradient(180deg, #dc3545 0%, #9e1c28 100%); border-color: #dc3545;"><div class="juri-title">JURI 6</div><div id="skorJ6" class="display-skor-juri text-secondary">---</div></div></div>
+                        </div>
+                    </div>
+
+                    <div class="card-custom border-danger">
+                        <h6 class="text-danger border-bottom border-secondary pb-2 mb-3">⚠️ PANEL HUKUMAN DEWAN JURI</h6>
+                        <div class="row g-2">
+                            <div class="col-8">
+                                <div class="row g-2">
+                                    <div class="col-6"><button class="btn btn-hukuman w-100" onclick="tambahHukumanDewan('Waktu Tidak Sesuai')">WAKTU (± >5 Dtk) <span class="badge-hukuman">-0.50</span></button></div>
+                                    <div class="col-6"><button class="btn btn-hukuman w-100" onclick="tambahHukumanDewan('Keluar Gelanggang')">KELUAR MATRAS <span class="badge-hukuman">-0.50</span></button></div>
+                                    <div class="col-6"><button class="btn btn-hukuman w-100" onclick="tambahHukumanDewan('Senjata Jatuh')">SENJATA JATUH <span class="badge-hukuman">-0.50</span></button></div>
+                                    <div class="col-6"><button class="btn btn-hukuman w-100" onclick="tambahHukumanDewan('Pakaian / Aksesoris')">PAKAIAN SALAH <span class="badge-hukuman">-0.50</span></button></div>
+                                    <div class="col-12"><button class="btn btn-hukuman warning-hukuman text-warning w-100" onclick="tambahHukumanDewan('Gerak Ditahan > 5 Dtk')">MENAHAN GERAK > 5 DTK <span class="badge-hukuman text-warning">-0.50</span></button></div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-4">
+                                <div class="log-hukuman-dewan">
+                                    <div class="text-center fw-bold text-danger border-bottom border-danger pb-1 mb-2">LOG HUKUMAN</div>
+                                    <div id="daftarHukumanDewan" class="log-isi">
+                                        <div class="text-center mt-3 text-secondary">Bersih</div>
+                                    </div>
+                                    <button class="btn btn-sm btn-danger w-100 mt-auto fw-bold" onclick="resetHukumanDewan()">RESET LOG</button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-5">
+                    <div class="card-custom sticky-top" style="top: 10px;">
+                        <h6 class="text-warning border-bottom border-secondary pb-2 mb-3 text-center">📊 PAPAN KALKULASI</h6>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between text-secondary mb-1" style="font-size: 13px;">
+                                <span>Array Terurut:</span> <span id="arrayUrut" class="font-monospace">[ - ]</span>
+                            </div>
+                            <div class="d-flex justify-content-between text-info mb-1" style="font-size: 13px;">
+                                <span>Data Diambil (Tengah):</span> <span id="dataTengah" class="font-monospace">[ - ]</span>
+                            </div>
+                            <div class="d-flex justify-content-between text-danger mb-1 fw-bold" style="font-size: 13px;">
+                                <span>Total Hukuman Dewan:</span> <span id="teksTotalHukuman" class="font-monospace">0.00</span>
+                            </div>
+                        </div>
+                        <div class="result-box mb-3">
+                            <div class="result-title">NILAI MEDIAN JURI</div>
+                            <div class="result-value text-info" id="hasilMedian">0.000</div>
+                        </div>
+                        <div class="result-box" style="border-color: #198754; background-color: #051b11;">
+                            <div class="result-title text-success">SKOR AKHIR FINAL</div>
+                            <div class="result-value text-success" style="font-size: 70px;" id="skorAkhirFinal">0.000</div>
+                        </div>
+                        <button class="btn btn-success w-100 fw-bold mt-3 py-3 fs-5 text-dark shadow" id="btnSahkanSeni" onclick="sahkanNilaiSeni()">✅ SAHKAN NILAI KE PANITIA</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="panelJuri" style="display: none; max-width: 600px; margin: auto;">
+            <div class="skor-utama-juri" id="displaySkorJuri">10.00</div>
+            
+            <div class="row px-2 mt-4">
+                <div class="col-6 pe-1">
+                    <button class="btn btn-kesalahan" onclick="potongNilaiJuri('Rincian Gerak')">
+                        RINCIAN GERAK <span class="badge-minus">- 0.01</span>
+                    </button>
+                    <button class="btn btn-kesalahan" onclick="potongNilaiJuri('Gerak Tertinggal')">
+                        TERTINGGAL <span class="badge-minus">- 0.01</span>
+                    </button>
+                </div>
+                <div class="col-6 ps-1">
+                    <button class="btn btn-kesalahan" onclick="potongNilaiJuri('Urutan Gerak')">
+                        URUTAN GERAK <span class="badge-minus">- 0.01</span>
+                    </button>
+                    <button class="btn btn-kesalahan warning-type text-warning" onclick="potongNilaiJuri('Senjata Terlepas')">
+                        SENJATA TERLEPAS <span class="badge-minus text-warning">- 0.01</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="row mt-2 px-2">
+                <div class="col-4 pe-1">
+                    <button class="btn btn-undo w-100" onclick="undoNilaiJuri()">↩ UNDO</button>
+                </div>
+                <div class="col-8 ps-1">
+                    <div class="log-box-juri" id="logKesalahanJuri">
+                        <div class="text-center mt-3">Belum ada pemotongan...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
+    import { getDatabase, ref, set, onValue, get, onDisconnect } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js";
+
+    // Ganti dengan Config Firebase kamu sendiri jika perlu (ini saya samakan dengan juri tanding)
+    const firebaseConfig = {
+        apiKey: "AIzaSyCNsOk8MsIhBoZ44Nd9WGGl6eBJOEKu3nI",
+        authDomain: "tesapksilat99.firebaseapp.com",
+        databaseURL: "https://tesapksilat99-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "tesapksilat99",
+        storageBucket: "tesapksilat99.firebasestorage.app",
+        messagingSenderId: "747533449255",
+        appId: "1:747533449255:web:358edf3c6032c22cdbb602"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    let sessionSeni = {};
+    let unsubscribeLock = null;
+    let modalInfoInstance = null;
+
+    // 🔥 CUSTOM ALERT 🔥
+    window.showCustomAlert = function(title, message, titleColorClass = "text-info") {
+        if (!modalInfoInstance) { modalInfoInstance = new bootstrap.Modal(document.getElementById('modalInfo')); }
+        let titleEl = document.getElementById('modalInfoTitle');
+        titleEl.innerText = title;
+        titleEl.className = `modal-title fw-bold ${titleColorClass}`;
+        document.getElementById('modalInfoBody').innerHTML = message;
+        modalInfoInstance.show();
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        new bootstrap.Modal(document.getElementById('modalLogin')).show();
+        pantauLockGelanggang();
+    });
+
+    window.toggleJuriDropdown = function() {
+        let pos = document.getElementById('lPosisi').value; 
+        let container = document.getElementById('containerJuri'); 
+        let labelPass = document.getElementById('labelPass');
+        
+        if(pos === 'juri') { 
+            container.style.display = 'block'; 
+            labelPass.innerText = "4. Masukkan Password Aplikasi:";
+        } else { 
+            container.style.display = 'none'; 
+            document.getElementById('lJuri').value = ""; 
+            labelPass.innerText = "3. Masukkan Password Aplikasi:";
+        }
+    }
+
+    // 🔥 1. SISTEM DETEKSI KEKOSONGAN & PENGUNCIAN SLOT (FIREBASE REALTIME) 🔥
+    window.pantauLockGelanggang = function() {
+        let gel = document.getElementById('lGelanggang').value;
+        if(unsubscribeLock) unsubscribeLock(); 
+        let lockRef = ref(database, `pertandingan/${gel}/locks`);
+
+        unsubscribeLock = onValue(lockRef, (snap) => {
+            let locks = snap.val() || {}; 
+            
+            // Pantau Dewan Seni
+            let optDewan = document.getElementById('optDewan');
+            if(locks['seni_dewan']) { 
+                optDewan.disabled = true; optDewan.innerText = "Dewan Seni (Sedang Dipakai)"; 
+                if(document.getElementById('lPosisi').value === 'dewan') document.getElementById('lPosisi').value = ""; 
+            } else { 
+                optDewan.disabled = false; optDewan.innerText = "Dewan Seni (Ketua / Penilai Hukuman)"; 
+            }
+
+            // Pantau Juri Seni 1 - 6
+            for(let i=1; i<=6; i++) {
+                let jId = `j${i}`;
+                let optJ = document.getElementById(`optJ${i}`);
+                if(optJ) {
+                    if(locks[`seni_${jId}`]) { 
+                        optJ.disabled = true; optJ.innerText = `Tablet Juri ${i} (Sedang Dipakai)`; 
+                        if(document.getElementById('lJuri').value === jId) document.getElementById('lJuri').value = ""; 
+                    } else { 
+                        optJ.disabled = false; optJ.innerText = `Tablet Juri ${i} (Tersedia)`; 
+                    }
+                }
+            }
+        });
+    }
+
+    window.initAppSeni = async function() {
+        const errorEl = document.getElementById('loginError');
+        const btnLogin = document.getElementById('btnLoginApp');
+        let gel = document.getElementById('lGelanggang').value; 
+        let pos = document.getElementById('lPosisi').value; 
+        let juri = document.getElementById('lJuri').value; 
+        const pass = document.getElementById('adminPass').value;
+        
+        if(!pos) { errorEl.innerText = "❌ Silakan pilih Jabatan Anda!"; errorEl.style.display = "block"; return; }
+        if(pos === 'juri' && !juri) { errorEl.innerText = "❌ Silakan pilih Nomor Perangkat Juri!"; errorEl.style.display = "block"; return; }
+        if(pass !== "admin123") { errorEl.innerText = "❌ Password Salah!"; errorEl.style.display = "block"; return; }
+
+        btnLogin.innerText = "MEMVALIDASI...";
+        btnLogin.disabled = true;
+        errorEl.style.display = "none";
+
+        // Cek & Kunci Slot di Firebase
+        let slotId = (pos === 'dewan') ? 'seni_dewan' : `seni_${juri}`; 
+        let lockRef = ref(database, `pertandingan/${gel}/locks/${slotId}`);
+        let snap = await get(lockRef);
+        
+        if(snap.exists() && snap.val() === true) {
+            let namaSlot = (pos === 'dewan') ? "Dewan Seni" : juri.toUpperCase();
+            errorEl.innerHTML = `❌ <strong>${namaSlot}</strong> tiba-tiba sudah dipakai orang lain!`; 
+            errorEl.style.display = "block"; 
+            btnLogin.innerText = "MASUK GELANGGANG"; 
+            btnLogin.disabled = false; 
+            return;
+        }
+
+        // Sukses Ambil Kunci! Hapus otomatis jika disconnect
+        await set(lockRef, true); 
+        onDisconnect(lockRef).remove(); 
+        if(unsubscribeLock) unsubscribeLock();
+
+        // Simpan Session
+        sessionSeni = { gel: gel, pos: pos, juriId: juri, slotId: slotId };
+
+        let namaEvent = "KATEGORI SENI - " + gel.toUpperCase();
+        if (pos === 'dewan') {
+            document.getElementById('labelJabatanTeks').innerText = `DEWAN SENI | ${namaEvent}`;
+            document.getElementById('panelDewan').style.display = "block";
+            document.getElementById('panelJuri').style.display = "none";
+            pasangSistemFirebaseDewan();
+        } else {
+            let labelJuri = juri.replace('j', 'JURI ');
+            document.getElementById('labelJabatanTeks').innerText = `${labelJuri.toUpperCase()} | ${namaEvent}`;
+            document.getElementById('panelDewan').style.display = "none";
+            document.getElementById('panelJuri').style.display = "block";
+            updateLayarJuri(); 
+        }
+
+        // 🔥 INI DIA POSISI YANG BENAR: Mengaktifkan Telinga Sensor sebelum UI dimunculkan
+        pantauStatusDanResetSeni(); 
+
+        document.getElementById('mainApp').style.display = "flex";
+        bootstrap.Modal.getInstance(document.getElementById('modalLogin')).hide();
+        btnLogin.innerText = "MASUK GELANGGANG";
+        btnLogin.disabled = false;
+    }
+
+    window.logoutSeni = function() {
+        // Hapus Kunci Firebase sebelum reload
+        if(sessionSeni.gel && sessionSeni.slotId) { 
+            set(ref(database, `pertandingan/${sessionSeni.gel}/locks/${sessionSeni.slotId}`), null); 
+        } 
+        setTimeout(() => { window.location.reload(); }, 200);
+    }
+
+    // ==========================================
+    // 🔥 2. LOGIKA JURI SENI (KIRIM KE FIREBASE)
+    // ==========================================
+    let skorAwalJuri = 10.00;
+    let totalPotonganJuri = 0;
+    let riwayatPotonganJuri = [];
+
+    window.updateLayarJuri = function() {
+        let skorAkhir = (skorAwalJuri - (totalPotonganJuri * 0.01)).toFixed(2);
+        if (skorAkhir < 9.00) skorAkhir = "9.00"; 
+        
+        document.getElementById('displaySkorJuri').innerText = skorAkhir;
+        let logHtml = riwayatPotonganJuri.length === 0 ? "<div class='text-center mt-3'>Belum ada pemotongan...</div>" : "";
+        riwayatPotonganJuri.forEach(item => logHtml += `<div class="mb-1">❌ ${item} <span class="text-danger fw-bold">(-0.01)</span></div>`);
+        document.getElementById('logKesalahanJuri').innerHTML = logHtml;
+
+        // PUSH SKOR KE FIREBASE REALTIME
+        if (sessionSeni.gel && sessionSeni.juriId) {
+            set(ref(database, `pertandingan/${sessionSeni.gel}/seni/skor/${sessionSeni.juriId}`), parseFloat(skorAkhir));
+        }
+    }
+
+    window.potongNilaiJuri = function(jenisKesalahan) {
+        if (skorAwalJuri - ((totalPotonganJuri + 1) * 0.01) < 9.00) {
+            showCustomAlert("Batas Poin", "Skor tidak boleh kurang dari 9.00", "text-danger");
+            return; 
+        }
+        totalPotonganJuri++; riwayatPotonganJuri.push(jenisKesalahan); updateLayarJuri();
+    }
+
+    window.undoNilaiJuri = function() {
+        if (totalPotonganJuri > 0) { totalPotonganJuri--; riwayatPotonganJuri.pop(); updateLayarJuri(); }
+    }
+
+    // ==========================================
+    // 🔥 3. LOGIKA DEWAN SENI (BACA DARI FIREBASE)
+    // ==========================================
+    let totalHukumanDewan = 0;
+    let listHukumanDewan = [];
+    let timerAnimasiJuri = {};
+
+    function pasangSistemFirebaseDewan() {
+        let baseRef = `pertandingan/${sessionSeni.gel}/seni`;
+
+        // DENGARKAN SKOR JURI 1-6 SECARA REAL-TIME
+        onValue(ref(database, `${baseRef}/skor`), (snap) => {
+            let skorData = snap.val() || {};
+            
+            for(let i=1; i<=6; i++) {
+                let idJuri = `j${i}`;
+                let elemenSkor = document.getElementById(`skor${idJuri.toUpperCase()}`); // skorJ1
+                let nilaiBaru = skorData[idJuri] !== undefined ? parseFloat(skorData[idJuri]).toFixed(2) : "10.00";
+                
+                if (elemenSkor && elemenSkor.innerText !== nilaiBaru) {
+                    elemenSkor.innerText = nilaiBaru;
+                    elemenSkor.classList.remove('text-secondary');
+                    elemenSkor.classList.add('text-white');
+                    
+                    // Beri efek kedip/highlight singkat kalau nilai juri berubah
+                    let boxJuri = document.getElementById(`boxJ${i}`);
+                    if (boxJuri) {
+                        boxJuri.classList.add('highlight');
+                        if(timerAnimasiJuri[i]) clearTimeout(timerAnimasiJuri[i]);
+                        timerAnimasiJuri[i] = setTimeout(() => { boxJuri.classList.remove('highlight'); }, 500);
+                    }
+                }
+            }
+            // Langsung hitung ulang median
+            kalkulasiSkorDewan();
+        });
+
+        // Ambil Data Atlet dari Setup
+        onValue(ref(database, `pertandingan/${sessionSeni.gel}/setup`), (snap) => {
+            let data = snap.val();
+            if(data) {
+                // 🔥 KABEL 2 TERSAMBUNG: Tablet Dewan & Juri pintar mendeteksi sudut Merah
+                let nB = data.nama_biru || "SUDUT BIRU"; let nM = data.nama_merah || "SUDUT MERAH";
+                let n = (nB !== "-" && nB !== "SUDUT BIRU") ? nB : ((nM !== "-" && nM !== "SUDUT MERAH") ? nM : "NAMA PESILAT SENI");
+                let kB = data.kontingen_biru || "-"; let kM = data.kontingen_merah || "-";
+                let k = (nB !== "-" && nB !== "SUDUT BIRU") ? kB : ((nM !== "-" && nM !== "SUDUT MERAH") ? kM : "KONTINGEN DAERAH");
+
+                document.getElementById('namaAtlet').innerText = n;
+                document.getElementById('kontingenAtlet').innerText = k;
+            }
+        });
+    }
+
+    window.tambahHukumanDewan = function(jenis) {
+        totalHukumanDewan += 0.50; listHukumanDewan.push(jenis); updateLogHukumanDewan(); kalkulasiSkorDewan();
+    }
+
+    window.resetHukumanDewan = function() {
+        totalHukumanDewan = 0; listHukumanDewan = []; updateLogHukumanDewan(); kalkulasiSkorDewan();
+    }
+
+    window.updateLogHukumanDewan = function() {
+        let html = listHukumanDewan.length === 0 ? "<div class='text-center mt-3 text-secondary'>Bersih</div>" : "";
+        listHukumanDewan.forEach(item => html += `<div class="mb-1">❌ ${item}</div>`);
+        document.getElementById('daftarHukumanDewan').innerHTML = html;
+        document.getElementById('teksTotalHukuman').innerText = "-" + totalHukumanDewan.toFixed(2);
+        
+        // PUSH TOTAL HUKUMAN KE FIREBASE
+        set(ref(database, `pertandingan/${sessionSeni.gel}/seni/hukuman`), totalHukumanDewan);
+    }
+
+    window.kalkulasiSkorDewan = function() {
+        let skor = [1,2,3,4,5,6].map(i => parseFloat(document.getElementById(`skorJ${i}`).innerText) || 10.00).sort((a, b) => a - b);
+        document.getElementById('arrayUrut').innerText = `[ ${skor.map(s => s.toFixed(2)).join(', ')} ]`;
+        
+        let median = (skor[2] + skor[3]) / 2;
+        document.getElementById('dataTengah').innerText = `[ ${skor[2].toFixed(2)} & ${skor[3].toFixed(2)} ]`;
+        document.getElementById('hasilMedian').innerText = median.toFixed(3); 
+
+        let skorAkhir = Math.max(0, median - totalHukumanDewan);
+        document.getElementById('skorAkhirFinal').innerText = skorAkhir.toFixed(3);
+
+        // PUSH SKOR AKHIR FINAL KE FIREBASE (Untuk Layar Monitor)
+        set(ref(database, `pertandingan/${sessionSeni.gel}/seni/hasil_akhir`), parseFloat(skorAkhir.toFixed(3)));
+    }
+
+
+    // 🔥 KABEL 4 LANJUTAN: Logika Pengesahan
+    window.sahkanNilaiSeni = function() {
+        set(ref(database, `pertandingan/${sessionSeni.gel}/status`), "PERTANDINGAN SELESAI");
+        set(ref(database, `pertandingan/${sessionSeni.gel}/timer`), "00:00");
+        set(ref(database, `pertandingan/${sessionSeni.gel}/izin_simpan`), true).then(() => {
+            showCustomAlert("✅ PENGESAHAN BERHASIL", "Skor akhir telah disahkan. Panitia sekarang dapat merekam data ke sistem.", "text-success");
+        });
+    }
+
+    // 🔥 KABEL 1 & 5 TERSAMBUNG: Sensor Waktu Juri & Sinkronisasi Reset Panitia
+    function pantauStatusDanResetSeni() {
+        onValue(ref(database, `pertandingan/${sessionSeni.gel}/status`), (snap) => {
+            let status = snap.val() || "PERSIAPAN";
+            
+            // Mengunci Juri Seni saat Jeda / Belum Main
+            let lockJuri = (status !== "RONDE");
+            document.querySelectorAll('.btn-kesalahan, .btn-undo').forEach(btn => {
+                btn.disabled = lockJuri;
+                btn.style.opacity = lockJuri ? "0.4" : "1";
+                btn.style.pointerEvents = lockJuri ? "none" : "auto";
+            });
+
+            // Mengunci Hukuman Dewan saat Jeda / Selesai
+            let lockDewan = (status !== "RONDE");
+            document.querySelectorAll('.btn-hukuman').forEach(btn => {
+                btn.disabled = lockDewan;
+                btn.style.opacity = lockDewan ? "0.4" : "1";
+                btn.style.pointerEvents = lockDewan ? "none" : "auto";
+            });
+
+            // Mengunci Tombol Sahkan (Hanya aktif saat Selesai Ronde)
+            let lockSahkan = (status === "PERSIAPAN" || status === "PERTANDINGAN SELESAI"); 
+            let btnSahkan = document.getElementById('btnSahkanSeni');
+            if (btnSahkan) {
+                btnSahkan.disabled = lockSahkan;
+                btnSahkan.style.opacity = lockSahkan ? "0.4" : "1";
+                btnSahkan.style.pointerEvents = lockSahkan ? "none" : "auto";
+            }
+
+            // MENDENGAR TOMBOL RESET PANITIA
+            if (status === "PERSIAPAN") {
+                // Reset Memori Lokal Juri
+                skorAwalJuri = 10.00; totalPotonganJuri = 0; riwayatPotonganJuri = [];
+                if (sessionSeni.pos === 'juri') updateLayarJuri();
+
+                // Reset Memori Lokal Dewan
+                totalHukumanDewan = 0; listHukumanDewan = [];
+                if (sessionSeni.pos === 'dewan') { updateLogHukumanDewan(); kalkulasiSkorDewan(); }
+            }
+        });
+    }
+
+
+
+</script>
+</body>
+</html>

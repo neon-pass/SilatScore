@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Layar TV Seni / Jurus - Digital Scoring</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* =================================================== */
+        /* 🔥 VARIABEL PENGATUR SKALA SENI (SISTEM SARAF)      */
+        /* =================================================== */
+        :root {
+            --skala-global: 13px;
+            --skala-skor-juri: 4.5rem;
+            --skala-skor-akhir: 9.5rem;
+        }
+
+        body { 
+            background-color: #080808; 
+            color: #fff; 
+            font-family: 'Arial', sans-serif; 
+            margin: 0; 
+            padding: 0.625rem; 
+            width: 100vw;
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden; 
+            user-select: none; 
+        }
+
+        /* TERhubung ke Tuas 1 (Zoom Keseluruhan) */
+        html { font-size: var(--skala-global); transition: font-size 0.15s ease-out; }
+        
+        .form-select { background-color: #333 !important; color: #fff !important; border: 1px solid #555 !important; }
+        .form-select:focus { border-color: #20c997 !important; box-shadow: 0 0 0 0.25rem rgba(32, 201, 151, 0.25) !important; }
+        option:disabled { color: #777; font-style: italic; background-color: #222; }
+        
+        /* Modal Theme */
+        .modal-content.dark-theme { background-color: #1a1a1a; border: 1px solid #555; color: white; box-shadow: 0 10px 25px rgba(0,0,0,0.8); }
+        .modal-header.dark-theme { border-bottom: 1px solid #333; }
+        .modal-footer.dark-theme { border-top: 1px solid #333; justify-content: center; }
+        .btn-close-white { filter: invert(1) grayscale(100%) brightness(200%); }
+
+        #mainAppUI { display: none; flex-direction: column; flex: 1; width: 100%; height: 100%; gap: 0.625rem; }
+
+        .header-top { display: flex; justify-content: space-between; align-items: center; background: linear-gradient(180deg, #222 0%, #050505 100%); border: 2px solid #1f4f37; border-radius: 0.5rem; padding: 0.3125rem 1.25rem; box-shadow: 0 4px 10px rgba(0,0,0,0.8); min-height: 4.5rem; position: relative; }
+        .sponsor-container { display: flex; align-items: center; gap: 0.8rem; z-index: 2; }
+        .sponsor-logo { height: 3.5rem; max-width: 6rem; object-fit: contain; }
+        .championship-title { font-size: 1.75rem; font-weight: 900; letter-spacing: 3px; text-transform: uppercase; color: #20c997; text-shadow: 2px 2px 5px rgba(0,0,0,0.8); position: absolute; left: 50%; transform: translateX(-50%); z-index: 1; text-align: center; width: 60%; }
+
+        /* =================================================== */
+        /* STYLING GRID SENI MURNI                             */
+        /* =================================================== */
+        .box-atlet-seni { background: linear-gradient(180deg, #111 0%, #000 100%); border: 2px solid #222; border-radius: 10px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 5px 15px rgba(0,0,0,0.8); }
+        .atlet-seni-nama { font-size: 3.2rem; font-weight: 900; color: #0dcaf0; text-shadow: 2px 2px 10px rgba(13,202,240,0.4); letter-spacing: 2px; text-transform: uppercase; }
+        .atlet-seni-asal { font-size: 1.3rem; color: #aaa; letter-spacing: 4px; margin-top: 5px; text-transform: uppercase; }
+        
+        .box-jam-seni { background: #000; border: 3px solid #ffc107; border-radius: 10px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(255, 193, 7, 0.25); }
+        .angka-jam-seni { font-size: 7rem; font-weight: 900; color: #ffc107; font-family: monospace; letter-spacing: 5px; line-height: 1; }
+
+        .card-juri-seni { background: #111; border: 2px solid #222; border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 5px 10px rgba(0,0,0,0.6); }
+        .cjs-header { background: linear-gradient(180deg, #0b5ed7 0%, #084298 100%); color: white; font-weight: bold; font-size: 1.2rem; padding: 6px 0; border-bottom: 2px solid #0d6efd; text-align: center; letter-spacing: 2px; }
+        
+        /* TERhubung ke Tuas 2 (Angka Skor Juri Biru) */
+        .cjs-score { flex-grow: 1; display: flex; align-items: center; justify-content: center; font-size: var(--skala-skor-juri); font-weight: bold; font-family: monospace; color: #fff; transition: font-size 0.15s ease-out; }
+
+        .box-skor-final-seni { background: linear-gradient(180deg, #051b11 0%, #020d08 100%); border: 3px solid #198754; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between; padding: 15px; text-align: center; box-shadow: 0 0 30px rgba(25, 135, 84, 0.3); }
+        .teks-hukuman-seni { font-size: 2.5rem; font-weight: bold; color: #ff4444; font-family: monospace; }
+        .teks-label-hijau { font-size: 1.4rem; font-weight: 900; color: #20c997; letter-spacing: 3px; }
+        
+        /* TERhubung ke Tuas 3 (Angka Skor Akhir Final Hijau) */
+        .angka-final-seni { font-size: var(--skala-skor-akhir); font-weight: 900; color: #20c997; font-family: monospace; line-height: 0.9; text-shadow: 0 0 25px rgba(32, 201, 151, 0.6); transition: font-size 0.15s ease-out; }
+
+        .btn-back-modal { position: absolute; top: 15px; left: 15px; text-decoration: none; color: #888; font-size: 20px; font-weight: bold; transition: 0.2s; z-index: 10; }
+        .btn-back-modal:active { color: #fff; transform: scale(0.9); }
+
+        #screensaverOverlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #000; z-index: 9999; justify-content: center; align-items: center; }
+        #screensaverImg { width: 100%; height: 100%; object-fit: contain; transition: opacity 0.8s ease-in-out; opacity: 0; }
+    </style>
+</head>
+<body>
+    
+    <div id="screensaverOverlay">
+        <img id="screensaverImg" src="">
+    </div>
+
+    <!-- 📺 MODAL SOKET 2 PIN (KHUSUS SENI / JURUS) -->
+    <div class="modal fade" id="modalSetupLayar" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content dark-theme p-4 position-relative border-success">
+                <a href="index.html" class="btn-back-modal">❮</a>
+                <h4 class="text-success text-center mb-4 fw-bold">PORTAL MONITOR TV (SENI / JURUS)</h4>
+                
+                <label class="form-label mb-1 text-secondary" style="font-size: 0.875rem;">Pilih Gelanggang TV:</label>
+                <select id="lGelanggangLayar" class="form-select mb-4 bg-dark text-white" onchange="pantauLockLayar()">
+                    <option value="" disabled selected>-- Pilih Gelanggang --</option>
+                    <option value="g1" id="opt_g1">Gelanggang 1</option>
+                    <option value="g2" id="opt_g2">Gelanggang 2</option>
+                    <option value="g3" id="opt_g3">Gelanggang 3</option>
+                    <option value="g4" id="opt_g4">Gelanggang 4</option>
+                    <option value="g5" id="opt_g5">Gelanggang 5</option>
+                    <option value="g6" id="opt_g6">Gelanggang 6</option>
+                    <option value="g7" id="opt_g7">Gelanggang 7</option>
+                </select>
+
+                <div id="setupError" class="text-danger fw-bold mb-3 text-center" style="display: none; font-size: 0.875rem;"></div>
+                <button class="btn btn-success text-dark w-100 fw-bold mt-2 py-2" id="btnMulaiLayar" onclick="mulaiLayarSeni()">TAYANGKAN KATEGORI SENI</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTAINER UTAMA -->
+    <div id="mainAppUI">
+        
+        <!-- HEADER -->
+        <div class="header-top">
+            <div class="sponsor-container" id="wadahKiri"></div>
+            <div class="championship-title" id="judulKejuaraan">KEJUARAAN PENCAK SILAT</div>
+            <div class="sponsor-container" id="wadahKanan"></div>
+        </div>
+
+        <!-- AREA KATEGORI JURUS -->
+        <div style="display: flex; gap: 0.625rem; height: 22%;">
+            <div class="box-atlet-seni" style="flex: 0.68;">
+                <div class="atlet-seni-nama" id="s_nama_atlet">NAMA PESILAT SENI</div>
+                <div class="atlet-seni-asal" id="s_kon_atlet">KONTINGEN DAERAH</div>
+            </div>
+            <div class="box-jam-seni" style="flex: 0.32;">
+                <div class="angka-jam-seni" id="s_timer">00:00</div>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 0.8rem; flex: 1;">
+            <div style="flex: 0.68; display: flex; flex-direction: column; gap: 0.6rem;">
+                <div style="display: flex; gap: 0.6rem; flex: 1;">
+                    <div style="flex:1;" class="card-juri-seni"><div class="cjs-header">JURI 1</div><div class="cjs-score" id="s_j1">10.00</div></div>
+                    <div style="flex:1;" class="card-juri-seni"><div class="cjs-header">JURI 2</div><div class="cjs-score" id="s_j2">10.00</div></div>
+                    <div style="flex:1;" class="card-juri-seni"><div class="cjs-header">JURI 3</div><div class="cjs-score" id="s_j3">10.00</div></div>
+                </div>
+                <div style="display: flex; gap: 0.6rem; flex: 1;">
+                    <div style="flex:1;" class="card-juri-seni"><div class="cjs-header" style="background: #9e1c28; border-color: #dc3545;">JURI 4</div><div class="cjs-score" id="s_j4">10.00</div></div>
+                    <div style="flex:1;" class="card-juri-seni"><div class="cjs-header" style="background: #9e1c28; border-color: #dc3545;">JURI 5</div><div class="cjs-score" id="s_j5">10.00</div></div>
+                    <div style="flex:1;" class="card-juri-seni"><div class="cjs-header" style="background: #9e1c28; border-color: #dc3545;">JURI 6</div><div class="cjs-score" id="s_j6">10.00</div></div>
+                </div>
+            </div>
+
+            <div class="box-skor-final-seni" style="flex: 0.32;">
+                <div style="border-bottom: 1px solid #1f4f37; padding-bottom: 10px;">
+                    <span style="color: #888; font-size: 1.1rem; font-weight: bold;">HUKUMAN DEWAN</span><br>
+                    <span class="teks-hukuman-seni" id="s_hukuman">-0.00</span>
+                </div>
+                <div style="margin: auto 0;">
+                    <div class="teks-label-hijau">SKOR AKHIR FINAL</div>
+                    <div class="angka-final-seni" id="s_skor_akhir">0.000</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MODAL PENGESAHAN HASIL SENI -->
+    <div class="modal fade" id="modalHasilSeniTV" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content p-5 text-center shadow-lg" style="background: #051b11; border: 4px solid #20c997; border-radius: 20px;">
+                <h3 class="text-warning fw-bold mb-1 letter-spacing-2">PENGESAHAN NILAI SENI</h3>
+                <h1 class="text-white fw-bold my-4 text-uppercase" id="pemenangSeniNama" style="font-size: 3.2rem; letter-spacing: 3px;">NAMA PESILAT</h1>
+                <div style="background: #000; border-radius: 15px; padding: 25px; border: 2px solid #198754;">
+                    <span class="text-secondary fw-bold fs-5">PEROLEHAN SKOR AKHIR</span><br>
+                    <span class="fw-bold" style="font-size: 7.5rem; color: #20c997; font-family: monospace;" id="pemenangSeniSkor">9.950</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
+        import { getDatabase, ref, set, get, onValue, onDisconnect } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCNsOk8MsIhBoZ44Nd9WGGl6eBJOEKu3nI",
+            authDomain: "tesapksilat99.firebaseapp.com",
+            databaseURL: "https://tesapksilat99-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "tesapksilat99",
+            storageBucket: "tesapksilat99.firebasestorage.app",
+            messagingSenderId: "747533449255",
+            appId: "1:747533449255:web:358edf3c6032c22cdbb602"
+        };
+        const app = initializeApp(firebaseConfig); 
+        const database = getDatabase(app);
+
+        let GELANGGANG = ""; 
+        let baseRefPath = ""; 
+        let modalHasilSeniTVInstance = null;
+
+        // SCREENSAVER LOGIC
+        let arrScreensavers = []; let ssDelay = 60000; let idleTimer = null; let slideInterval = null; let currentSlide = 0; let isScreensaverAktifManual = false;
+        function resetIdleTimer() { clearTimeout(idleTimer); if(isScreensaverAktifManual){ tampilkanScreensaver(); return; } sembunyikanScreensaver(); if(arrScreensavers.length > 0) idleTimer = setTimeout(tampilkanScreensaver, ssDelay); }
+        function tampilkanScreensaver() { if(arrScreensavers.length===0)return; document.getElementById('screensaverOverlay').style.display='flex'; currentSlide=0; gantiSlide(); clearInterval(slideInterval); slideInterval=setInterval(gantiSlide, 5000); }
+        function sembunyikanScreensaver() { document.getElementById('screensaverOverlay').style.display='none'; document.getElementById('screensaverImg').style.opacity=0; clearInterval(slideInterval); }
+        function gantiSlide() { if(arrScreensavers.length===0)return; let imgEl=document.getElementById('screensaverImg'); imgEl.style.opacity=0; setTimeout(()=>{ imgEl.src=arrScreensavers[currentSlide]; imgEl.style.opacity=1; currentSlide=(currentSlide+1)%arrScreensavers.length; }, 800); }
+
+        document.addEventListener("DOMContentLoaded", () => { 
+            modalHasilSeniTVInstance = new bootstrap.Modal(document.getElementById('modalHasilSeniTV'));
+
+            // Mengunci gembok yang sama dengan Layar Utama agar matras tidak bisa mendua
+            for(let i=1; i<=7; i++) {
+                let optEl = document.getElementById(`opt_g${i}`);
+                if(optEl) {
+                    onValue(ref(database, `pertandingan/g${i}/locks/layar_utama`), (snap) => {
+                        if(snap.exists() && snap.val() === true) {
+                            optEl.innerText = `Gelanggang ${i} (Sedang Dipakai)`;
+                            optEl.disabled = true;
+                        } else {
+                            optEl.innerText = `Gelanggang ${i} (Tersedia)`;
+                            optEl.disabled = false;
+                        }
+                    });
+                }
+            }
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const gelParam = urlParams.get('gelanggang');
+
+            if (gelParam && gelParam.startsWith("JADWAL_")) {
+                let targetGel = gelParam.replace("JADWAL_", "");
+                window.location.replace(`jadwal-tv.html?gelanggang=${targetGel}&kategori=seni`);
+                return; 
+            }
+
+            if (gelParam) {
+                window.isDiLayarTV = true; 
+                document.getElementById('lGelanggangLayar').value = gelParam; 
+                setTimeout(() => { window.mulaiLayarSeni(); }, 400);
+            } else {
+                new bootstrap.Modal(document.getElementById('modalSetupLayar')).show(); 
+            }
+        });
+
+        window.pantauLockLayar = function() { document.getElementById('setupError').style.display = "none"; }
+
+        window.mulaiLayarSeni = async function() {
+            const errorEl = document.getElementById('setupError'); 
+            const btnLogin = document.getElementById('btnMulaiLayar');
+            let gel = document.getElementById('lGelanggangLayar').value; 
+
+            if(!gel) { errorEl.innerText = "❌ Silakan pilih Gelanggang TV!"; errorEl.style.display = "block"; return; }
+
+            if (!window.isDiLayarTV && typeof AndroidApp !== "undefined" && AndroidApp.isTvConnected()) {
+                btnLogin.innerText = "MENGIRIM KABEL KE TV..."; btnLogin.disabled = true;
+                AndroidApp.bukaDiTV(gel, "seni"); 
+                setTimeout(() => { btnLogin.innerText = "TAYANG DI TV ✅"; }, 500);
+                setTimeout(() => { window.location.href = "index.html"; }, 2000); 
+                return; 
+            }
+
+            btnLogin.innerText = "MEMBUKA SOKET SENI..."; btnLogin.disabled = true;
+
+            let lockRef = ref(database, `pertandingan/${gel}/locks/layar_utama`);
+            let snap = await get(lockRef);
+            if(snap.exists() && snap.val() === true && !window.isDiLayarTV) { 
+                errorEl.innerHTML = `❌ Monitor TV Gelanggang ini sedang menyala!`; errorEl.style.display = "block"; btnLogin.innerText = "TAYANGKAN KATEGORI SENI"; btnLogin.disabled = false; return; 
+            }
+
+            await set(lockRef, true); onDisconnect(lockRef).remove();
+
+            GELANGGANG = gel; 
+            baseRefPath = `pertandingan/${GELANGGANG}`; 
+
+            let modalSetup = bootstrap.Modal.getInstance(document.getElementById('modalSetupLayar'));
+            if (modalSetup) modalSetup.hide();
+            
+            document.getElementById('mainAppUI').style.display = 'flex';
+            jalankanMesinFirebaseSeni();
+        }
+
+        function jalankanMesinFirebaseSeni() {
+            let seniRef = `${baseRefPath}/seni`;
+
+            onValue(ref(database, `pengaturan`), (snap) => {
+                let data = snap.val() || {};
+                if(data.nama_kejuaraan) document.getElementById('judulKejuaraan').innerText = data.nama_kejuaraan.toUpperCase();
+                if(data.logos) {
+                    let htmlKiri = ""; let htmlKanan = "";
+                    for(let i=1; i<=4; i++) {
+                        if(data.logos[`kiri${i}`]) htmlKiri += `<img src="${data.logos[`kiri${i}`]}" class="sponsor-logo">`;
+                        if(data.logos[`kanan${i}`]) htmlKanan += `<img src="${data.logos[`kanan${i}`]}" class="sponsor-logo">`;
+                    }
+                    document.getElementById('wadahKiri').innerHTML = htmlKiri; document.getElementById('wadahKanan').innerHTML = htmlKanan;
+                }
+                if (data.waktu_screensaver) ssDelay = parseInt(data.waktu_screensaver) * 1000;
+                if (data.screensavers) arrScreensavers = Object.values(data.screensavers).filter(img => img !== "");
+                
+                // SENSOR SKALA KHUSUS SENI
+                onValue(ref(database, `${baseRefPath}/skala_seni`), (snap) => {
+                    let s = snap.val();
+                    if (s) {
+                        const r = document.documentElement.style;
+                        if (s.global !== undefined) r.setProperty('--skala-global', `${s.global}px`);
+                        if (s.skor_juri !== undefined) r.setProperty('--skala-skor-juri', `${s.skor_juri}rem`);
+                        if (s.skor_akhir !== undefined) r.setProperty('--skala-skor-akhir', `${s.skor_akhir}rem`);
+                    }
+                });
+
+                resetIdleTimer(); 
+            });
+
+            onValue(ref(database, `${baseRefPath}/last_activity`), () => { resetIdleTimer(); });
+            onValue(ref(database, `${baseRefPath}/status_screensaver`), (snap) => {
+                isScreensaverAktifManual = snap.val() || false;
+                if(isScreensaverAktifManual) tampilkanScreensaver(); else { sembunyikanScreensaver(); resetIdleTimer(); }
+            });
+
+            onValue(ref(database, `${baseRefPath}/timer`), (snap) => { document.getElementById('s_timer').innerText = snap.val() || "00:00"; resetIdleTimer(); });
+
+            onValue(ref(database, `${baseRefPath}/setup`), (snap) => {
+                let d = snap.val();
+                if(d) {
+                    // 🔥 KABEL 2 TERSAMBUNG: TV bisa mendeteksi nama & asal sudut Merah jika Biru kosong
+                    let nB = d.nama_biru || "SUDUT BIRU";
+                    let nM = d.nama_merah || "SUDUT MERAH";
+                    let n = (nB !== "-" && nB !== "SUDUT BIRU") ? nB : ((nM !== "-" && nM !== "SUDUT MERAH") ? nM : "NAMA PESILAT SENI");
+                    
+                    let kB = d.kontingen_biru || "-";
+                    let kM = d.kontingen_merah || "-";
+                    let k = (nB !== "-" && nB !== "SUDUT BIRU") ? kB : ((nM !== "-" && nM !== "SUDUT MERAH") ? kM : "KONTINGEN DAERAH");
+
+                    document.getElementById('s_nama_atlet').innerText = n;
+                    document.getElementById('s_kon_atlet').innerText = k;
+                    document.getElementById('pemenangSeniNama').innerText = n;
+                }
+            });
+
+            onValue(ref(database, `${seniRef}/skor`), (snap) => {
+                let s = snap.val() || {};
+                for(let i=1; i<=6; i++) {
+                    let el = document.getElementById(`s_j${i}`);
+                    if(el) el.innerText = s[`j${i}`] !== undefined ? parseFloat(s[`j${i}`]).toFixed(2) : "10.00";
+                }
+            });
+
+            onValue(ref(database, `${seniRef}/hukuman`), (snap) => {
+                let h = snap.val() || 0;
+                document.getElementById('s_hukuman').innerText = "-" + parseFloat(h).toFixed(2);
+            });
+
+            onValue(ref(database, `${seniRef}/hasil_akhir`), (snap) => {
+                let fa = snap.val() || 0;
+                document.getElementById('s_skor_akhir').innerText = parseFloat(fa).toFixed(3);
+                document.getElementById('pemenangSeniSkor').innerText = parseFloat(fa).toFixed(3);
+            });
+
+            onValue(ref(database, `${baseRefPath}/izin_simpan`), (snap) => {
+                if(snap.val() === true) modalHasilSeniTVInstance.show(); else modalHasilSeniTVInstance.hide();
+            });
+        }
+    </script>
+</body>
+</html>

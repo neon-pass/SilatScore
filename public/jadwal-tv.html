@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Papan Panggilan & Jadwal - Digital Silat</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* =================================================== */
+        /* 🔥 SISTEM SARAF PENERIMA SKALA JADWAL               */
+        /* =================================================== */
+        :root {
+            --skala-global: 13px;
+            --skala-partai: 1.5rem;
+            --skala-nama: 1.4rem;
+        }
+
+        body { background-color: #080808; color: #fff; font-family: 'Arial', sans-serif; margin: 0; padding: 0; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
+        
+        /* TERhubung ke Tuas 1 (Zoom Keseluruhan) */
+        html { font-size: var(--skala-global); transition: font-size 0.15s ease-out; }
+        
+        /* HEADER 3-KOLOM PRESISI */
+        .header-top { 
+            display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; 
+            background: linear-gradient(180deg, #222 0%, #000 100%); 
+            border-bottom: 3px solid #ffc107; padding: 12px 30px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.8); z-index: 10; 
+        }
+        .header-left   { justify-self: start; }
+        .header-center { justify-self: center; text-align: center; }
+        .header-right  { justify-self: end; }
+
+        .championship-title { font-size: 2.2rem; font-weight: 900; letter-spacing: 4px; text-transform: uppercase; color: #ffc107; text-shadow: 2px 2px 5px rgba(0,0,0,0.8); margin: 0; }
+        
+        .gelanggang-badge { 
+            background: #ffc107; color: #000; font-size: 1.2rem; font-weight: 900; 
+            padding: 6px 20px; border-radius: 8px; letter-spacing: 1px; 
+            cursor: pointer; transition: 0.2s; user-select: none; text-transform: uppercase;
+        }
+        .gelanggang-badge:hover { background: #fff; box-shadow: 0 0 15px rgba(255, 193, 7, 0.8); transform: scale(1.04); }
+        
+        .kategori-badge {
+            background: #111; color: #0dcaf0; border: 2px solid #0dcaf0; 
+            font-size: 1.2rem; font-weight: 900; padding: 6px 20px; 
+            border-radius: 8px; letter-spacing: 1.5px; text-transform: uppercase;
+        }
+
+        /* MODE NORMAL (1 GELANGGANG) */
+        #normalLayout { display: none; flex-grow: 1; overflow: hidden; }
+
+        .left-panel { width: 45%; background: #0a0a0a; border-right: 2px solid #333; display: flex; flex-direction: column; padding: 15px; }
+        .panel-title { 
+            color: #0dcaf0; font-size: 1.4rem; font-weight: 900; text-align: center; 
+            margin-bottom: 15px; letter-spacing: 2px; border-bottom: 2px dashed #0dcaf0; 
+            height: 50px; display: flex; align-items: center; justify-content: center; 
+        }
+        
+        .upnext-box { background: #111; border: 1px solid #333; border-radius: 10px; margin-bottom: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.5); }
+        .upnext-box.sedang-main { border: 2px solid #198754; background: linear-gradient(180deg, #051b11 0%, #111 100%); box-shadow: 0 0 15px rgba(25, 135, 84, 0.4); }
+
+        .right-panel { width: 55%; display: flex; flex-direction: column; background: #050505; }
+        
+        table { width: 100%; table-layout: fixed; border-collapse: separate; border-spacing: 0 8px; }
+        th { color: #0dcaf0; font-size: 1rem; padding: 0 10px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #0dcaf0; text-align: center; height: 50px; vertical-align: middle; }
+        td { background: #111; padding: 10px; font-weight: bold; text-transform: uppercase; border: 1px solid #222; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        
+        /* Menerapkan Skala pada Tabel Kanan */
+        .td-biru { font-size: var(--skala-nama); background: linear-gradient(90deg, #0b5ed7 0%, #111 100%); color: #fff; text-align: left !important; border-left: 4px solid #0dcaf0; transition: font-size 0.15s; }
+        .td-merah { font-size: var(--skala-nama); background: linear-gradient(270deg, #dc3545 0%, #111 100%); color: #fff; text-align: right !important; border-right: 4px solid #ff4444; transition: font-size 0.15s; }
+        .td-vs { color: #ffc107; font-size: 0.9rem; font-weight: 900; background: #0a0a0a; border: none; }
+        .td-partai { background: #222; color: #ffc107; font-size: var(--skala-partai); font-family: monospace; border-radius: 6px 0 0 6px; line-height: 1.2; transition: font-size 0.15s; }
+        
+        .sub-teks { display: block; font-size: 0.75rem; color: #aaa; font-weight: normal; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; }
+        .kelas-teks { display: block; font-size: 0.7rem; color: #fff; font-family: sans-serif; letter-spacing: 0.5px; margin-top: 4px; background: #333; border-radius: 3px; padding: 2px;}
+
+        .scroll-container { flex-grow: 1; overflow: hidden; position: relative; padding: 0 15px 15px 15px; }
+        .scroll-content { position: absolute; width: calc(100% - 30px); top: 100%; animation: scrollTembusAtas linear infinite; }
+        
+        @keyframes scrollTembusAtas { 
+            from { transform: translateY(0); } 
+            to   { transform: translateY(calc(-100% - var(--h-kontainer, 75vh))); } 
+        }
+
+        /* MODE MASTER FIDS (SEMUA GELANGGANG) */
+        #masterLayout { display: none; flex-grow: 1; background: #050505; }
+        .master-grid { display: grid; gap: 15px; padding: 15px; width: 100%; height: 100%; }
+        
+        .grid-count-1 { grid-template-columns: 1fr; }
+        .grid-count-2 { grid-template-columns: 1fr 1fr; }
+        .grid-count-3 { grid-template-columns: repeat(3, 1fr); }
+        .grid-count-4 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+        .grid-count-5 { grid-template-columns: repeat(3, 1fr); grid-template-rows: 1fr 1fr; }
+        .grid-count-6 { grid-template-columns: repeat(3, 1fr); grid-template-rows: 1fr 1fr; }
+
+        .gel-box { background: #0a0a0a; border: 2px solid #333; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.8); }
+        .gb-header { background: linear-gradient(180deg, #ffc107 0%, #d39e00 100%); color: #000; text-align: center; font-weight: 900; padding: 10px; font-size: 1.3rem; letter-spacing: 3px; border-bottom: 3px solid #222; text-transform: uppercase; }
+        .gb-body { padding: 12px; flex-grow: 1; display: flex; flex-direction: column; gap: 10px; justify-content: flex-start; overflow-y: auto; }
+
+        .match-strip { border-radius: 8px; padding: 10px 15px; display: flex; flex-direction: column; gap: 8px; }
+        .match-now { background: linear-gradient(180deg, #051b11 0%, #111 100%); border: 2px solid #198754; box-shadow: 0 0 10px rgba(25,135,84,0.3); }
+        .match-next { background: #111; border: 1px solid #333; }
+        
+        /* Menerapkan Skala pada Master Grid */
+        .ms-partai { font-family: monospace; font-size: var(--skala-partai); font-weight: 900; color: #ffc107; background: #000; padding: 2px 12px; border-radius: 4px; border: 1px solid #444; display: inline-block; transition: font-size 0.15s; }
+        .match-now .ms-partai { background: #198754; color: #fff; border-color: #20c997; font-size: calc(var(--skala-partai) * 1.2); }
+
+        .ms-kelas { font-size: calc(var(--skala-partai) * 0.75); color: #0dcaf0; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; background: #222; padding: 4px 10px; border-radius: 4px; border: 1px solid #333; transition: font-size 0.15s; }
+        .match-now .ms-kelas { color: #20c997; background: #022e1f; border-color: #198754; }
+
+        .ms-fighters { display: flex; justify-content: center; gap: 10px; font-size: var(--skala-nama); font-weight: bold; text-align: center; white-space: normal; line-height: 1.3; transition: font-size 0.15s; }
+        .match-now .ms-fighters { font-size: calc(var(--skala-nama) * 1.25); }
+
+        .pesilat-name { color: #fff; }
+        .pesilat-biru { color: #0dcaf0; }
+        .pesilat-merah { color: #ff4444; }
+        .vs-text { color: #ffc107; font-size: 0.8em; margin: 0 10px; font-weight: 900; }
+
+        /* MODAL */
+        .modal-content.dark-theme { background-color: #1a1a1a; border: 1px solid #555; color: white; }
+    </style>
+</head>
+<body>
+
+    <div class="modal fade" id="modalSetupJadwal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content dark-theme p-4 position-relative">
+                <a href="index.html" style="position: absolute; top: 15px; left: 15px; text-decoration: none; color: #888; font-size: 20px; font-weight: bold;">❮</a>
+                <h4 class="text-warning text-center mb-4 fw-bold">PENGATURAN LAYAR JADWAL</h4>
+                
+                <label class="form-label mb-1 text-secondary" style="font-size:0.85rem;">1. Pilih Gelanggang / Matras:</label>
+                <select id="pilihGelanggang" class="form-select bg-dark text-white border-secondary mb-3">
+                    <option value="g1">Gelanggang 1 (Matras 1)</option>
+                    <option value="g2">Gelanggang 2 (Matras 2)</option>
+                    <option value="g3">Gelanggang 3 (Matras 3)</option>
+                    <option value="g4">Gelanggang 4 (Matras 4)</option>
+                    <option value="g5">Gelanggang 5 (Matras 5)</option>
+                    <option value="g6">Gelanggang 6 (Matras 6)</option>
+                    <option value="semua" class="text-warning fw-bold">TAMPILKAN SEMUA GELANGGANG</option>
+                </select>
+
+                <label class="form-label mb-1 text-secondary" style="font-size:0.85rem;">2. Pilih Kategori Kompetisi:</label>
+                <select id="pilihKategori" class="form-select bg-dark text-white border-secondary mb-4">
+                    <option value="tanding">KATEGORI TANDING</option>
+                    <option value="jurus">KATEGORI SENI / JURUS</option>
+                </select>
+
+                <button class="btn btn-warning w-100 fw-bold py-2" onclick="mulaiLayarJadwal()">TAMPILKAN LAYAR</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="mainAppUI" style="display: none; flex-direction: column; height: 100%;">
+        
+        <div class="header-top">
+            <div class="header-left">
+                <div class="gelanggang-badge" id="lblGelanggang" onclick="bukaModalRahasia()" title="Klik untuk buka pengaturan">GELANGGANG 1</div>
+            </div>
+            <div class="header-center">
+                <h1 class="championship-title" id="judulKejuaraan">PAPAN PANGGILAN PESILAT</h1>
+            </div>
+            <div class="header-right">
+                <div class="kategori-badge" id="lblKategoriAtas">KATEGORI TANDING</div>
+            </div>
+        </div>
+
+        <div id="normalLayout">
+            <div class="left-panel">
+                <div class="panel-title" id="judulPanelKiri">LIVE: SEDANG & AKAN MAIN</div>
+                <div id="wadahUpNext" style="display: flex; flex-direction: column; flex-grow: 1; overflow-y:auto;">
+                    <div class="text-center text-secondary mt-5">Menunggu Koneksi...</div>
+                </div>
+            </div>
+
+            <div class="right-panel">
+                <div style="padding: 15px 15px 0 15px; background: #050505; z-index: 5;">
+                    <table style="margin-bottom: 0; border-collapse: collapse; border-spacing: 0;">
+                        <thead>
+                            <tr>
+                                <th style="width: 15%;">PARTAI</th>
+                                <th style="width: 37%;">SUDUT BIRU</th>
+                                <th style="width: 10%;">VS</th>
+                                <th style="width: 38%;">SUDUT MERAH</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+                <div class="scroll-container">
+                    <div class="scroll-content" id="scrollWrapper">
+                        <table id="tabelJadwal"><tbody id="isiTabelKanan"></tbody></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="masterLayout">
+            <div class="master-grid grid-count-1" id="masterGridContainer"></div>
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCNsOk8MsIhBoZ44Nd9WGGl6eBJOEKu3nI",
+            authDomain: "tesapksilat99.firebaseapp.com",
+            databaseURL: "https://tesapksilat99-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "tesapksilat99",
+            storageBucket: "tesapksilat99.firebasestorage.app",
+            messagingSenderId: "747533449255",
+            appId: "1:747533449255:web:358edf3c6032c22cdbb602"
+        };
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        let GELANGGANG = "";
+        let KATEGORI_TAMPILAN = "tanding";
+        let radarSudahAktif = false; 
+
+        let dataGlobalTanding = [];
+        let dataGlobalJurus = [];
+        let livePanitiaMap = { g1: {}, g2: {}, g3: {}, g4: {}, g5: {}, g6: {} };
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const gelParam = urlParams.get('gelanggang');
+            const katParam = urlParams.get('kategori');
+
+            if (gelParam && katParam) {
+                window.isDiLayarTV = true; // Kunci pemicu APK agar tidak looping
+                document.getElementById('pilihGelanggang').value = gelParam;
+                document.getElementById('pilihKategori').value = katParam;
+                window.mulaiLayarJadwal();
+            } else {
+                new bootstrap.Modal(document.getElementById('modalSetupJadwal')).show();
+            }
+        });
+
+        window.bukaModalRahasia = function() {
+            let elem = document.getElementById('modalSetupJadwal');
+            let mInst = bootstrap.Modal.getInstance(elem) || new bootstrap.Modal(elem);
+            mInst.show();
+        }
+
+        window.mulaiLayarJadwal = function() {
+            GELANGGANG = document.getElementById('pilihGelanggang').value;
+            KATEGORI_TAMPILAN = document.getElementById('pilihKategori').value;
+
+            // =======================================================
+            // 🔥 MESIN APK: LEMPAR TABLET BALIK KE INDEX.HTML
+            // =======================================================
+            if (!window.isDiLayarTV && typeof AndroidApp !== "undefined" && AndroidApp.isTvConnected()) {
+                let btn = document.querySelector('#modalSetupJadwal .btn-warning');
+                btn.innerText = "MENGIRIM JADWAL KE TV..."; 
+                btn.disabled = true;
+                
+                AndroidApp.bukaDiTV("JADWAL_" + GELANGGANG, KATEGORI_TAMPILAN); 
+
+                setTimeout(() => { 
+                    btn.innerText = "TAYANG DI TV ✅"; 
+                    btn.classList.replace("btn-warning", "btn-success"); 
+                }, 500);
+
+                setTimeout(() => {
+                    window.location.href = "index.html"; 
+                }, 2000);
+
+                return; 
+            }
+            // =======================================================
+
+            let modalSetup = bootstrap.Modal.getInstance(document.getElementById('modalSetupJadwal'));
+            if (modalSetup) modalSetup.hide();
+
+            let teksGel = (GELANGGANG === 'semua') ? "SEMUA GELANGGANG" : `GELANGGANG ${GELANGGANG.replace('g','')}`;
+            let teksKat = (KATEGORI_TAMPILAN === 'tanding') ? "KATEGORI TANDING" : "KATEGORI JURUS";
+
+            document.getElementById('lblGelanggang').innerText = teksGel;
+            document.getElementById('lblKategoriAtas').innerText = teksKat;
+            document.getElementById('mainAppUI').style.display = 'flex';
+
+            if (GELANGGANG === 'semua') {
+                document.getElementById('normalLayout').style.display = 'none';
+                document.getElementById('masterLayout').style.display = 'flex';
+            } else {
+                document.getElementById('normalLayout').style.display = 'flex';
+                document.getElementById('masterLayout').style.display = 'none';
+            }
+
+            if (!radarSudahAktif) {
+                jalankanRadarJadwal();
+                radarSudahAktif = true;
+            } else {
+                kalkulasiTampilan();
+            }
+        }
+
+        function isGelanggangCocok(valExcel, kodeGelanggang) {
+            if (!valExcel) return false;
+            let teks = String(valExcel).trim().toLowerCase();
+            let targetAngka = kodeGelanggang.replace(/[^0-9]/g, '');
+            let ekstraksiAngka = teks.match(/\b\d+\b/);
+            if (ekstraksiAngka) return parseInt(ekstraksiAngka[0], 10) === parseInt(targetAngka, 10);
+            return teks === "g" + targetAngka || teks === "gelanggang" + targetAngka;
+        }
+
+        function jalankanRadarJadwal() {
+            onValue(ref(database, 'pengaturan/nama_kejuaraan'), (snap) => {
+                if(snap.exists()) document.getElementById('judulKejuaraan').innerText = snap.val().toUpperCase();
+            });
+
+            onValue(ref(database, 'pengaturan/jadwal_tanding'), (snap) => {
+                dataGlobalTanding = snap.val() || []; kalkulasiTampilan(); 
+            });
+
+            onValue(ref(database, 'pengaturan/jadwal_jurus'), (snap) => {
+                dataGlobalJurus = snap.val() || []; kalkulasiTampilan(); 
+            });
+
+            ['g1', 'g2', 'g3', 'g4', 'g5', 'g6'].forEach(gel => {
+                onValue(ref(database, `pertandingan/${gel}/setup`), (snap) => {
+                    livePanitiaMap[gel] = snap.val() || {}; kalkulasiTampilan();
+                });
+            });
+
+            // =======================================================
+            // 🔥 MESIN PENANGKAP SINYAL SKALA JADWAL DARI FIREBASE
+            // =======================================================
+            let targetPathSkala = (GELANGGANG === 'semua') ? 'pertandingan/g1/skala_jadwal' : `pertandingan/${GELANGGANG}/skala_jadwal`;
+            onValue(ref(database, targetPathSkala), (snap) => {
+                let s = snap.val();
+                if(s) {
+                    const r = document.documentElement.style;
+                    if (s.global) r.setProperty('--skala-global', `${s.global}px`);
+                    if (s.teks_partai) r.setProperty('--skala-partai', `${s.teks_partai}rem`);
+                    if (s.teks_nama) r.setProperty('--skala-nama', `${s.teks_nama}rem`);
+                }
+            });
+        }
+
+        function kalkulasiTampilan() {
+            if (GELANGGANG === 'semua') renderMasterFIDS();
+            else { renderNormalPanelKiri(); renderNormalTabelKanan(); }
+        }
+
+        function renderNormalPanelKiri() {
+            let wadah = document.getElementById('wadahUpNext');
+            let sumberData = (KATEGORI_TAMPILAN === 'jurus') ? dataGlobalJurus : dataGlobalTanding;
+            let panitiaLokal = livePanitiaMap[GELANGGANG] || { partai: "-" };
+            let jadwalLokal = sumberData.filter(x => isGelanggangCocok(x['Gelanggang'] || x['GELANGGANG'], GELANGGANG));
+
+            if (jadwalLokal.length === 0) {
+                wadah.innerHTML = `<div class="text-center text-secondary mt-5">Belum ada data..</div>`;
+                return;
+            }
+
+            let idKetemu = jadwalLokal.findIndex(x => String(x['Partai'] || x['PARTAI']).trim() === String(panitiaLokal.partai).trim());
+            let startIdx = (idKetemu !== -1) ? idKetemu : 0;
+            let limaPartai = jadwalLokal.slice(startIdx, startIdx + 5);
+            let htmlKiri = "";
+
+            limaPartai.forEach((item, idx) => {
+                let isNow = (idx === 0 && idKetemu !== -1);
+                let bg = isNow ? "sedang-main" : "";
+                let lbl = isNow ? "NOW" : "NEXT";
+
+                let partai = item['Partai'] || item['PARTAI'] || "-";
+                let kelas  = item['Kelas'] || item['KELAS'] || "-"; 
+                let nBiru  = item['Nama Biru'] || item['SUDUT BIRU'] || "-";
+                let nMerah = item['Nama Merah'] || item['SUDUT MERAH'] || "-";
+
+                // Memasukkan variabel skala ke dalam inline style agar ikut bereaksi
+                htmlKiri += `
+                <div class="upnext-box ${bg}" style="display: flex; flex-direction: column; padding: 15px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 8px; margin-bottom: 12px;">
+                        <div>
+                            <span style="background:#444; color:#fff; font-size:0.8rem; padding:3px 8px; border-radius:4px; font-weight:bold;">${lbl}</span>
+                            <span style="font-size:var(--skala-partai); font-family:monospace; font-weight:bold; color:#ffc107; margin-left:8px; transition: font-size 0.15s;">PARTAI ${partai}</span>
+                        </div>
+                        <div style="background:#222; color:#0dcaf0; font-size: calc(var(--skala-partai) * 0.75); padding:4px 12px; border-radius:4px; font-weight:bold; border:1px solid #444; transition: font-size 0.15s;">${kelas}</div>
+                    </div>
+                    <div style="font-size: var(--skala-nama); font-weight: bold; text-align: center; transition: font-size 0.15s;">
+                        <span class="text-primary">${nBiru}</span> <span class="text-warning mx-2" style="font-size:0.8em;">VS</span> <span class="text-danger">${nMerah}</span>
+                    </div>
+                </div>`;
+            });
+            wadah.innerHTML = htmlKiri;
+        }
+
+        function renderNormalTabelKanan() {
+            let sumberData = (KATEGORI_TAMPILAN === 'jurus') ? dataGlobalJurus : dataGlobalTanding;
+            let tersaring = sumberData.filter(x => isGelanggangCocok(x['Gelanggang'] || x['GELANGGANG'], GELANGGANG));
+            let html = "";
+            if (tersaring.length === 0) html = `<tr><td colspan="4" class="text-danger py-5 text-center fw-bold">Jadwal Kosong.</td></tr>`;
+            else {
+                tersaring.forEach(item => {
+                    let partai = item['Partai'] || item['PARTAI'] || "-";
+                    let kelas  = item['Kelas'] || item['KELAS'] || "-"; 
+                    let nBiru  = item['Nama Biru'] || item['SUDUT BIRU'] || "-";
+                    let kBiru  = item['Kontingen Biru'] || item['KONTINGEN BIRU'] || "-";
+                    let nMerah = item['Nama Merah'] || item['SUDUT MERAH'] || "-";
+                    let kMerah = item['Kontingen Merah'] || item['KONTINGEN MERAH'] || "-";
+
+                    html += `<tr>
+                        <td class="td-partai" style="width: 15%;"><span class="fw-bold">${partai}</span><span class="kelas-teks">${kelas}</span></td>
+                        <td class="td-biru" style="width: 37%;">${nBiru} <span class="sub-teks">${kBiru}</span></td>
+                        <td class="td-vs" style="width: 10%;">VS</td>
+                        <td class="td-merah" style="width: 38%;">${nMerah} <span class="sub-teks">${kMerah}</span></td>
+                    </tr>`;
+                });
+            }
+            document.getElementById('isiTabelKanan').innerHTML = html;
+            let kontainer = document.querySelector('.scroll-container');
+            if (kontainer) kontainer.style.setProperty('--h-kontainer', (kontainer.clientHeight + 60) + 'px');
+            document.getElementById('scrollWrapper').style.animationDuration = Math.max(12, tersaring.length * 3.2) + "s";
+        }
+
+        function renderMasterFIDS() {
+            let container = document.getElementById('masterGridContainer');
+            let sumberData = (KATEGORI_TAMPILAN === 'jurus') ? dataGlobalJurus : dataGlobalTanding;
+            
+            let matrasAktif = [];
+            ['g1', 'g2', 'g3', 'g4', 'g5', 'g6'].forEach(gelKey => {
+                let panitia = livePanitiaMap[gelKey];
+                if (panitia && panitia.partai && panitia.partai !== "-") matrasAktif.push(gelKey);
+            });
+
+            if (matrasAktif.length === 0) {
+                container.className = "master-grid grid-count-1";
+                container.innerHTML = `<div class="text-center text-secondary w-100" style="margin-top:20vh; font-size:2rem; font-weight:bold;">BELUM ADA GELANGGANG YANG AKTIF MEMULAI PERTANDINGAN</div>`;
+                return;
+            }
+
+            container.className = `master-grid grid-count-${matrasAktif.length}`;
+            let htmlHTML = "";
+
+            matrasAktif.forEach(gelKey => {
+                let noGel = gelKey.replace('g', '');
+                let p = livePanitiaMap[gelKey];
+                let jadwalLokal = sumberData.filter(x => isGelanggangCocok(x['Gelanggang'] || x['GELANGGANG'], gelKey));
+                
+                let idKetemu = jadwalLokal.findIndex(x => String(x['Partai'] || x['PARTAI']).trim() === String(p.partai).trim());
+                let startIdx = (idKetemu !== -1) ? idKetemu : 0;
+                let limaPartai = jadwalLokal.slice(startIdx, startIdx + 5);
+
+                let isiStrips = "";
+
+                if (limaPartai.length === 0) isiStrips = `<div class="text-center text-secondary mt-5 fw-bold">Data Excel Kosong / Habis</div>`;
+                else {
+                    limaPartai.forEach((item, idx) => {
+                        let isNow = (idx === 0 && idKetemu !== -1);
+                        let cls = isNow ? "match-now" : "match-next";
+                        
+                        let partai = item['Partai'] || item['PARTAI'] || "-";
+                        let kls  = item['Kelas'] || item['KELAS'] || "-"; 
+                        let nBiru  = item['Nama Biru'] || item['SUDUT BIRU'] || "-";
+                        let nMerah = item['Nama Merah'] || item['SUDUT MERAH'] || "-";
+
+                        let matchTeks = "";
+                        if (KATEGORI_TAMPILAN === 'tanding' || (nBiru !== "-" && nMerah !== "-")) {
+                            matchTeks = `<span class="pesilat-biru">${nBiru}</span> <span class="vs-text">VS</span> <span class="pesilat-merah">${nMerah}</span>`;
+                        } else {
+                            let namaTunggal = item['Nama'] || item['NAMA PESILAT'] || nBiru;
+                            matchTeks = `<span class="pesilat-name">${namaTunggal}</span>`;
+                        }
+
+                        isiStrips += `
+                        <div class="match-strip ${cls}">
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 6px;">
+                                <span class="ms-partai">PARTAI ${partai}</span>
+                                <span class="ms-kelas">${kls}</span>
+                            </div>
+                            <div class="ms-fighters">
+                                ${matchTeks}
+                            </div>
+                        </div>`;
+                    });
+                }
+
+                htmlHTML += `
+                <div class="gel-box">
+                    <div class="gb-header">GELANGGANG ${noGel}</div>
+                    <div class="gb-body">${isiStrips}</div>
+                </div>`;
+            });
+            container.innerHTML = htmlHTML;
+        }
+    </script>
+</body>
+</html>
