@@ -8,8 +8,6 @@
     <meta http-equiv="Expires" content="0">
     <title>Layar TV Tanding - Digital Scoring</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
     <style>
         /* =================================================== */
         /* 🔥 VARIABEL PENGATUR SKALA REAL-TIME (SISTEM SARAF) */
@@ -18,21 +16,6 @@
             --skala-global: 13px;
             --skala-skor: 17.5rem;
             --skala-ikon: 1.5rem;
-        }
-
-        @font-face {
-            font-family: 'FontGadugi';
-            /* 🔥 Perbarui jalur (path) URL-nya di bawah ini */
-            src: url('assets/font/gadugi-bold.ttf') format('truetype'); 
-            font-weight: bold;
-            font-style: normal;
-        }
-
-        @font-face {
-            font-family: 'FontDigital'; /* Nama panggilan untuk font ini */
-            src: url('assets/font/DJB-Get-Digital.ttf') format('truetype');
-            font-weight: normal;
-            font-style: normal;
         }
 
         /* CSS FULL SCREEN MURNI */
@@ -50,553 +33,87 @@
             user-select: none; 
             transition: background-color 0.8s ease; 
         }
-
-        body.lead-biru { 
-            background-color: #003679 !important; 
-        } 
-
-        body.lead-merah { 
-            background-color: #6b0000 !important; 
-        } 
+        body.lead-biru { background-color: #031f42 !important; } 
+        body.lead-merah { background-color: #380202 !important; } 
         
         /* TERhubung ke Tuas 1 (Zoom Keseluruhan) */
-        html { 
-            font-size: var(--skala-global); 
-            transition: font-size 0.15s ease-out; 
-        }
+        html { font-size: var(--skala-global); transition: font-size 0.15s ease-out; }
         
-        .form-select { 
-            background-color: #333 !important; 
-            color: #fff !important; 
-            border: 0.0625rem solid #555 !important; 
-        }
-
-        .form-select:focus { 
-            background-color: #444 !important; 
-            border-color: #ffc107 !important; 
-            box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.25) !important; 
-        }
-
-        option:disabled { 
-            color: #777; 
-            font-style: italic; 
-            background-color: #222; 
-        }
+        .form-select { background-color: #333 !important; color: #fff !important; border: 0.0625rem solid #555 !important; }
+        .form-select:focus { background-color: #444 !important; border-color: #ffc107 !important; box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.25) !important; }
+        option:disabled { color: #777; font-style: italic; background-color: #222; }
         
         /* Modal Theme */
-        .modal-content.dark-theme { 
-            background-color: #1a1a1a; 
-            border: 1px solid #555; 
-            color: white; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.8); 
-        }
+        .modal-content.dark-theme { background-color: #1a1a1a; border: 1px solid #555; color: white; box-shadow: 0 10px 25px rgba(0,0,0,0.8); }
+        .modal-header.dark-theme { border-bottom: 1px solid #333; }
+        .modal-footer.dark-theme { border-top: 1px solid #333; justify-content: center; }
+        .btn-close-white { filter: invert(1) grayscale(100%) brightness(200%); }
 
-        .modal-header.dark-theme { 
-            border-bottom: 1px solid #333; 
-        }
+        #mainAppUI { display: none; flex-direction: column; flex: 1; width: 100%; height: 100%; }
 
-        .modal-footer.dark-theme { 
-            border-top: 1px solid #333; 
-            justify-content: center; 
-        }
-
-        .btn-close-white { 
-            filter: invert(1) grayscale(100%) brightness(200%); 
-        }
-
-        #mainAppUI { 
-            display: none; 
-            flex-direction: column; 
-            flex: 1; 
-            width: 100%; 
-            height: 100%; 
-        }
-
-        /* 1. KOTAK PEMBUNGKUS LUAR DIBUAT 100% TRANSPARAN */
-        .header-top { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 0.625rem; 
-            min-height: 4.5rem; 
-            position: relative; 
-            background: transparent !important; /* Paksa hapus warna latar */
-            border: none !important;            /* Paksa hapus garis pinggir */
-            box-shadow: none !important;        /* Paksa hapus bayangan */
-            backdrop-filter: none !important;   /* Paksa hapus efek blur kaca */
-        }
-
-        .sponsor-container { 
-            display: flex; 
-            align-items: center; 
-            gap: 0.5rem; 
-            z-index: 2; 
-        }
-
-        .sponsor-logo { 
-            height: 4.5rem; 
-            max-width: 8rem; 
-            object-fit: contain; 
-        }
-        
-        /* 2. KOTAK KACA HANYA ADA DI JUDUL KEJUARAAN */
-        .championship-title { 
-            font-size: 1.75rem; 
-            font-weight: 900; 
-            letter-spacing: 0.125rem; 
-            text-transform: uppercase; 
-            text-shadow: 2px 2px 5px rgba(0,0,0,0.8); 
-            position: absolute; 
-            left: 50%; 
-            transform: translateX(-50%); 
-            z-index: 1; 
-            text-align: center; 
-            background: linear-gradient(180deg, rgba(51, 51, 51, 0.5) 0%, rgba(17, 17, 17, 0.5) 100%); 
-            backdrop-filter: blur(5px); 
-            border: 0.125rem solid rgba(85, 85, 85, 0.5); 
-            border-radius: 0.5rem; 
-            padding: 0.5rem 2.5rem; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
-            white-space: nowrap; 
-        }
+        .header-top { display: flex; justify-content: space-between; align-items: center; background: linear-gradient(180deg, #333 0%, #111 100%); border: 0.125rem solid #555; border-radius: 0.5rem; padding: 0.3125rem 1.25rem; margin-bottom: 0.625rem; box-shadow: 0 4px 10px rgba(0,0,0,0.5); min-height: 4.5rem; position: relative; }
+        .sponsor-container { display: flex; align-items: center; gap: 0.8rem; z-index: 2; }
+        .sponsor-logo { height: 3.5rem; max-width: 6rem; object-fit: contain; }
+        .championship-title { font-size: 1.75rem; font-weight: 900; letter-spacing: 0.125rem; text-transform: uppercase; text-shadow: 2px 2px 5px rgba(0,0,0,0.8); position: absolute; left: 50%; transform: translateX(-50%); z-index: 1; text-align: center; width: 60%; }
 
         /* =================================================== */
-        /* STYLING ASLI UI TANDING                             */
+        /* STYLING ASLI UI TANDING                            */
         /* =================================================== */
-        .category-bar { 
-            display: flex; 
-            justify-content: space-between; 
-            margin-bottom: 0.625rem; 
-            gap: 0.625rem; 
-        }
+        .category-bar { display: flex; justify-content: space-between; margin-bottom: 0.625rem; gap: 0.625rem; }
+        .category-box { flex: 1; background: linear-gradient(180deg, #444 0%, #222 100%); text-align: center; font-size: 1.375rem; font-weight: bold; padding: 0.3125rem 0; border-radius: 0.5rem; border: 0.125rem solid #555; text-transform: uppercase; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        #labelGelanggangBar { color: #ffc107; border-color: #ffc107; }
 
-        .category-box { 
-            flex: 1; 
-            background: linear-gradient(180deg, #444 0%, #222 100%); 
-            font-size: 1.375rem; 
-            font-weight: bold; 
-            border-radius: 0.5rem; 
-            border: 0.125rem solid #555; 
-            text-transform: uppercase; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3); 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            padding: 0.5rem 0; 
-        }
-
-        .info-box { 
-            flex: 1; 
-            background: linear-gradient(180deg, #555 0%, #222 100%); 
-            font-size: 1.5rem; 
-            font-weight: bold; 
-            border-radius: 0.5rem; 
-            border: 0.125rem solid #666; 
-            text-transform: uppercase; 
-            color: #0dcaf0; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3); 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            padding: 0.5rem 0; 
-        }
-
-        #labelGelanggangBar { color: #ffffff; }
-        #judulKejuaraan { font-size: 25px; }
-        #l_nama_biru { font-size: 18px; }
-        #l_kon_biru { font-size: 14px; }
-        #l_nama_merah { font-size: 18px; }
-        #l_kon_merah { font-size: 14px; }
-        #l_babak { color: #ffffff; }
-        #l_partai { color: #ffffff; }
-
-        .profile-bar { 
-            display: flex; 
-            gap: 0.625rem; 
-            margin-bottom: 0.625rem; 
-            height: 5rem; 
-        }
-
-        .profile-box { 
-            flex: 1; 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center; 
-            align-items: center; 
-            border-radius: 0.5rem; 
-            border: 0.125rem solid #222; 
-            overflow: hidden; 
-            white-space: nowrap; 
-            box-shadow: 0 4px 8px rgba(0,0,0,0.4); 
-            gap: 5px;
-        }
-
+        .profile-bar { display: flex; gap: 0.625rem; margin-bottom: 0.625rem; height: 5rem; }
+        .profile-box { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; border-radius: 0.5rem; border: 0.125rem solid #222; overflow: hidden; white-space: nowrap; box-shadow: 0 4px 8px rgba(0,0,0,0.4); }
         .bg-biru-gelap { background: linear-gradient(180deg, #0a4ebd 0%, #06307a 100%); }
         .bg-merah-gelap { background: linear-gradient(180deg, #cc0000 0%, #800000 100%); }
+        .pesilat-nama { font-size: 1.375rem; font-weight: bold; text-transform: uppercase; text-shadow: 1px 1px 3px rgba(0,0,0,0.5); }
+        .pesilat-negara { font-size: 1rem; font-weight: normal; text-transform: uppercase; color: #ccc;}
+        .timer-box { width: 15.625rem; background: linear-gradient(180deg, #333 0%, #000 100%); border-radius: 0.5rem; border: 0.125rem solid #555; display: flex; align-items: center; justify-content: center; font-size: 3.4375rem; font-weight: bold; letter-spacing: 0.1875rem; color: #ffc107; box-shadow: inset 0 0 10px rgba(0,0,0,0.8); }
 
-        .pesilat-nama { 
-            font-size: 1rem; 
-            font-weight: bold; 
-            text-transform: uppercase; 
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.5); 
-            line-height: 1.2; 
-            margin-bottom: -3px !important; 
-        }
-
-        .pesilat-negara { 
-            font-size: 1rem; 
-            font-weight: normal; 
-            text-transform: uppercase; 
-            color: #ccc;
-            line-height: 1.2;
-        }
-
-        .timer-box { 
-            font-family: 'FontDigital', sans-serif;
-            width: 15rem; 
-            padding-top: 0.4rem; 
-            padding-bottom: -0.4rem; 
-            line-height: 1;         
-            background: linear-gradient(180deg, #333 0%, #000 100%); 
-            border-radius: 0.5rem; 
-            border: 0.125rem solid #555; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-size: 5rem; 
-            font-weight: normal; 
-            letter-spacing: 0.1rem; 
-            color: #ffd900; 
-        }
-
-        .match-info-bar { 
-            display: flex; 
-            gap: 0.625rem; 
-            margin-bottom: 0.625rem; 
-        }
-
+        .match-info-bar { display: flex; gap: 0.625rem; margin-bottom: 0.625rem; }
+        .info-box { flex: 1; background: linear-gradient(180deg, #555 0%, #222 100%); text-align: center; font-size: 1.5rem; font-weight: bold; padding: 0.5rem 0; border-radius: 0.5rem; border: 0.125rem solid #666; text-transform: uppercase; color: #0dcaf0; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
         #teksRonde { color: #fff; }
 
-        .score-container { 
-            flex: 1; 
-            display: flex; 
-            gap: 0; 
-            position: relative; 
-            border-radius: 0.5rem; 
-            overflow: hidden; 
-            border: 0.125rem solid #444; 
-            margin-bottom: 0.625rem; 
-            box-shadow: 0 6px 15px rgba(0,0,0,0.6); 
-        }
-
-        .score-side { 
-            flex: 1; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            position: relative; 
-            transition: background-color 0.5s ease; 
-        }
+        .score-container { flex: 1; display: flex; gap: 0; position: relative; border-radius: 0.5rem; overflow: hidden; border: 0.125rem solid #444; margin-bottom: 0.625rem; box-shadow: 0 6px 15px rgba(0,0,0,0.6); }
+        .score-side { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; transition: background-color 0.5s ease; }
+        .bg-biru-terang { background-color: #0b5ed7; }
+        .bg-merah-terang { background-color: #dc3545; }
+        #panelSkorBiru.kalah { background-color: #021a3b !important; }
+        #panelSkorMerah.kalah { background-color: #380101 !important; }
         
-        /* =================================================== */
-        /* 🔥 UPDATE GRADASI & WARNA SKOR                      */
-        /* =================================================== */
-        .bg-biru-terang { background: linear-gradient(180deg, #0b5ed7 30%, #000000 100%) !important; }
-        .bg-merah-terang { background: linear-gradient(180deg, #dc3545 30%, #000000 100%) !important; }
+        /* TERhubung ke Tuas 2 (Angka Skor Utama) */
+        .skor-besar { font-size: var(--skala-skor); font-weight: bold; line-height: 1; text-shadow: 5px 5px 15px rgba(0,0,0,0.5); transition: font-size 0.15s ease-out; }
 
-        #panelSkorBiru.kalah, #panelSkorMerah.kalah { 
-            background: linear-gradient(180deg, #ffffff 30%, #080808 100%) !important; 
-        }
+        /* TERhubung ke Tuas 3 (Ikon Pelanggaran & Bantingan) */
+        .icons-panel { position: absolute; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 0.33em; padding: 0.625em; font-size: var(--skala-ikon); transition: font-size 0.15s ease-out; }
+        .icons-panel.left { left: 0.625rem; }
+        .icons-panel.right { right: 0.625rem; }
+        .icon-box { width: 3.33em; height: 1.875em; background: #222; border: 0.083em solid #555; border-radius: 0.33em; display: flex; justify-content: center; align-items: center; font-size: 1em; box-shadow: inset 0 0 0.4em rgba(0,0,0,0.8); gap: 0.33em; }
+        .icon-count { color: #ffc107; font-size: 0.833em; font-weight: bold; }
 
-        #panelSkorBiru.kalah .skor-besar { color: #0b5ed7 !important; }
-        #panelSkorMerah.kalah .skor-besar { color: #dc3545 !important; }
-        
-        /* Angka Skor Utama */
-        .skor-besar { 
-            font-family: 'FontGadugi', arial; 
-            letter-spacing: -5px;
-            font-size: var(--skala-skor); 
-            font-weight: bold;
-            line-height: 1; 
-            text-shadow: 5px 5px 15px rgba(0,0,0,0.5); 
-            transition: font-size 0.15s ease-out, color 0.3s ease; 
-            margin-top: -20px;      /* Menggeser angka ke atas */
-            padding-bottom: 10px;   /* Memberi jarak ekstra di bawah */
-        }
-
-        /* =================================================== */
-        /* 🔥 PENGATURAN KOTAK IKON 6 TINGKATAN (SAMPING)      */
-        /* =================================================== */
-
-        /* Untuk Sudut Kiri (Biru) */
-        .icons-panel.left-side {
-            position: absolute; 
-            left: 0.5rem; 
-            top: 50%; 
-            transform: translateY(-50%);
-            display: flex; 
-            flex-direction: column; 
-            gap: 0.6rem; 
-            font-size: var(--skala-ikon); 
-        }
-
-        /* Untuk Sudut Kanan (Merah) */
-        .icons-panel.right-side {
-            position: absolute; 
-            right: 0.5rem; 
-            top: 50%; 
-            transform: translateY(-50%);
-            display: flex; 
-            flex-direction: column; 
-            gap: 0.6rem; 
-            font-size: var(--skala-ikon); 
-        }
-
-        .icon-item { 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            border: 0.125em solid #444; 
-            border-radius: 0.25em; 
-            padding: 0.25em; 
-            transition: all 0.3s ease;
-            opacity: 30%;
-        }
-
-        .icon-item.menyala {
-            border-color: #ffd900;
-            box-shadow: 0 0 8px rgba(255, 193, 7, 0.4); 
-            opacity: 100%;
-        }
-
-        .img-icon {
-            width: 2em !important; 
-            height: 2em !important; 
-            object-fit: contain; 
-            display: block;
-            filter: drop-shadow(0px 1px 2px rgba(0,0,0,0.8));
-        }
-
-        .img-pelanggaran {
-            opacity: 1; 
-            transition: all 0.3s ease-in-out; 
-        }
-
-        /* =================================================== */
-        /* PERBAIKAN PANEL JURI (SIMETRIS ATAS & BAWAH)        */
-        /* =================================================== */
-        .juri-footer { 
-            display: flex; 
-            background: #222; 
-            border-top: 0.125rem solid #444; 
-            border-radius: 0.5rem; 
-            overflow: hidden; 
-            text-align: center; 
-            font-weight: bold; 
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.5); 
-        }
-
-        .juri-col { 
-            flex: 1; 
-            padding: 0.3125rem; 
-            border-right: 0.0625rem solid #444; 
-            font-size: 0.875rem; 
-            transition: all 0.15s ease-in-out; 
-        }
-
+        .juri-footer { display: flex; background: #222; border-top: 0.125rem solid #444; border-radius: 0.5rem; overflow: hidden; text-align: center; font-weight: bold; box-shadow: 0 -2px 10px rgba(0,0,0,0.5); }
+        .juri-col { flex: 1; padding: 0.3125rem; border-right: 0.0625rem solid #444; font-size: 0.875rem; transition: all 0.15s ease-in-out; }
         .juri-col:last-child { border-right: none; }
-        
-        .juri-row-top { 
-            display: flex; 
-            flex: 1; 
-            align-items: center; 
-            border-bottom: 0.0625rem solid #444; 
-            color: #aaa; 
-            background: linear-gradient(180deg, #555 0%, #333 100%); 
-        }
+        .juri-row-top { border-bottom: 0.0625rem solid #444; color: #aaa; background: linear-gradient(180deg, #555 0%, #333 100%); }
+        .juri-row-bot { background: linear-gradient(180deg, #444 0%, #222 100%); color: #ccc;}
+        .center-icons { flex: 0.5; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 1.25rem; background-color: #111; border-left: 0.125rem solid #555; border-right: 0.125rem solid #555;}
+        .juri-col.active { background: #ffc107 !important; color: #000 !important; box-shadow: inset 0 0 0.625rem rgba(0,0,0,0.5); }
 
-        .juri-row-bot { 
-            display: flex; 
-            flex: 1; 
-            align-items: center; 
-            background: linear-gradient(180deg, #444 0%, #222 100%); 
-            color: #ccc;
-        }
-        
-        .center-icons { 
-            flex: 0.5; 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center; 
-            align-items: center; 
-            font-size: 1.25rem; 
-            background: linear-gradient(180deg, #444 0%, #222 100%); 
-            color: #ccc;
-        }
+        .btn-back-modal { position: absolute; top: 0.9375rem; left: 0.9375rem; text-decoration: none; color: #888; font-size: 1.375rem; font-weight: bold; transition: 0.2s; z-index: 10; }
+        .btn-back-modal:active { color: #fff; transform: scale(0.9); }
 
-        .juri-col.active { 
-            background: #ffc107 !important; 
-            color: #000 !important; 
-            box-shadow: inset 0 0 0.625rem rgba(0,0,0,0.5); 
-        }
-
-        .btn-back-modal { 
-            position: absolute; 
-            top: 0.9375rem; 
-            left: 0.9375rem; 
-            text-decoration: none; 
-            color: #888; 
-            font-size: 1.375rem; 
-            font-weight: bold; 
-            transition: 0.2s; 
-            z-index: 10; 
-        }
-
-        .btn-back-modal:active { 
-            color: #fff; 
-            transform: scale(0.9); 
-        }
-
-        #screensaverOverlay { 
-            display: none; 
-            position: fixed; 
-            top: 0; 
-            left: 0; 
-            width: 100vw; 
-            height: 100vh; 
-            background-color: #000; 
-            z-index: 9999; 
-            justify-content: center; 
-            align-items: center; 
-        }
-
-        #screensaverImg { 
-            width: 100%; 
-            height: 100%; 
-            object-fit: contain; 
-            transition: opacity 0.8s ease-in-out; 
-            opacity: 0; 
-        }
-    
-        /* Efek saat skor berubah (membesar dan bercahaya sesaat) */
-        @keyframes efekPopSkor {
-            0%   { transform: scale(1); }
-            50%  { transform: scale(1.2); text-shadow: 0 0 30px #ffc107, 0 0 50px #ffc107; color: #ffc107; }
-            100% { transform: scale(1); }
-        }
-
-        .skor-besar.skor-berubah {
-            animation: efekPopSkor 0.3s ease-out; /* Durasi efek 0.4 detik */
-        }
-
-        /* KOTAK CARD TRANSPARAN 20% UNTUK TEKS */
-        .var-text-card {
-            background: rgba(0, 0, 0, 0.5); /* Warna hitam dengan transparansi 20% */
-            border-radius: 15px; /* Membuat sudut kotak sedikit membulat */
-            padding: 20px 50px 10px 50px; /* Jarak ruang di dalam kotak */
-            border: 1px solid rgba(255, 255, 255, 0.1); /* Garis putih sangat tipis sebagai pemanis */
-            z-index: 2;
-            margin-bottom: 3vh;
-        }
+        #screensaverOverlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #000; z-index: 9999; justify-content: center; align-items: center; }
+        #screensaverImg { width: 100%; height: 100%; object-fit: contain; transition: opacity 0.8s ease-in-out; opacity: 0; }
     </style>
 </head>
 <body>
     
-    <!-- =================================================== -->
-    <!-- 🔥 OVERLAY VAR (VERIFIKASI) SUPER MEWAH & DRAMATIS 🔥 -->
-    <!-- =================================================== -->
-    <style>
-        .var-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 10005; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; backdrop-filter: blur(10px); transition: background 0.8s ease; overflow: hidden; }
-        .var-particles { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
-        .var-bokeh { position: absolute; bottom: -5vh; border-radius: 50%; filter: blur(4px); opacity: 0; animation: varFloatUp linear forwards; }
-        @keyframes varFloatUp { 0% { transform: translateY(0) scale(0.5); opacity: 0; } 20% { opacity: 0.8; } 80% { opacity: 0.5; } 100% { transform: translateY(-120vh) scale(1.5); opacity: 0; } }
-
-        .var-loader-ring { width: 8vw; height: 8vw; border: 0.4vw solid rgba(255, 215, 0, 0.1); border-top-color: #ffc107; border-radius: 50%; animation: varSpin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite; margin-bottom: 3vh; box-shadow: 0 0 3vw rgba(255, 193, 7, 0.4); z-index: 2;}
-        @keyframes varSpin { 100% { transform: rotate(360deg); } }
-
-        .var-title { z-index: 2; font-family: 'FontGadugi', Arial; font-size: 3.5vw; background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c); -webkit-background-clip: text; color: transparent; text-shadow: 0 0 2vw rgba(255, 215, 0, 0.3); letter-spacing: 0.5vw; margin-bottom: 1vh; text-transform: uppercase; font-weight: 900; }
-        .var-subtitle { z-index: 2; font-size: 2vw; color: #a8a8a8; letter-spacing: 0.3vw; margin-bottom: 4vh; text-transform: uppercase; font-weight: bold; }
-        
-        .var-box { z-index: 2; position: relative; padding: 2vh 5vw; border-radius: 1vw; font-family: 'FontGadugi', Arial; font-size: 4vw; font-weight: 900; letter-spacing: 0.4vw; box-shadow: 0 2vw 4vw rgba(0,0,0,0.8); overflow: hidden; color: white; transition: all 0.5s ease; }
-        .var-box::before { content: ''; position: absolute; top: 0; left: -150%; width: 50%; height: 100%; background: linear-gradient(to right, transparent, rgba(255,255,255,0.4), transparent); transform: skewX(-25deg); animation: varShine 3s infinite; }
-        @keyframes varShine { 0% { left: -150%; } 20% { left: 200%; } 100% { left: 200%; } }
-        
-        .var-result { 
-    z-index: 2; 
-    font-family: 'FontGadugi', Arial; 
-    font-weight: 900; 
-    margin-top: 5vh; 
-    text-transform: uppercase; 
-    letter-spacing: 0.2vw; 
-    opacity: 0; 
-    transform: scale(0.5); 
-    transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-    line-height: 1.2; 
-    font-size: 26px; 
-
-    /* 🔥 TAMBAHAN WARNA DAN BAYANGAN 🔥 */
-    color: #FFFFFF; /* Warna teks (Putih) */
-    text-shadow: 3px 3px 10px rgba(0, 0, 0, 1.2); /* Bayangan teks (Hitam pekat) */
-}
-        .var-result.show-result { opacity: 1; transform: scale(1.5); }
-    </style>
-
-    <div id="tvVerifikasiOverlay" class="var-overlay" style="display: none;">
-        <!-- Wadah Efek Partikel Terbang -->
-        <div id="varParticles" class="var-particles"></div>
-        
-        <!-- Teks Emas Dibungkus Card -->
-        <div class="var-text-card">
-            <h1 class="var-title" style="margin-bottom: 0;">PROSES VERIFIKASI</h1>
-            <h2 id="tvVerifTipe" class="var-subtitle" style="margin-bottom: 10px; margin-top: 10px;">TIPE REVIEW</h2>
-        </div>
-        
-        <!-- 🔥 WADAH PUSAT ANTI-GESER 🔥 -->
-        <!-- Tingginya dikunci di 260px. Apa pun yang muncul di dalam sini tidak akan merusak layout luar -->
-        <div style="height: 260px; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%;">
-            
-            <!-- 1. Cincin Emas Berputar -->
-            <div id="tvVerifLoader" class="var-loader-ring"></div>
-            
-            <!-- 2. Teks Hasil (S A H) -->
-            <h1 id="tvVerifHasil" class="var-result" style="margin-top: 0 !important; margin-bottom: 25px !important;"></h1>
-            
-            <!-- 3. Kotak Identitas Sudut (SUDUT MERAH) -->
-            <!-- Dipindah ke dalam wadah ini agar tidak mendorong layout saat muncul -->
-            <div id="tvVerifSudut" class="var-box" style="margin-top: 10px;">SUDUT</div>
-            
-        </div>
-        
-        <!-- WADAH VOTING 3 JURI -->
-        <div id="tvVerifJuriVotes" style="display: none; justify-content: center; gap: 70px; margin-top: 10px; z-index: 2;">
-            
-            <!-- KOTAK JURI 1 -->
-            <div style="background: rgba(0,0,0,0.7); border: 3px solid #555; border-radius: 14px; width: 250px; height: 130px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 14px 28px rgba(0,0,0,0.8);">
-                <div style="font-size: 20px; color: #ccc; letter-spacing: 3px; font-weight: bold; border-bottom: 1px solid #444; padding-bottom: 4px; margin-bottom: 7px; width: 80%; text-align: center;">JURI 1</div>
-                <div id="tvResJ1" style="font-family: 'FontGadugi', Arial; font-size: 42px; font-weight: 900; text-shadow: 0 0 14px rgba(0,0,0,0.8); line-height: 1; text-align: center;">-</div>
-            </div>
-
-            <!-- KOTAK JURI 2 -->
-            <div style="background: rgba(0,0,0,0.7); border: 3px solid #555; border-radius: 14px; width: 250px; height: 130px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 14px 28px rgba(0,0,0,0.8);">
-                <div style="font-size: 20px; color: #ccc; letter-spacing: 3px; font-weight: bold; border-bottom: 1px solid #444; padding-bottom: 4px; margin-bottom: 7px; width: 80%; text-align: center;">JURI 2</div>
-                <div id="tvResJ2" style="font-family: 'FontGadugi', Arial; font-size: 42px; font-weight: 900; text-shadow: 0 0 14px rgba(0,0,0,0.8); line-height: 1; text-align: center;">-</div>
-            </div>
-
-            <!-- KOTAK JURI 3 -->
-            <div style="background: rgba(0,0,0,0.7); border: 3px solid #555; border-radius: 14px; width: 250px; height: 130px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 14px 28px rgba(0,0,0,0.8);">
-                <div style="font-size: 20px; color: #ccc; letter-spacing: 3px; font-weight: bold; border-bottom: 1px solid #444; padding-bottom: 4px; margin-bottom: 7px; width: 80%; text-align: center;">JURI 3</div>
-                <div id="tvResJ3" style="font-family: 'FontGadugi', Arial; font-size: 42px; font-weight: 900; text-shadow: 0 0 14px rgba(0,0,0,0.8); line-height: 1; text-align: center;">-</div>
-            </div>
-
-        </div>
-        
-    </div>
-
-
     <div id="screensaverOverlay">
         <img id="screensaverImg" src="">
     </div>
 
+    <!-- 📺 MODAL SOKET 2 PIN (KHUSUS TANDING) -->
     <div class="modal fade" id="modalSetupLayar" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content dark-theme p-4 position-relative">
@@ -621,22 +138,49 @@
         </div>
     </div>
 
+    <!-- CONTAINER UTAMA -->
     <div id="mainAppUI">
         
+        <!-- HEADER -->
         <div class="header-top">
             <div class="sponsor-container" id="wadahKiri"></div>
             <div class="championship-title" id="judulKejuaraan">KEJUARAAN PENCAK SILAT</div>
             <div class="sponsor-container" id="wadahKanan"></div>
         </div>
 
+        <!-- KAMAR TANDING -->
         <div id="kamarTanding" style="display: flex; flex-direction: column; flex: 1;">
-
+            <div class="category-bar">
+                <div class="category-box" id="labelGelanggangBar">G?</div><div class="category-box" id="l_kelas">KELAS</div><div class="category-box">TANDING</div>
+            </div>
             <div class="profile-bar">
                 <div class="profile-box bg-biru-gelap"><div class="pesilat-nama" id="l_nama_biru">SUDUT BIRU</div><div class="pesilat-negara" id="l_kon_biru">KONTINGEN</div></div>
                 <div class="timer-box" id="t_timer">00:00</div>
                 <div class="profile-box bg-merah-gelap"><div class="pesilat-nama" id="l_nama_merah">SUDUT MERAH</div><div class="pesilat-negara" id="l_kon_merah">KONTINGEN</div></div>
             </div>
             <div class="match-info-bar">
+<<<<<<< HEAD
+                <div class="info-box" id="l_partai">PARTAI</div><div class="info-box" id="l_babak">BABAK</div><div class="info-box text-warning" id="teksRonde">RONDE 1</div>
+            </div>
+
+            <div class="score-container">
+                <div class="score-side bg-biru-terang" id="panelSkorBiru">
+                    <div class="icons-panel left">
+                        <div class="icon-box">👉<span class="icon-count" id="b_count_0" style="display:none;">0</span></div>
+                        <div class="icon-box">☝️<span class="icon-count" id="b_count_-1" style="display:none;">0</span></div>
+                        <div class="icon-box">✌️<span class="icon-count" id="b_count_-5" style="display:none;">0</span></div>
+                        <div class="icon-box">🤼<span class="icon-count" id="b_count_3" style="display:none;">0</span></div>
+                    </div>
+                    <div class="skor-besar" id="skorTotalBiru">0</div>
+                </div>
+                <div class="score-side bg-merah-terang" id="panelSkorMerah">
+                    <div class="skor-besar" id="skorTotalMerah">0</div>
+                    <div class="icons-panel right">
+                        <div class="icon-box">👈<span class="icon-count" id="m_count_0" style="display:none;">0</span></div>
+                        <div class="icon-box">☝️<span class="icon-count" id="m_count_-1" style="display:none;">0</span></div>
+                        <div class="icon-box">✌️<span class="icon-count" id="m_count_-5" style="display:none;">0</span></div>
+                        <div class="icon-box">🤼<span class="icon-count" id="m_count_3" style="display:none;">0</span></div>
+=======
                 <div class="category-box" id="labelGelanggangBar">G?</div><div class="category-box" id="l_kelas"> </div><div class="info-box text-warning" id="teksRonde">RONDE 1</div><div class="info-box" id="l_partai">PARTAI</div><div class="info-box" id="l_babak">BABAK</div>
             </div>
 
@@ -664,12 +208,22 @@
                         <div class="icon-item"><img id="m_img_-1_2" src="assets/icons/teguran_2.png" class="img-icon img-pelanggaran"></div>
                         <div class="icon-item"><img id="m_img_-5_1" src="assets/icons/peringatan_1.png" class="img-icon img-pelanggaran"></div>
                         <div class="icon-item"><img id="m_img_-5_2" src="assets/icons/peringatan_2.png" class="img-icon img-pelanggaran"></div>
+>>>>>>> 9691892 (Initial commit)
                     </div>
                 </div>
             </div>
 
             <div class="juri-footer">
                 <div style="flex: 1; display: flex; flex-direction: column;">
+<<<<<<< HEAD
+                    <div style="display: flex;" class="juri-row-top"><div class="juri-col" id="b_j1_top">J1</div><div class="juri-col" id="b_j2_top">J2</div><div class="juri-col" id="b_j3_top">J3</div></div>
+                    <div style="display: flex;" class="juri-row-bot"><div class="juri-col" id="b_j1_bot">J1</div><div class="juri-col" id="b_j2_bot">J2</div><div class="juri-col" id="b_j3_bot">J3</div></div>
+                </div>
+                <div class="center-icons"><div>👊</div><div>🦶</div></div>
+                <div style="flex: 1; display: flex; flex-direction: column;">
+                    <div style="display: flex;" class="juri-row-top"><div class="juri-col" id="m_j1_top">J1</div><div class="juri-col" id="m_j2_top">J2</div><div class="juri-col" id="m_j3_top">J3</div></div>
+                    <div style="display: flex;" class="juri-row-bot"><div class="juri-col" id="m_j1_bot">J1</div><div class="juri-col" id="m_j2_bot">J2</div><div class="juri-col" id="m_j3_bot">J3</div></div>
+=======
                     <div class="juri-row-top"><div class="juri-col" id="b_j1_top">J1</div><div class="juri-col" id="b_j2_top">J2</div><div class="juri-col" id="b_j3_top">J3</div></div>
                     <div class="juri-row-bot"><div class="juri-col" id="b_j1_bot">J1</div><div class="juri-col" id="b_j2_bot">J2</div><div class="juri-col" id="b_j3_bot">J3</div></div>
                 </div>
@@ -680,12 +234,17 @@
                 <div style="flex: 1; display: flex; flex-direction: column;">
                     <div class="juri-row-top"><div class="juri-col" id="m_j1_top">J1</div><div class="juri-col" id="m_j2_top">J2</div><div class="juri-col" id="m_j3_top">J3</div></div>
                     <div class="juri-row-bot"><div class="juri-col" id="m_j1_bot">J1</div><div class="juri-col" id="m_j2_bot">J2</div><div class="juri-col" id="m_j3_bot">J3</div></div>
+>>>>>>> 9691892 (Initial commit)
                 </div>
             </div>
         </div>
 
     </div>
     
+<<<<<<< HEAD
+    <!-- MODAL HASIL PEMENANG TANDING -->
+=======
+>>>>>>> 9691892 (Initial commit)
     <div class="modal fade" id="modalHasilTV" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content dark-theme shadow-lg" style="border: 2px solid #ffc107;">
@@ -705,35 +264,16 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<<<<<<< HEAD
+=======
     
     <script src="animasi-ronde.js"></script>
     <script src="animasi-pemenang.js"></script>
 
+>>>>>>> 9691892 (Initial commit)
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
         import { getDatabase, ref, set, get, onValue, onDisconnect } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js";
-
-        // 🔥 CACHING DOM ELEMENTS (MENYIMPAN ELEMEN KE MEMORI) 🔥
-        const elTimer = document.getElementById('t_timer');
-        const elTeksRonde = document.getElementById('teksRonde');
-        const elSkorBiru = document.getElementById('skorTotalBiru');
-        const elSkorMerah = document.getElementById('skorTotalMerah');
-        const pB = document.getElementById('panelSkorBiru');
-        const pM = document.getElementById('panelSkorMerah');
-        
-        const elNamaBiru = document.getElementById('l_nama_biru');
-        const elKonBiru = document.getElementById('l_kon_biru');
-        const elNamaMerah = document.getElementById('l_nama_merah');
-        const elKonMerah = document.getElementById('l_kon_merah');
-        const elPartai = document.getElementById('l_partai');
-        const elBabak = document.getElementById('l_babak');
-        const elKelas = document.getElementById('l_kelas');
-        const elNamaBiruTV = document.getElementById('namaBiruTV');
-        const elNamaMerahTV = document.getElementById('namaMerahTV');
-        
-        const elJudulKejuaraan = document.getElementById('judulKejuaraan');
-        const elWadahKiri = document.getElementById('wadahKiri');
-        const elWadahKanan = document.getElementById('wadahKanan');
 
         const firebaseConfig = {
             apiKey: "AIzaSyCNsOk8MsIhBoZ44Nd9WGGl6eBJOEKu3nI",
@@ -749,6 +289,11 @@
 
         let GELANGGANG = ""; 
         let baseRefPath = ""; 
+<<<<<<< HEAD
+        let rondeRef = null; let rondeAktif = 1;
+        let riwayatBiru = { 1: [], 2: [], 3: [] }; let riwayatMerah = { 1: [], 2: [], 3: [] };
+        let finalSkorBiru = 0; let finalSkorMerah = 0;
+=======
         let rondeRef = null; 
         let rondeAktif = 1;
         let riwayatBiru = { 1: [], 2: [], 3: [] }; let riwayatMerah = { 1: [], 2: [], 3: [] };
@@ -756,6 +301,7 @@
         window.riwayatMerah = riwayatMerah;
         let finalSkorBiru = 0; 
         let finalSkorMerah = 0;
+>>>>>>> 9691892 (Initial commit)
 
         let modalHasilTVInstance = null;
 
@@ -846,14 +392,22 @@
         function jalankanMesinFirebase() {
             onValue(ref(database, `pengaturan`), (snap) => {
                 let data = snap.val() || {};
+<<<<<<< HEAD
+                if(data.nama_kejuaraan) document.getElementById('judulKejuaraan').innerText = data.nama_kejuaraan.toUpperCase();
+=======
                 if(data.nama_kejuaraan) elJudulKejuaraan.innerText = data.nama_kejuaraan.toUpperCase();
+>>>>>>> 9691892 (Initial commit)
                 if(data.logos) {
                     let htmlKiri = ""; let htmlKanan = "";
                     for(let i=1; i<=4; i++) {
                         if(data.logos[`kiri${i}`]) htmlKiri += `<img src="${data.logos[`kiri${i}`]}" class="sponsor-logo">`;
                         if(data.logos[`kanan${i}`]) htmlKanan += `<img src="${data.logos[`kanan${i}`]}" class="sponsor-logo">`;
                     }
+<<<<<<< HEAD
+                    document.getElementById('wadahKiri').innerHTML = htmlKiri; document.getElementById('wadahKanan').innerHTML = htmlKanan;
+=======
                     elWadahKiri.innerHTML = htmlKiri; elWadahKanan.innerHTML = htmlKanan;
+>>>>>>> 9691892 (Initial commit)
                 }
                 if (data.waktu_screensaver) ssDelay = parseInt(data.waktu_screensaver) * 1000;
                 if (data.screensavers) arrScreensavers = Object.values(data.screensavers).filter(img => img !== "");
@@ -872,6 +426,8 @@
                 resetIdleTimer(); 
             });
 
+<<<<<<< HEAD
+=======
             // ===================================================
             // 🔥 SENSOR VAR TELEVISI: EFEK MEWAH & PARTIKEL 🔥
             // ===================================================
@@ -983,17 +539,37 @@
                 }
             });
 
+>>>>>>> 9691892 (Initial commit)
             onValue(ref(database, `${baseRefPath}/last_activity`), () => { resetIdleTimer(); });
             onValue(ref(database, `${baseRefPath}/status_screensaver`), (snap) => {
                 isScreensaverAktifManual = snap.val() || false;
                 if(isScreensaverAktifManual) tampilkanScreensaver(); else { sembunyikanScreensaver(); resetIdleTimer(); }
             });
 
+<<<<<<< HEAD
+            onValue(ref(database, `${baseRefPath}/timer`), (snap) => { document.getElementById('t_timer').innerText = snap.val() || "00:00"; resetIdleTimer(); });
+=======
             onValue(ref(database, `${baseRefPath}/timer`), (snap) => { elTimer.innerText = snap.val() || "00:00"; resetIdleTimer(); });
+>>>>>>> 9691892 (Initial commit)
             
             onValue(ref(database, `${baseRefPath}/setup`), (snap) => {
                 let data = snap.val();
                 if(data) {
+<<<<<<< HEAD
+                    document.getElementById('l_nama_biru').innerText = data.nama_biru || "SUDUT BIRU"; 
+                    document.getElementById('l_kon_biru').innerText = data.kontingen_biru || "-";
+                    document.getElementById('l_nama_merah').innerText = data.nama_merah || "SUDUT MERAH"; 
+                    document.getElementById('l_kon_merah').innerText = data.kontingen_merah || "-";
+                    document.getElementById('l_partai').innerText = data.partai ? `PARTAI ${data.partai}` : "PARTAI -"; 
+                    document.getElementById('l_babak').innerText = data.babak || "-";
+                    document.getElementById('l_kelas').innerText = data.kelas ? `KELAS ${data.kelas}` : "-";
+                    document.getElementById('namaBiruTV').innerText = data.nama_biru || "SUDUT BIRU";
+                    document.getElementById('namaMerahTV').innerText = data.nama_merah || "SUDUT MERAH";
+                }
+            });
+
+            onValue(rondeRef, (snap) => { rondeAktif = snap.val() || 1; document.getElementById('teksRonde').innerText = "RONDE " + rondeAktif; updateLayarTanding(); });
+=======
                     elNamaBiru.innerText = data.nama_biru || "SUDUT BIRU"; 
                     elKonBiru.innerText = data.kontingen_biru || "-";
                     elNamaMerah.innerText = data.nama_merah || "SUDUT MERAH"; 
@@ -1032,6 +608,7 @@
                 elTeksRonde.innerText = "RONDE " + rondeAktif; 
                 updateLayarTanding(); 
             });
+>>>>>>> 9691892 (Initial commit)
 
             [1, 2, 3].forEach(r => {
                 onValue(ref(database, `${baseRefPath}/biru/r${r}_log`), (snap) => { riwayatBiru[r] = snap.val() ? Object.values(snap.val()) : []; updateLayarTanding(); });
@@ -1049,6 +626,24 @@
                 }
             });
 
+<<<<<<< HEAD
+            onValue(ref(database, baseRefPath), (snap) => {
+                let d = snap.val();
+                if(d && d.izin_simpan === true) {
+                    let teks = document.getElementById('teksPemenangTV'); let alasan = document.getElementById('teksAlasanTV');
+                    if (d.pemenang_keputusan) {
+                        let alTxt = d.alasan_menang === "teknik" ? "T.K.O" : (d.alasan_menang === "undur_diri" ? "UNDUR DIRI" : "W.M.P");
+                        teks.innerHTML = `<span class='${d.pemenang_keputusan==="biru"?"text-primary":"text-danger"}'>PEMENANG SUDUT ${d.pemenang_keputusan.toUpperCase()}</span>`;
+                        alasan.innerHTML = d.alasan_menang === "diskualifikasi" ? `SUDUT LAWAN DISKUALIFIKASI` : alTxt;
+                        alasan.style.display = "block";
+                    } else {
+                        alasan.style.display = "none"; 
+                        teks.innerHTML = finalSkorBiru > finalSkorMerah ? "<span class='text-primary'>SUDUT BIRU MENANG</span>" : (finalSkorMerah > finalSkorBiru ? "<span class='text-danger'>SUDUT MERAH MENANG</span>" : "<span class='text-secondary'>HASIL SERI</span>");
+                    }
+                    document.getElementById('skorBiruTV').innerText = finalSkorBiru; document.getElementById('skorMerahTV').innerText = finalSkorMerah;
+                    modalHasilTVInstance.show();
+                } else { if(modalHasilTVInstance) modalHasilTVInstance.hide(); }
+=======
             // SENSOR PENENTUAN PEMENANG AKHIR
             onValue(ref(database, baseRefPath), (snap) => {
                 let d = snap.val();
@@ -1133,6 +728,7 @@
                     }
                     if (window.tutupEfekPemenang) window.tutupEfekPemenang();
                 }
+>>>>>>> 9691892 (Initial commit)
             });
         }
 
@@ -1144,6 +740,18 @@
                 riwayatMerah[i].forEach(p=>{ if(p===0)hM['0']++; else if(p===-1||p===-2)hM['-1']++; else if(p===-5||p===-10)hM['-5']++; else if(p===3)hM['3']++; });
             }
             finalSkorBiru = tB; finalSkorMerah = tM;
+<<<<<<< HEAD
+            document.getElementById('skorTotalBiru').innerText = tB; document.getElementById('skorTotalMerah').innerText = tM;
+            let pB = document.getElementById('panelSkorBiru'); let pM = document.getElementById('panelSkorMerah');
+            if(tB>tM){ pB.classList.remove('kalah'); pM.classList.add('kalah'); document.body.className="lead-biru"; } 
+            else if(tM>tB){ pM.classList.remove('kalah'); pB.classList.add('kalah'); document.body.className="lead-merah"; } 
+            else { pB.classList.remove('kalah'); pM.classList.remove('kalah'); document.body.className=""; }
+            ['0','-1','-5','3'].forEach(p=>{
+                document.getElementById(`b_count_${p}`).style.display = hB[p]>0?"inline":"none"; document.getElementById(`b_count_${p}`).innerText = hB[p];
+                document.getElementById(`m_count_${p}`).style.display = hM[p]>0?"inline":"none"; document.getElementById(`m_count_${p}`).innerText = hM[p];
+            });
+        }
+=======
 
             // Cek apakah skor biru berubah
             if (parseInt(elSkorBiru.innerText) !== tB) {
@@ -1254,6 +862,7 @@
             // Tambahkan kembali class animasinya
             elemen.classList.add('skor-berubah');
         }
+>>>>>>> 9691892 (Initial commit)
     </script>
 </body>
 </html>
