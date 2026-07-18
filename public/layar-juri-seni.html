@@ -277,7 +277,12 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
     import { getDatabase, ref, set, onValue, get, onDisconnect } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js";
 
-    // Ganti dengan Config Firebase kamu sendiri jika perlu (ini saya samakan dengan juri tanding)
+    const ruangAktif = localStorage.getItem('kode_voucer_aktif');
+if (!ruangAktif) {
+    window.location.href = 'index.html'; 
+}
+    
+
     const firebaseConfig = {
         apiKey: "AIzaSyCNsOk8MsIhBoZ44Nd9WGGl6eBJOEKu3nI",
         authDomain: "tesapksilat99.firebaseapp.com",
@@ -329,7 +334,7 @@
     window.pantauLockGelanggang = function() {
         let gel = document.getElementById('lGelanggang').value;
         if(unsubscribeLock) unsubscribeLock(); 
-        let lockRef = ref(database, `pertandingan/${gel}/locks`);
+        let lockRef = ref(database, `${ruangAktif}/pertandingan/${gel}/locks`);
 
         unsubscribeLock = onValue(lockRef, (snap) => {
             let locks = snap.val() || {}; 
@@ -377,7 +382,7 @@
 
         // Cek & Kunci Slot di Firebase
         let slotId = (pos === 'dewan') ? 'seni_dewan' : `seni_${juri}`; 
-        let lockRef = ref(database, `pertandingan/${gel}/locks/${slotId}`);
+        let lockRef = ref(database, `${ruangAktif}/pertandingan/${gel}/locks/${slotId}`);
         let snap = await get(lockRef);
         
         if(snap.exists() && snap.val() === true) {
@@ -423,7 +428,7 @@
     window.logoutSeni = function() {
         // Hapus Kunci Firebase sebelum reload
         if(sessionSeni.gel && sessionSeni.slotId) { 
-            set(ref(database, `pertandingan/${sessionSeni.gel}/locks/${sessionSeni.slotId}`), null); 
+            set(ref(database, `${ruangAktif}/pertandingan/${sessionSeni.gel}/locks/${sessionSeni.slotId}`), null); 
         } 
         setTimeout(() => { window.location.reload(); }, 200);
     }
@@ -446,7 +451,7 @@
 
         // PUSH SKOR KE FIREBASE REALTIME
         if (sessionSeni.gel && sessionSeni.juriId) {
-            set(ref(database, `pertandingan/${sessionSeni.gel}/seni/skor/${sessionSeni.juriId}`), parseFloat(skorAkhir));
+            set(ref(database, `${ruangAktif}/pertandingan/${sessionSeni.gel}/seni/skor/${sessionSeni.juriId}`), parseFloat(skorAkhir));
         }
     }
 
@@ -470,7 +475,7 @@
     let timerAnimasiJuri = {};
 
     function pasangSistemFirebaseDewan() {
-        let baseRef = `pertandingan/${sessionSeni.gel}/seni`;
+        let baseRef = `${ruangAktif}/pertandingan/${sessionSeni.gel}/seni`;
 
         // DENGARKAN SKOR JURI 1-6 SECARA REAL-TIME
         onValue(ref(database, `${baseRef}/skor`), (snap) => {
@@ -500,7 +505,7 @@
         });
 
         // Ambil Data Atlet dari Setup
-        onValue(ref(database, `pertandingan/${sessionSeni.gel}/setup`), (snap) => {
+        onValue(ref(database, `${ruangAktif}/pertandingan/${sessionSeni.gel}/setup`), (snap) => {
             let data = snap.val();
             if(data) {
                 // 🔥 KABEL 2 TERSAMBUNG: Tablet Dewan & Juri pintar mendeteksi sudut Merah
@@ -530,7 +535,7 @@
         document.getElementById('teksTotalHukuman').innerText = "-" + totalHukumanDewan.toFixed(2);
         
         // PUSH TOTAL HUKUMAN KE FIREBASE
-        set(ref(database, `pertandingan/${sessionSeni.gel}/seni/hukuman`), totalHukumanDewan);
+        set(ref(database, `${ruangAktif}/pertandingan/${sessionSeni.gel}/seni/hukuman`), totalHukumanDewan);
     }
 
     window.kalkulasiSkorDewan = function() {
@@ -545,22 +550,22 @@
         document.getElementById('skorAkhirFinal').innerText = skorAkhir.toFixed(3);
 
         // PUSH SKOR AKHIR FINAL KE FIREBASE (Untuk Layar Monitor)
-        set(ref(database, `pertandingan/${sessionSeni.gel}/seni/hasil_akhir`), parseFloat(skorAkhir.toFixed(3)));
+        set(ref(database, `${ruangAktif}/pertandingan/${sessionSeni.gel}/seni/hasil_akhir`), parseFloat(skorAkhir.toFixed(3)));
     }
 
 
     // 🔥 KABEL 4 LANJUTAN: Logika Pengesahan
     window.sahkanNilaiSeni = function() {
-        set(ref(database, `pertandingan/${sessionSeni.gel}/status`), "PERTANDINGAN SELESAI");
-        set(ref(database, `pertandingan/${sessionSeni.gel}/timer`), "00:00");
-        set(ref(database, `pertandingan/${sessionSeni.gel}/izin_simpan`), true).then(() => {
+        set(ref(database, `${ruangAktif}/pertandingan/${sessionSeni.gel}/status`), "PERTANDINGAN SELESAI");
+        set(ref(database, `${ruangAktif}/pertandingan/${sessionSeni.gel}/timer`), "00:00");
+        set(ref(database, `${ruangAktif}/pertandingan/${sessionSeni.gel}/izin_simpan`), true).then(() => {
             showCustomAlert("✅ PENGESAHAN BERHASIL", "Skor akhir telah disahkan. Panitia sekarang dapat merekam data ke sistem.", "text-success");
         });
     }
 
     // 🔥 KABEL 1 & 5 TERSAMBUNG: Sensor Waktu Juri & Sinkronisasi Reset Panitia
     function pantauStatusDanResetSeni() {
-        onValue(ref(database, `pertandingan/${sessionSeni.gel}/status`), (snap) => {
+        onValue(ref(database, `${ruangAktif}/pertandingan/${sessionSeni.gel}/status`), (snap) => {
             let status = snap.val() || "PERSIAPAN";
             
             // Mengunci Juri Seni saat Jeda / Belum Main

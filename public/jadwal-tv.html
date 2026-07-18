@@ -204,6 +204,13 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js";
 
+        const ruangAktif = localStorage.getItem('kode_voucer_aktif');
+if (!ruangAktif) {
+    window.location.href = 'index.html'; 
+}
+
+
+
         const firebaseConfig = {
             apiKey: "AIzaSyCNsOk8MsIhBoZ44Nd9WGGl6eBJOEKu3nI",
             authDomain: "tesapksilat99.firebaseapp.com",
@@ -321,7 +328,7 @@
             });
 
             ['g1', 'g2', 'g3', 'g4', 'g5', 'g6'].forEach(gel => {
-                onValue(ref(database, `pertandingan/${gel}/setup`), (snap) => {
+                onValue(ref(database, `${ruangAktif}/pertandingan/${gel}/setup`), (snap) => {
                     livePanitiaMap[gel] = snap.val() || {}; kalkulasiTampilan();
                 });
             });
@@ -329,7 +336,7 @@
             // =======================================================
             // 🔥 MESIN PENANGKAP SINYAL SKALA JADWAL DARI FIREBASE
             // =======================================================
-            let targetPathSkala = (GELANGGANG === 'semua') ? 'pertandingan/g1/skala_jadwal' : `pertandingan/${GELANGGANG}/skala_jadwal`;
+            let targetPathSkala = (GELANGGANG === 'semua') ? 'pertandingan/g1/skala_jadwal' : `${ruangAktif}/pertandingan/${GELANGGANG}/skala_jadwal`;
             onValue(ref(database, targetPathSkala), (snap) => {
                 let s = snap.val();
                 if(s) {

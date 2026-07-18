@@ -211,7 +211,7 @@
 
                 // --- FITUR TENDANG PAKSA (CCTV FIREBASE) ---
                 if (kodeAktif) {
-                    db.ref('vouchers/' + kodeAktif).on('value', (snapshot) => {
+                    db.ref('00_isi_vouchers_disini/' + kodeAktif).on('value', (snapshot) => {
                         // Jika data tiba-tiba hilang/dihapus dari Firebase
                         if (!snapshot.exists()) {
                             localStorage.removeItem('batas_waktu_voucer');
@@ -274,7 +274,7 @@
             pesan.innerText = "";
 
             try {
-                const dbRef = db.ref('vouchers/' + kode);
+                const dbRef = db.ref('00_isi_vouchers_disini/' + kode);
                 const snapshot = await dbRef.once('value');
 
                 if (snapshot.exists()) {

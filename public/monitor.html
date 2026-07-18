@@ -124,6 +124,13 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js";
 
+        const ruangAktif = localStorage.getItem('kode_voucer_aktif');
+if (!ruangAktif) {
+    window.location.href = 'index.html'; 
+}
+
+
+
         const firebaseConfig = {
             apiKey: "AIzaSyCNsOk8MsIhBoZ44Nd9WGGl6eBJOEKu3nI",
             authDomain: "tesapksilat99.firebaseapp.com",
@@ -138,7 +145,7 @@
 
         document.addEventListener("DOMContentLoaded", () => {
             for(let i = 1; i <= 7; i++) {
-                onValue(ref(database, `pertandingan/g${i}/locks/layar_utama`), (snap) => {
+                onValue(ref(database, `${ruangAktif}/pertandingan/g${i}/locks/layar_utama`), (snap) => {
                     let optTanding = document.getElementById(`opt_t_g${i}`);
                     let optSeni = document.getElementById(`opt_s_g${i}`); // 🔥 KABEL 3 TERSAMBUNG
                     let isLocked = snap.exists() && snap.val() === true;

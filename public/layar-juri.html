@@ -227,20 +227,14 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content dark-theme border-info" style="border-width: 2px;">
             <div class="modal-header dark-theme justify-content-center position-relative">
-                <h5 class="modal-title text-info fw-bold">VERIFIKASI</h5>
+                <h5 class="modal-title text-info fw-bold">PILIH VERIFIKASI</h5>
                 <button type="button" class="btn-close btn-close-white position-absolute end-0 me-3" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body text-center py-4">
-                <h6 class="text-light mb-3 letter-spacing-1" style="font-size: 12px;">1. SUDUT MANA YANG MENGAJUKAN?</h6>
-                <div class="d-flex justify-content-center gap-3 mb-4">
-                    <button id="btnSdtVerifBiru" class="btn btn-outline-primary w-50 fw-bold py-2 fs-5" onclick="setSudutVerifikasi('biru')">BIRU</button>
-                    <button id="btnSdtVerifMerah" class="btn btn-outline-danger w-50 fw-bold py-2 fs-5" onclick="setSudutVerifikasi('merah')">MERAH</button>
-                </div>
-                
-                <h6 class="text-light mb-3 letter-spacing-1" style="font-size: 12px;">2. APA YANG DIVERIFIKASI?</h6>
+                <h6 class="text-light mb-3 letter-spacing-1" style="font-size: 12px;">APA YANG INGIN DIVERIFIKASI?</h6>
                 <div class="row g-2 mb-2">
-                    <div class="col-6"><button id="btnTipeVerifJatuhan" class="btn btn-outline-light w-100 fw-bold py-3" disabled onclick="kirimSinyalVerifikasi('jatuhan')">JATUHAN</button></div>
-                    <div class="col-6"><button id="btnTipeVerifPelang" class="btn btn-outline-light w-100 fw-bold py-3" disabled onclick="kirimSinyalVerifikasi('pelanggaran')">PELANGGARAN</button></div>
+                    <div class="col-6"><button id="btnTipeVerifJatuhan" class="btn btn-outline-light w-100 fw-bold py-3" onclick="kirimSinyalVerifikasi('jatuhan')">JATUHAN</button></div>
+                    <div class="col-6"><button id="btnTipeVerifPelang" class="btn btn-outline-light w-100 fw-bold py-3" onclick="kirimSinyalVerifikasi('pelanggaran')">PELANGGARAN</button></div>
                 </div>
             </div>
         </div>
@@ -412,7 +406,13 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
     import { getDatabase, ref, set, onValue, get, onDisconnect } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js";
 
-    // 🔥 DOM CACHING (MENYIMPAN ELEMEN KE MEMORI) 🔥
+    const ruangAktif = localStorage.getItem('kode_voucer_aktif');
+if (!ruangAktif) {
+    window.location.href = 'index.html'; 
+}
+    
+
+
     const elLGelanggang = document.getElementById('lGelanggang');
     const elLPosisi = document.getElementById('lPosisi');
     const elLJuri = document.getElementById('lJuri');
@@ -538,16 +538,16 @@
         if (binM < binB) return { sudut: "merah", alasan: "Menang Poin" };
         
         let jB = hitungKejadian(logB, x => x === 3); let jM = hitungKejadian(logM, x => x === 3);
-        if (jB > jM) return { sudut: "biru", alasan: "Menang Nilai Teknik (Jatuhan)" };
-        if (jM > jB) return { sudut: "merah", alasan: "Menang Nilai Teknik (Jatuhan)" };
+        if (jB > jM) return { sudut: "biru", alasan: "Menang Poin" };
+        if (jM > jB) return { sudut: "merah", alasan: "Menang Poin" };
         
         let tB = hitungKejadian(logB, x => x === 2); let tM = hitungKejadian(logM, x => x === 2);
-        if (tB > tM) return { sudut: "biru", alasan: "Menang Nilai Teknik (Tendangan)" };
-        if (tM > tB) return { sudut: "merah", alasan: "Menang Nilai Teknik (Tendangan)" };
+        if (tB > tM) return { sudut: "biru", alasan: "Menang Poin" };
+        if (tM > tB) return { sudut: "merah", alasan: "Menang Poin" };
         
         let pB = hitungKejadian(logB, x => x === 1); let pM = hitungKejadian(logM, x => x === 1);
-        if (pB > pM) return { sudut: "biru", alasan: "Menang Nilai Teknik (Pukulan)" };
-        if (pM > pB) return { sudut: "merah", alasan: "Menang Nilai Teknik (Pukulan)" };
+        if (pB > pM) return { sudut: "biru", alasan: "Menang Poin" };
+        if (pM > pB) return { sudut: "merah", alasan: "Menang Poin" };
         
         return { sudut: (Math.random() > 0.5 ? "biru" : "merah"), alasan: "Undian Sistem" };
     }
@@ -587,7 +587,7 @@
     window.pantauLockGelanggang = function() {
         let gel = elLGelanggang.value;
         if(unsubscribeLock) unsubscribeLock(); 
-        let lockRef = ref(database, `pertandingan/${gel}/locks`);
+        let lockRef = ref(database, `${ruangAktif}/pertandingan/${gel}/locks`);
 
         unsubscribeLock = onValue(lockRef, (snap) => {
             let locks = snap.val() || {}; 
@@ -638,7 +638,7 @@
         }
 
         elBtnLoginApp.innerText = "MEMPROSES..."; elBtnLoginApp.disabled = true;
-        let slotId = (pos === 'dewan') ? 'dewan' : juri; let lockRef = ref(database, `pertandingan/${gel}/locks/${slotId}`);
+        let slotId = (pos === 'dewan') ? 'dewan' : juri; let lockRef = ref(database, `${ruangAktif}/pertandingan/${gel}/locks/${slotId}`);
         let snap = await get(lockRef);
         if(snap.exists() && snap.val() === true) {
             let namaSlot = (pos === 'dewan') ? "Dewan Juri" : juri.toUpperCase();
@@ -662,7 +662,7 @@
             </div>
         `;
         if(session.gel && session.slotId) { 
-            set(ref(database, `pertandingan/${session.gel}/locks/${session.slotId}`), null); 
+            set(ref(database, `${ruangAktif}/pertandingan/${session.gel}/locks/${session.slotId}`), null); 
         } 
         setTimeout(() => { window.location.reload(); }, 300);
     }
@@ -715,8 +715,8 @@
         if (session.pos !== 'dewan') return;
         let gel = session.gel;
         
-        set(ref(database, `pertandingan/${gel}/timer_run`), false);
-        set(ref(database, `pertandingan/${gel}/status`), "PAUSE");
+        set(ref(database, `${ruangAktif}/pertandingan/${gel}/timer_run`), false);
+        set(ref(database, `${ruangAktif}/pertandingan/${gel}/status`), "PAUSE");
 
         if(typeof resetPopupHentikanPertandingan === "function") resetPopupHentikanPertandingan();
 
@@ -730,97 +730,94 @@
 
     window.bukaCabangVerifikasi = function() {
         bootstrap.Modal.getInstance(document.getElementById('modalMenuJeda')).hide();
-        
-        sudutVerifAktif = "";
-        document.getElementById('btnSdtVerifBiru').className = 'btn btn-outline-primary w-50 fw-bold py-2 fs-5';
-        document.getElementById('btnSdtVerifMerah').className = 'btn btn-outline-danger w-50 fw-bold py-2 fs-5';
-        document.getElementById('btnTipeVerifJatuhan').disabled = true;
-        document.getElementById('btnTipeVerifPelang').disabled = true;
-        
+        // Buka popup verifikasi langsung tanpa reset tombol sudut (karena sudah dihapus)
         bootstrap.Modal.getOrCreateInstance(document.getElementById('modalPilihVerifikasi')).show();
     }
 
-    window.setSudutVerifikasi = function(sudut) {
-        sudutVerifAktif = sudut;
-        document.getElementById('btnSdtVerifBiru').className = (sudut === 'biru') ? 'btn btn-primary w-50 fw-bold py-2 fs-5' : 'btn btn-outline-primary w-50 fw-bold py-2 fs-5';
-        document.getElementById('btnSdtVerifMerah').className = (sudut === 'merah') ? 'btn btn-danger w-50 fw-bold py-2 fs-5' : 'btn btn-outline-danger w-50 fw-bold py-2 fs-5';
-        
-        document.getElementById('btnTipeVerifJatuhan').disabled = false;
-        document.getElementById('btnTipeVerifPelang').disabled = false;
-    }
-
     window.kirimSinyalVerifikasi = function(tipe) {
-        if (!sudutVerifAktif) return;
-        
-        let payload = { id: Date.now(), tipe: tipe, sudut: sudutVerifAktif, aktif: true, hasil: "", votes: { j1: "", j2: "", j3: "" } };
-        set(ref(database, `pertandingan/${session.gel}/verifikasi`), payload);
+        // Hanya mengirim tipe (jatuhan/pelanggaran) tanpa variabel 'sudut'
+        let payload = { id: Date.now(), tipe: tipe, aktif: true, hasil: "", votes: { j1: "", j2: "", j3: "" } };
+        set(ref(database, `${ruangAktif}/pertandingan/${session.gel}/verifikasi`), payload);
         
         bootstrap.Modal.getInstance(document.getElementById('modalPilihVerifikasi')).hide();
     }
 
     window.kirimVoteJuri = function(pilihan) {
         if(!currentVerifikasi) return;
-        set(ref(database, `pertandingan/${session.gel}/verifikasi/votes/${session.slotId}`), pilihan);
+        set(ref(database, `${ruangAktif}/pertandingan/${session.gel}/verifikasi/votes/${session.slotId}`), pilihan);
     }
 
     window.batalkanVerifikasi = function() {
         let gel = session.gel;
-        set(ref(database, `pertandingan/${gel}/verifikasi`), null);
+        set(ref(database, `${ruangAktif}/pertandingan/${gel}/verifikasi`), null);
         let modalVerif = bootstrap.Modal.getInstance(document.getElementById('modalVerifikasiDewan'));
         if(modalVerif) modalVerif.hide();
     }
 
     window.eksekusiHasilVerifikasi = function() {
-        if (!currentVerifikasi || !currentVerifikasi.votes) return;
+    if (!currentVerifikasi || !currentVerifikasi.votes) return;
+    
+    let v = currentVerifikasi.votes;
+    let cBiru = 0, cMerah = 0, cTidak = 0;
+    let totalVotes = 0;
+
+    ['j1', 'j2', 'j3'].forEach(j => {
+        if (v[j] === 'biru') { cBiru++; totalVotes++; }
+        else if (v[j] === 'merah') { cMerah++; totalVotes++; }
+        else if (v[j] === 'tidak') { cTidak++; totalVotes++; }
+    });
+
+    if (totalVotes < 2) {
+        showCustomAlert("Belum Selesai", "Tunggu minimal 2 Juri memberikan suaranya sebelum menampilkan hasil.", "text-warning", 3000); return;
+    }
+
+    let pemenangVar = "tidak";
+    if (cBiru >= 2) pemenangVar = "biru";
+    else if (cMerah >= 2) pemenangVar = "merah";
+    else if (cTidak >= 2) pemenangVar = "tidak";
+    else if (totalVotes === 3) pemenangVar = "imbang_batal"; 
+    else { showCustomAlert("Suara Imbang", "Suara masih 1 vs 1. Tunggu Juri ke-3 memberikan suaranya.", "text-info", 3000); return; }
+
+    tutupVerifikasi(pemenangVar);
+}
+
+window.tutupVerifikasi = function(hasilVar) {
+    let gel = session.gel;
+    let tipeVerif = currentVerifikasi.tipe; // Isinya 'jatuhan' atau 'pelanggaran'
+    
+    // Langsung kirim hasil finalnya ke Layar TV
+    set(ref(database, `${ruangAktif}/pertandingan/${gel}/verifikasi/hasil`), hasilVar);
+    
+    let teksTipe = (tipeVerif === 'jatuhan') ? 'Jatuhan' : 'Pelanggaran';
+
+    // LOGIKA TAMPILAN ALERT DI TABLET DEWAN
+    if (hasilVar === 'biru' || hasilVar === 'merah') {
+        let namaSudutTarget = `SUDUT ${hasilVar.toUpperCase()}`;
+        let warnaTarget = (hasilVar === 'biru') ? 'text-primary' : 'text-danger';
         
-        let v = currentVerifikasi.votes;
-        let cBiru = 0, cMerah = 0, cTidak = 0;
-        let totalVotes = 0;
-
-        ['j1', 'j2', 'j3'].forEach(j => {
-            if (v[j] === 'biru') { cBiru++; totalVotes++; }
-            else if (v[j] === 'merah') { cMerah++; totalVotes++; }
-            else if (v[j] === 'tidak') { cTidak++; totalVotes++; }
-        });
-
-        if (totalVotes < 2) {
-            showCustomAlert("Belum Selesai", "Tunggu minimal 2 Juri memberikan suaranya sebelum menampilkan hasil.", "text-warning", 3000); return;
-        }
-
-        let pemenangVar = "tidak";
-        if (cBiru >= 2) pemenangVar = "biru";
-        else if (cMerah >= 2) pemenangVar = "merah";
-        else if (cTidak >= 2) pemenangVar = "tidak";
-        else if (totalVotes === 3) pemenangVar = "imbang_batal"; 
-        else { showCustomAlert("Suara Imbang", "Suara masih 1 vs 1. Tunggu Juri ke-3 memberikan suaranya.", "text-info", 3000); return; }
-
-        tutupVerifikasi(pemenangVar);
+        showCustomAlert(
+            `✅ ${teksTipe.toUpperCase()} SAH`, 
+            `${teksTipe} <b class="text-success">SAH</b> untuk <b class="${warnaTarget}">${namaSudutTarget}</b>!<br><small class="text-light">Berdasarkan Voting Mayoritas Juri</small>`, 
+            "text-success", 6000
+        );
+    } else {
+        let alasanText = (hasilVar === "imbang_batal") ? "Suara juri terpecah (1 vs 1 vs 1)." : "Mayoritas juri menyatakan TIDAK SAH.";
+        
+        showCustomAlert(
+            `❌ ${teksTipe.toUpperCase()} TIDAK SAH`, 
+            `${teksTipe} dinyatakan <b class="text-danger">TIDAK SAH</b>.<br><small class="text-secondary">${alasanText}</small>`, 
+            "text-danger", 6000
+        );
     }
     
-    window.tutupVerifikasi = function(hasilVar) {
-        let gel = session.gel;
-        
-        set(ref(database, `pertandingan/${gel}/verifikasi/hasil`), hasilVar);
-        
-        if (hasilVar === 'biru' || hasilVar === 'merah') {
-            if (currentVerifikasi.tipe === 'jatuhan') {
-                showCustomAlert("✅ JATUHAN DISAHKAN", `Jatuhan sudut <b class="text-uppercase">${hasilVar}</b> SAH (Mayoritas Juri)!<br><span class="text-warning">Silakan tekan tombol poin Jatuhan secara manual JIKA poin belum masuk.</span>`, "text-success", 5000);
-            } else {
-                showCustomAlert("⚠️ PELANGGARAN DISAHKAN", `Pelanggaran oleh sudut <b class="text-uppercase">${hasilVar}</b> SAH (Mayoritas Juri)!<br><span class="text-warning">Silakan tekan tombol poin pelanggaran yang sesuai.</span>`, "text-warning", 5000);
-            }
-        } else {
-            let alasanText = (hasilVar === "imbang_batal") ? "Suara juri terpecah (1 vs 1 vs 1)." : "Mayoritas juri menyatakan TIDAK ADA.";
-            showCustomAlert("❌ VERIFIKASI DITOLAK", `${alasanText}<br>Pertandingan dilanjutkan tanpa perubahan nilai.`, "text-danger", 5000);
-        }
-        
-        let modalVerif = bootstrap.Modal.getInstance(document.getElementById('modalVerifikasiDewan'));
-        if(modalVerif) modalVerif.hide();
-        
-        setTimeout(() => {
-            set(ref(database, `pertandingan/${gel}/verifikasi/aktif`), false);
-            set(ref(database, `pertandingan/${gel}/verifikasi`), null);
-        }, 5000);
-    }
+    let modalVerif = bootstrap.Modal.getInstance(document.getElementById('modalVerifikasiDewan'));
+    if(modalVerif) modalVerif.hide();
+    
+    setTimeout(() => {
+        set(ref(database, `${ruangAktif}/pertandingan/${gel}/verifikasi/aktif`), false);
+        set(ref(database, `${ruangAktif}/pertandingan/${gel}/verifikasi`), null);
+    }, 5000);
+}
 
     window.pilihPemenangPertandingan = function(sudut) {
         selectedPemenangPertandingan = sudut;
@@ -864,18 +861,18 @@
         let gel = elLGelanggang.value || session.gel; 
         
         let teksAlasanTv = selectedAlasanPertandingan;
-        if (selectedAlasanPertandingan === 'teknik') teksAlasanTv = "T.K.O / MENANG TEKNIK";
-        else if (selectedAlasanPertandingan === 'undur_diri') teksAlasanTv = "UNDUR DIRI";
-        else if (selectedAlasanPertandingan === 'diskualifikasi') teksAlasanTv = "DISKUALIFIKASI";
-        else if (selectedAlasanPertandingan === 'wmp') teksAlasanTv = "W.M.P";
+        if (selectedAlasanPertandingan === 'teknik') teksAlasanTv = "MENANG TEKNIK";
+        else if (selectedAlasanPertandingan === 'undur_diri') teksAlasanTv = "MENANG UNDUR DIRI";
+        else if (selectedAlasanPertandingan === 'diskualifikasi') teksAlasanTv = "MENANG DISKUALIFIKASI";
+        else if (selectedAlasanPertandingan === 'wmp') teksAlasanTv = "MENANG W.M.P";
 
-        set(ref(database, `pertandingan/${gel}/pemenang_keputusan`), selectedPemenangPertandingan);
-        set(ref(database, `pertandingan/${gel}/alasan_menang`), teksAlasanTv); 
+        set(ref(database, `${ruangAktif}/pertandingan/${gel}/pemenang_keputusan`), selectedPemenangPertandingan);
+        set(ref(database, `${ruangAktif}/pertandingan/${gel}/alasan_menang`), teksAlasanTv); 
         
-        set(ref(database, `pertandingan/${gel}/status`), "PERTANDINGAN SELESAI");
-        set(ref(database, `pertandingan/${gel}/timer`), "00:00");
-        set(ref(database, `pertandingan/${gel}/izin_simpan`), true);
-        set(ref(database, `pertandingan/${gel}/trigger_auto_save`), Date.now()); 
+        set(ref(database, `${ruangAktif}/pertandingan/${gel}/status`), "PERTANDINGAN SELESAI");
+        set(ref(database, `${ruangAktif}/pertandingan/${gel}/timer`), "00:00");
+        set(ref(database, `${ruangAktif}/pertandingan/${gel}/izin_simpan`), true);
+        set(ref(database, `${ruangAktif}/pertandingan/${gel}/trigger_auto_save`), Date.now()); 
         
         let modalHentikan = bootstrap.Modal.getInstance(document.getElementById('modalHentikanPertandingan'));
         if(modalHentikan) modalHentikan.hide();
@@ -887,11 +884,11 @@
         let gel = elLGelanggang.value || session.gel; 
         let pemenangLawan = (sudutYgDisq === 'biru') ? 'merah' : 'biru';
         
-        set(ref(database, `pertandingan/${gel}/pemenang_keputusan`), pemenangLawan);
-        set(ref(database, `pertandingan/${gel}/alasan_menang`), "diskualifikasi");
-        set(ref(database, `pertandingan/${gel}/izin_simpan`), true);
-        set(ref(database, `pertandingan/${gel}/status`), "PERTANDINGAN SELESAI");
-        set(ref(database, `pertandingan/${gel}/timer`), "00:00");
+        set(ref(database, `${ruangAktif}/pertandingan/${gel}/pemenang_keputusan`), pemenangLawan);
+        set(ref(database, `${ruangAktif}/pertandingan/${gel}/alasan_menang`), "diskualifikasi");
+        set(ref(database, `${ruangAktif}/pertandingan/${gel}/izin_simpan`), true);
+        set(ref(database, `${ruangAktif}/pertandingan/${gel}/status`), "PERTANDINGAN SELESAI");
+        set(ref(database, `${ruangAktif}/pertandingan/${gel}/timer`), "00:00");
 
         let namaPesilat = sudutYgDisq === 'biru' ? elNamaBiru.innerText : elNamaMerah.innerText;
         let colorClass = sudutYgDisq === 'biru' ? 'text-primary' : 'text-danger';
@@ -905,6 +902,8 @@
 
     window.tampilkanPopupPemenang = function() {
         if (session.pos !== 'dewan') return;
+        dataSkorDewan.biru = parseInt(elTotalBiruAtas.innerText) || 0;
+        dataSkorDewan.merah = parseInt(elTotalMerahAtas.innerText) || 0;
 
         window.isModeEdit = false; 
         
@@ -988,15 +987,15 @@
         let gel = elLGelanggang.value || session.gel; 
 
         if (window.alasanPemenangFinalDewan) {
-            set(ref(database, `pertandingan/${gel}/alasan_menang`), window.alasanPemenangFinalDewan);
+            set(ref(database, `${ruangAktif}/pertandingan/${gel}/alasan_menang`), window.alasanPemenangFinalDewan);
         }
         if (window.hasilPemenangFinalDewan) {
-            set(ref(database, `pertandingan/${gel}/pemenang_keputusan`), window.hasilPemenangFinalDewan);
+            set(ref(database, `${ruangAktif}/pertandingan/${gel}/pemenang_keputusan`), window.hasilPemenangFinalDewan);
         }
 
-        set(ref(database, `pertandingan/${gel}/status`), "PERTANDINGAN SELESAI");
-        set(ref(database, `pertandingan/${gel}/izin_simpan`), true);
-        set(ref(database, `pertandingan/${gel}/trigger_auto_save`), Date.now())
+        set(ref(database, `${ruangAktif}/pertandingan/${gel}/status`), "PERTANDINGAN SELESAI");
+        set(ref(database, `${ruangAktif}/pertandingan/${gel}/izin_simpan`), true);
+        set(ref(database, `${ruangAktif}/pertandingan/${gel}/trigger_auto_save`), Date.now())
             .then(() => {
                 let modalEl = document.getElementById('modalPengesahanHasil');
                 let modalInst = bootstrap.Modal.getInstance(modalEl) || modalPengesahanInstance;
@@ -1006,7 +1005,7 @@
     }
 
     function pasangSistemFirebase() {
-        let baseRef = `pertandingan/${session.gel}`;
+        let baseRef = `${ruangAktif}/pertandingan/${session.gel}`;
         rondeRef = ref(database, `${baseRef}/ronde_aktif`);
 
         onValue(ref(database, `${baseRef}/timer`), (snap) => {
@@ -1245,7 +1244,7 @@ if(data) {
     }
 
     window.catatPoin = function(sudut, nilai, isAutoSah = false) {
-        let baseRef = `pertandingan/${session.gel}`;
+        let baseRef = `${ruangAktif}/pertandingan/${session.gel}`;
         let timestamp = Date.now();
 
         if(session.pos === 'dewan') {
@@ -1320,7 +1319,7 @@ if(data) {
     
     window.undoSkor = function(sudut, ronde) {
         if(session.pos !== 'dewan') return; 
-        let baseRef = `pertandingan/${session.gel}`;
+        let baseRef = `${ruangAktif}/pertandingan/${session.gel}`;
         if(sudut === 'biru') { 
             if(riwayatBiru[ronde].length > 0) { riwayatBiru[ronde].pop(); set(ref(database, `${baseRef}/biru/r${ronde}_log`), riwayatBiru[ronde]); set(ref(database, `${baseRef}/biru/r${ronde}`), riwayatBiru[ronde].reduce((a,b)=>a+b, 0)); } 
         } else { 
@@ -1337,8 +1336,8 @@ if(data) {
     
     window.eksekusiGantiRonde = function() { 
         set(rondeRef, targetRondeBaru); 
-        set(ref(database, `pertandingan/${session.gel}/izin_play`), true);
-        set(ref(database, `pertandingan/${session.gel}/sinyal_dewan`), null);
+        set(ref(database, `${ruangAktif}/pertandingan/${session.gel}/izin_play`), true);
+        set(ref(database, `${ruangAktif}/pertandingan/${session.gel}/sinyal_dewan`), null);
     }
 </script>
 </body>

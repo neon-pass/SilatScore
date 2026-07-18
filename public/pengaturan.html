@@ -214,6 +214,12 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
         import { getDatabase, ref, set, update, onValue, get } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js";
 
+        const ruangAktif = localStorage.getItem('kode_voucer_aktif');
+if (!ruangAktif) {
+    window.location.href = 'index.html'; 
+}
+
+
         const firebaseConfig = { apiKey: "AIzaSyCNsOk8MsIhBoZ44Nd9WGGl6eBJOEKu3nI", authDomain: "tesapksilat99.firebaseapp.com", databaseURL: "https://tesapksilat99-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "tesapksilat99", storageBucket: "tesapksilat99.firebasestorage.app", messagingSenderId: "747533449255", appId: "1:747533449255:web:358edf3c6032c22cdbb602" };
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
@@ -245,16 +251,20 @@
         };
         window.gantiKonteksSkala = function() { targetGelSkala = document.getElementById('pilihGelanggangSkala').value; targetJenisSkala = document.getElementById('pilihJenisLayarSkala').value; renderUI_Sliders(); pantauSkalaFirebase(targetGelSkala, targetJenisSkala); }
         function renderUI_Sliders() { let conf = configSliders[targetJenisSkala]; let html = ""; conf.forEach(c => { html += `<div class="slider-row"><label class="slider-label">${c.label}</label><input type="range" class="slider-input" id="slide_${c.id}" min="${c.min}" max="${c.max}" step="${c.step}" oninput="updateSkalaLive('${c.id}', this.value, '${c.unit}')"><span class="slider-val" id="val_${c.id}">-</span></div>`; }); document.getElementById('wadahSlidersSkala').innerHTML = html; }
-        function pantauSkalaFirebase(gelId, jenisId) { if (unsubSkala) unsubSkala(); unsubSkala = onValue(ref(database, `pertandingan/${gelId}/${jenisId}`), (snap) => { let data = snap.val() || {}; let conf = configSliders[jenisId]; conf.forEach(c => { let val = data[c.id] !== undefined ? data[c.id] : c.def; let elSlide = document.getElementById(`slide_${c.id}`); let elVal = document.getElementById(`val_${c.id}`); if(elSlide) elSlide.value = val; if(elVal) elVal.innerText = val + ' ' + c.unit; }); }); }
+        function pantauSkalaFirebase(gelId, jenisId) { if (unsubSkala) unsubSkala(); unsubSkala = onValue(ref(database, `${ruangAktif}/pertandingan/${gelId}/${jenisId}`), (snap) => { let data = snap.val() || {}; let conf = configSliders[jenisId]; conf.forEach(c => { let val = data[c.id] !== undefined ? data[c.id] : c.def; let elSlide = document.getElementById(`slide_${c.id}`); let elVal = document.getElementById(`val_${c.id}`); if(elSlide) elSlide.value = val; if(elVal) elVal.innerText = val + ' ' + c.unit; }); }); }
         let timerDebounce = null;
-        window.updateSkalaLive = function(kunciVar, nilai, satuan) { document.getElementById(`val_${kunciVar}`).innerText = `${nilai} ${satuan}`; clearTimeout(timerDebounce); timerDebounce = setTimeout(() => { update(ref(database, `pertandingan/${targetGelSkala}/${targetJenisSkala}`), { [kunciVar]: parseFloat(nilai) }); }, 100); }
+        window.updateSkalaLive = function(kunciVar, nilai, satuan) { document.getElementById(`val_${kunciVar}`).innerText = `${nilai} ${satuan}`; clearTimeout(timerDebounce); timerDebounce = setTimeout(() => { update(ref(database, `${ruangAktif}/pertandingan/${targetGelSkala}/${targetJenisSkala}`), { [kunciVar]: parseFloat(nilai) }); }, 100); }
 
         document.addEventListener("DOMContentLoaded", () => {
             gantiKonteksSkala();
-            onValue(ref(database, 'pengaturan'), (snap) => {
+            onValue(ref(database, `${ruangAktif}/pengaturan`), (snap) => {
                 let data = snap.val() || {};
                 if(data.nama_kejuaraan) document.getElementById('inputNamaKejuaraan').value = data.nama_kejuaraan;
-                if(data.silat_sheet_url) { document.getElementById('sheetUrl').value = data.silat_sheet_url; } else { let savedUrl = localStorage.getItem('silat_sheet_url'); if (savedUrl) document.getElementById('sheetUrl').value = savedUrl; }
+                if(data && data.silat_sheet_url) { 
+    document.getElementById('sheetUrl').value = data.silat_sheet_url; 
+} else { 
+    document.getElementById('sheetUrl').value = ""; 
+}
                 if(data.logos) { Object.keys(dataLogos).forEach(key => { if(data.logos[key]) { dataLogos[key] = data.logos[key]; let pEl = document.getElementById(`prev_${key}`); if(pEl) pEl.innerHTML = `<img src="${dataLogos[key]}">`; } }); }
                 if(data.screensavers) { Object.keys(dataScreensavers).forEach(key => { if(data.screensavers[key]) { dataScreensavers[key] = data.screensavers[key]; let sEl = document.getElementById(`prev_${key}`); if(sEl) sEl.innerHTML = `<img src="${dataScreensavers[key]}">`; } }); }
                 if(data.waktu_screensaver) { document.getElementById('inputWaktuScreensaver').value = data.waktu_screensaver; }
@@ -653,8 +663,8 @@
                 let updates = {};
                 
                 // 2. Tulis CETAK BIRU UTUH ke server (Tetap ada Dami/Bye untuk arsip Bagan)
-                updates['pengaturan/jadwal_tanding'] = window.tempJadwalTanding;
-                updates['pengaturan/jadwal_jurus'] = window.tempJadwalJurus;
+                updates[`${ruangAktif}/pengaturan/jadwal_tanding`] = window.tempJadwalTanding;
+updates[`${ruangAktif}/pengaturan/jadwal_jurus`] = window.tempJadwalJurus;
 
                 let ts = Date.now();
                 let countAutoWin = 0;
@@ -684,7 +694,7 @@
                         dataPemenang['KONTINGEN'] = kontMenang;
 
                         // Kirim ke brankas Pemenang di Gelanggang tersebut
-                        updates[`pertandingan/${gelId}/riwayat_pemenang/${ts + countAutoWin}`] = dataPemenang;
+                        updates[`${ruangAktif}/pertandingan/${gelId}/riwayat_pemenang/${ts + countAutoWin}`] = dataPemenang;
 
                         // Kumpulkan ID index yang sudah selesai (Auto-Win)
                         if (!himpunanSelesaiGelanggang[gelId]) {
@@ -700,7 +710,7 @@
 
                 // Terapkan status partai selesai ke update list
                 for (let gelId in himpunanSelesaiGelanggang) {
-                    updates[`pertandingan/${gelId}/partai_selesai_tanding`] = himpunanSelesaiGelanggang[gelId];
+                    updates[`${ruangAktif}/pertandingan/${gelId}/partai_selesai_tanding`] = himpunanSelesaiGelanggang[gelId];
                 }
 
                 // 4. Eksekusi Kirim Massal ke Database
@@ -774,11 +784,32 @@
         };
 
         window.simpanPengaturan = function() {
-            let urlInput = document.getElementById('sheetUrl').value.trim(); let namaKejuaraan = document.getElementById('inputNamaKejuaraan').value.trim(); let waktuTunggu = parseInt(document.getElementById('inputWaktuScreensaver').value) || 60;
-            if(urlInput !== "") localStorage.setItem('silat_sheet_url', urlInput);
-            let btn = document.querySelector('.btn-save-master'); let teksAsli = btn.innerText; btn.innerText = "MENYIMPAN KE SERVER..."; btn.disabled = true;
-            update(ref(database, 'pengaturan'), { nama_kejuaraan: namaKejuaraan, silat_sheet_url: urlInput, logos: dataLogos, screensavers: dataScreensavers, waktu_screensaver: waktuTunggu }).then(() => { showCustomAlert("✅ Sukses Disimpan!", "Semua konfigurasi telah disinkronkan ke Server Cloud.", "text-success"); btn.innerText = teksAsli; btn.disabled = false; }).catch((error) => { showCustomAlert("❌ Gagal Menyimpan", "Terjadi kesalahan jaringan: " + error, "text-danger"); btn.innerText = teksAsli; btn.disabled = false; });
-        }
+    let urlInput = document.getElementById('sheetUrl').value.trim(); 
+    let namaKejuaraan = document.getElementById('inputNamaKejuaraan').value.trim(); 
+    let waktuTunggu = parseInt(document.getElementById('inputWaktuScreensaver').value) || 60;
+    
+
+    let btn = document.querySelector('.btn-save-master'); 
+    let teksAsli = btn.innerText; 
+    btn.innerText = "MENYIMPAN KE SERVER..."; 
+    btn.disabled = true;
+    
+    update(ref(database, `${ruangAktif}/pengaturan`), { 
+        nama_kejuaraan: namaKejuaraan, 
+        silat_sheet_url: urlInput, 
+        logos: dataLogos, 
+        screensavers: dataScreensavers, 
+        waktu_screensaver: waktuTunggu 
+    }).then(() => { 
+        showCustomAlert("✅ Sukses Disimpan!", "Semua konfigurasi telah disinkronkan ke Server Cloud.", "text-success"); 
+        btn.innerText = teksAsli; 
+        btn.disabled = false; 
+    }).catch((error) => { 
+        showCustomAlert("❌ Gagal Menyimpan", "Terjadi kesalahan jaringan: " + error, "text-danger"); 
+        btn.innerText = teksAsli; 
+        btn.disabled = false; 
+    });
+}
 
 
         // =============================================================

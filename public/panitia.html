@@ -335,7 +335,12 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
         import { getDatabase, ref, set, onValue, get, onDisconnect } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js";
 
-        // 🔥 CACHING DOM ELEMENTS (MENYIMPAN ELEMEN KE MEMORI) 🔥
+        const ruangAktif = localStorage.getItem('kode_voucer_aktif');
+if (!ruangAktif) {
+    window.location.href = 'index.html'; 
+}
+        
+
         const elAudioGong = document.getElementById('audioGong');
         const elLGelanggangPanitia = document.getElementById('lGelanggangPanitia');
         const elLModeSesiPanitia = document.getElementById('lModeSesiPanitia');
@@ -440,7 +445,7 @@
 
         async function gantiLockGelanggang(gelBaru) {
             if (myCurrentGelanggang && myLockRef) { await set(myLockRef, null); onDisconnect(myLockRef).cancel(); }
-            myCurrentGelanggang = gelBaru; myLockRef = ref(database, `pertandingan/${gelBaru}/locks/panitia`);
+            myCurrentGelanggang = gelBaru; myLockRef = ref(database, `${ruangAktif}/pertandingan/${gelBaru}/locks/panitia`);
             await set(myLockRef, true); onDisconnect(myLockRef).remove(); 
         }
 
@@ -453,7 +458,7 @@
             if(pass !== "admin123") { errorEl.innerText = "❌ Sandi Salah!"; errorEl.style.display = "block"; return; }
 
             btn.innerText = "MENGUNCI RUANGAN..."; btn.disabled = true;
-            let snap = await get(ref(database, `pertandingan/${gel}/locks/panitia`));
+            let snap = await get(ref(database, `${ruangAktif}/pertandingan/${gel}/locks/panitia`));
             if (snap.exists() && snap.val() === true) {
                 errorEl.innerText = "⚠️ Matras ini sedang dikontrol komputer lain!"; errorEl.style.display = "block";
                 btn.innerText = "KUNCI SESI & MASUK"; btn.disabled = false; return;
@@ -497,26 +502,26 @@
         // =============================================================
         function sinkronisasiMemoriAwan(gel) {
             // 1. Telinga Khusus Baris Merah (Live Match)
-            onValue(ref(database, `pertandingan/${gel}/baris_merah`), (snap) => {
+            onValue(ref(database, `${ruangAktif}/pertandingan/${gel}/baris_merah`), (snap) => {
                 indexMerah = (snap.exists() && snap.val() !== null) ? parseInt(snap.val()) : null;
                 renderTabelJadwal();
             });
 
             // 2. Telinga Khusus Daftar Partai Selesai
-            onValue(ref(database, `pertandingan/${gel}/partai_selesai_${modeKategoriAktif}`), (snap) => {
+            onValue(ref(database, `${ruangAktif}/pertandingan/${gel}/partai_selesai_${modeKategoriAktif}`), (snap) => {
                 let memoriSelesai = snap.val() || []; 
                 himpunanSelesai = new Set(memoriSelesai);
                 renderTabelJadwal();
             });
 
             // 3. Telinga Khusus Riwayat Pemenang
-            onValue(ref(database, `pertandingan/${gel}/riwayat_pemenang`), (snap) => {
+            onValue(ref(database, `${ruangAktif}/pertandingan/${gel}/riwayat_pemenang`), (snap) => {
                 riwayatPemenangGlobal = snap.val() || {};
                 renderTabelJadwal();
             });
 
             // 4. Telinga Khusus Setup (Untuk mengisi form)
-            onValue(ref(database, `pertandingan/${gel}/setup`), (snap) => {
+            onValue(ref(database, `${ruangAktif}/pertandingan/${gel}/setup`), (snap) => {
                 let setup = snap.val();
                 if (setup && indexMerah !== null && indexKuning === null) {
                     if(setup.partai) elIPartai.value = setup.partai;
@@ -534,7 +539,7 @@
         let isScreensaverNyala = false;
         window.toggleScreensaverManual = function() {
             let gel = elPilihGelanggang.value; if(!gel) return;
-            set(ref(database, `pertandingan/${gel}/status_screensaver`), !isScreensaverNyala);
+            set(ref(database, `${ruangAktif}/pertandingan/${gel}/status_screensaver`), !isScreensaverNyala);
         }
 
         window.aktifkanTombolKirim = function() {
@@ -624,8 +629,8 @@
 
         window.eksekusiBatalLive = function() {
             let gel = elPilihGelanggang.value;
-            set(ref(database, `pertandingan/${gel}/setup`), { kategori: modeKategoriAktif, partai: "-", tingkat: "-", babak: "-", kelas: "-", nama_biru: "SUDUT BIRU", kontingen_biru: "-", nama_merah: "SUDUT MERAH", kontingen_merah: "-" });
-            set(ref(database, `pertandingan/${gel}/baris_merah`), null);
+            set(ref(database, `${ruangAktif}/pertandingan/${gel}/setup`), { kategori: modeKategoriAktif, partai: "-", tingkat: "-", babak: "-", kelas: "-", nama_biru: "SUDUT BIRU", kontingen_biru: "-", nama_merah: "SUDUT MERAH", kontingen_merah: "-" });
+            set(ref(database, `${ruangAktif}/pertandingan/${gel}/baris_merah`), null);
             if (indexKuning === indexMerah) { indexKuning = null; resetFormAtas(); }
             indexMerah = null; renderTabelJadwal();
         }
@@ -654,8 +659,8 @@
                 dataObj.wasit = elSKp.value || "KP"; dataObj.dewan = elSDewan.value || "Dewan"; dataObj.juri1 = elSJ1.value || "J1"; dataObj.juri2 = elSJ2.value || "J2"; dataObj.juri3 = elSJ3.value || "J3"; dataObj.juri4 = elSJ4.value || "J4"; dataObj.juri5 = elSJ5.value || "J5"; dataObj.juri6 = elSJ6.value || "J6";
             }
 
-            set(ref(database, `pertandingan/${gel}/setup`), dataObj).then(() => {
-                indexMerah = targetKirimIdx; set(ref(database, `pertandingan/${gel}/baris_merah`), indexMerah); 
+            set(ref(database, `${ruangAktif}/pertandingan/${gel}/setup`), dataObj).then(() => {
+                indexMerah = targetKirimIdx; set(ref(database, `${ruangAktif}/pertandingan/${gel}/baris_merah`), indexMerah); 
                 if (indexKuning === indexMerah) indexKuning = null; 
                 renderTabelJadwal();
                 elBtnKirimData.disabled = true; elBtnKirimData.className = "btn btn-secondary fw-bold px-3 py-2 shadow text-nowrap"; 
@@ -816,7 +821,7 @@
             let gel = elPilihGelanggang.value;
             
             // 1. Screensaver
-            onValue(ref(database, `pertandingan/${gel}/status_screensaver`), (snap) => {
+            onValue(ref(database, `${ruangAktif}/pertandingan/${gel}/status_screensaver`), (snap) => {
                 isScreensaverNyala = snap.val() || false; 
                 if(elBtnToggleSS) {
                     elBtnToggleSS.className = isScreensaverNyala ? "btn btn-info text-dark fw-bold px-3 text-nowrap" : "btn btn-outline-info fw-bold px-3 text-nowrap";
@@ -825,46 +830,46 @@
             });
 
             // 2. Auto Save Trigger
-            onValue(ref(database, `pertandingan/${gel}/trigger_auto_save`), (snap) => {
+            onValue(ref(database, `${ruangAktif}/pertandingan/${gel}/trigger_auto_save`), (snap) => {
                 let token = snap.val();
                 if (token && !isAutoSaving) { jalankanAutoSave(gel); }
             });
 
             // 3. Setup (Hanya untuk mengunci/membuka tombol Play)
-            onValue(ref(database, `pertandingan/${gel}/setup`), (snap) => {
+            onValue(ref(database, `${ruangAktif}/pertandingan/${gel}/setup`), (snap) => {
                 dataSetupSnapshot = snap.val() || {};
                 let belumAdaPeserta = (!dataSetupSnapshot.nama_biru || dataSetupSnapshot.nama_biru === "SUDUT BIRU");
                 if (state === "PERSIAPAN") { elBtnPlay.disabled = belumAdaPeserta; }
             });
 
             // 4. Kalkulator Total Biru (Tidak menyentuh DOM)
-            onValue(ref(database, `pertandingan/${gel}/biru`), (snap) => {
+            onValue(ref(database, `${ruangAktif}/pertandingan/${gel}/biru`), (snap) => {
                 if (modeKategoriAktif === 'tanding') {
                     let b = snap.val() || {}; skorBiruTotal = (b.r1||0) + (b.r2||0) + (b.r3||0);
                 }
             });
 
             // 5. Kalkulator Total Merah (Tidak menyentuh DOM)
-            onValue(ref(database, `pertandingan/${gel}/merah`), (snap) => {
+            onValue(ref(database, `${ruangAktif}/pertandingan/${gel}/merah`), (snap) => {
                 if (modeKategoriAktif === 'tanding') {
                     let m = snap.val() || {}; skorMerahTotal = (m.r1||0) + (m.r2||0) + (m.r3||0);
                 }
             });
 
             // 6. Kalkulator Seni
-            onValue(ref(database, `pertandingan/${gel}/seni/hasil_akhir`), (snap) => {
+            onValue(ref(database, `${ruangAktif}/pertandingan/${gel}/seni/hasil_akhir`), (snap) => {
                 if (modeKategoriAktif !== 'tanding') { skorBiruTotal = snap.val() || 0; skorMerahTotal = 0; }
             });
 
             // 7. Pengesahan Dewan
-            onValue(ref(database, `pertandingan/${gel}/izin_simpan`), (snap) => {
+            onValue(ref(database, `${ruangAktif}/pertandingan/${gel}/izin_simpan`), (snap) => {
                 izinSimpanDewan = snap.val() || false; updateTombolHasil();
             });
-            onValue(ref(database, `pertandingan/${gel}/pemenang_keputusan`), (snap) => { pemenangMutlak = snap.val() || null; });
-            onValue(ref(database, `pertandingan/${gel}/alasan_menang`), (snap) => { alasanMenangGlobal = snap.val() || ""; });
+            onValue(ref(database, `${ruangAktif}/pertandingan/${gel}/pemenang_keputusan`), (snap) => { pemenangMutlak = snap.val() || null; });
+            onValue(ref(database, `${ruangAktif}/pertandingan/${gel}/alasan_menang`), (snap) => { alasanMenangGlobal = snap.val() || ""; });
 
             // 8. Ronde Aktif
-            onValue(ref(database, `pertandingan/${gel}/ronde_aktif`), (snap) => {
+            onValue(ref(database, `${ruangAktif}/pertandingan/${gel}/ronde_aktif`), (snap) => {
                 let r = snap.val();
                 if (r && r !== rondeSaatIni && state !== "PERSIAPAN") {
                     rondeSaatIni = r; setStatusTampilan(`SIAP RONDE ${rondeSaatIni}`, "bg-info text-dark");
@@ -872,7 +877,7 @@
             });
 
             // 9. Status Master & Logic Timer
-            onValue(ref(database, `pertandingan/${gel}/status`), (snap) => {
+            onValue(ref(database, `${ruangAktif}/pertandingan/${gel}/status`), (snap) => {
                 let s = snap.val(); if (!s) return;
                 
                 if(s === "PERTANDINGAN SELESAI" && state !== "SELESAI") { 
@@ -948,11 +953,11 @@
             }
 
             let ts = Date.now(); 
-            set(ref(database, `pertandingan/${gel}/riwayat_pemenang/${ts}`), dataPemenang).catch(e => console.warn(e));
+            set(ref(database, `${ruangAktif}/pertandingan/${gel}/riwayat_pemenang/${ts}`), dataPemenang).catch(e => console.warn(e));
             
             if (indexMerah !== null) { 
                 himpunanSelesai.add(indexMerah); 
-                set(ref(database, `pertandingan/${gel}/partai_selesai_${modeKategoriAktif}`), Array.from(himpunanSelesai)).catch(e => console.warn(e)); 
+                set(ref(database, `${ruangAktif}/pertandingan/${gel}/partai_selesai_${modeKategoriAktif}`), Array.from(himpunanSelesai)).catch(e => console.warn(e)); 
             }
             
             let btn = elBtnSimpanHasil;
@@ -969,7 +974,7 @@
 
         window.eksekusiLanjutPartai = function() {
             let gel = elPilihGelanggang.value;
-            let base = `pertandingan/${gel}`;
+            let base = `${ruangAktif}/pertandingan/${gel}`;
             
             let modalLanjut = bootstrap.Modal.getInstance(elModalLanjutkanPertandingan);
             if(modalLanjut) modalLanjut.hide();
@@ -990,7 +995,7 @@
 
         window.downloadExcelPemenang = function() {
             let gel = elPilihGelanggang.value;
-            get(ref(database, `pertandingan/${gel}/riwayat_pemenang`)).then(snap => {
+            get(ref(database, `${ruangAktif}/pertandingan/${gel}/riwayat_pemenang`)).then(snap => {
                 let data = snap.val();
                 let arr = data ? Object.values(data) : [];
                 
@@ -1127,7 +1132,7 @@
         
         function updateLayarDanFirebase(tTxt) {
             let gel = elPilihGelanggang.value; elLayarTimerLokal.innerText = tTxt;
-            set(ref(database, `pertandingan/${gel}/timer`), tTxt); set(ref(database, `pertandingan/${gel}/status`), elStatusTanding.innerText);
+            set(ref(database, `${ruangAktif}/pertandingan/${gel}/timer`), tTxt); set(ref(database, `${ruangAktif}/pertandingan/${gel}/status`), elStatusTanding.innerText);
         }
 
         let modalEditTimerInst = null;
@@ -1179,8 +1184,8 @@
                         sisaDetik--; 
                         elLayarTimerLokal.innerText = konversiDetikKeMenit(sisaDetik);
                         let gel = elPilihGelanggang.value;
-                        set(ref(database, `pertandingan/${gel}/status`), elStatusTanding.innerText);
-                        set(ref(database, `pertandingan/${gel}/timer_istirahat`), sisaDetik);
+                        set(ref(database, `${ruangAktif}/pertandingan/${gel}/status`), elStatusTanding.innerText);
+                        set(ref(database, `${ruangAktif}/pertandingan/${gel}/timer_istirahat`), sisaDetik);
                     }
                 }
 
@@ -1197,8 +1202,8 @@
                             
                             elLayarTimerLokal.innerText = konversiDetikKeMenit(sisaDetik);
                             let gel = elPilihGelanggang.value;
-                            set(ref(database, `pertandingan/${gel}/timer`), "00:00");
-                            set(ref(database, `pertandingan/${gel}/status`), elStatusTanding.innerText);
+                            set(ref(database, `${ruangAktif}/pertandingan/${gel}/timer`), "00:00");
+                            set(ref(database, `${ruangAktif}/pertandingan/${gel}/status`), elStatusTanding.innerText);
                             
                             jalankanHitungMundur(); 
                         } else { 
@@ -1214,8 +1219,8 @@
                         
                         updateLayarDanFirebase(konversiDetikKeMenit(sisaDetik));
                         let gel = elPilihGelanggang.value;
-                        set(ref(database, `pertandingan/${gel}/izin_play`), true); 
-                        set(ref(database, `pertandingan/${gel}/ronde_aktif`), rondeSaatIni);
+                        set(ref(database, `${ruangAktif}/pertandingan/${gel}/izin_play`), true); 
+                        set(ref(database, `${ruangAktif}/pertandingan/${gel}/ronde_aktif`), rondeSaatIni);
                         elBtnPlay.disabled = false; elBtnPause.disabled = true;
                     }
                 }
@@ -1224,13 +1229,13 @@
 
         window.mulaiTimer = function() {
             elBtnPlay.disabled = true; elBtnPause.disabled = false;
-            let gel = elPilihGelanggang.value; setTemaTimer(false); set(ref(database, `pertandingan/${gel}/timer_run`), true);
+            let gel = elPilihGelanggang.value; setTemaTimer(false); set(ref(database, `${ruangAktif}/pertandingan/${gel}/timer_run`), true);
             
             if (state === "PERSIAPAN") { 
                 rondeSaatIni = 1; targetWaktuSekarang = hitungTotalDetikTanding(elCfgWaktu.value); sisaDetik = (modeKategoriAktif === 'tanding') ? targetWaktuSekarang : 0; state = "RONDE"; setStatusTampilan(`RONDE 1`, "bg-primary"); updateLayarDanFirebase(konversiDetikKeMenit(sisaDetik)); mainkanGong(); jalankanHitungMundur(); 
                 
-                set(ref(database, `pertandingan/${gel}/ronde_aktif`), rondeSaatIni);
-                set(ref(database, `pertandingan/${gel}/trigger_animasi`), { ronde: 1, token: Math.random() });
+                set(ref(database, `${ruangAktif}/pertandingan/${gel}/ronde_aktif`), rondeSaatIni);
+                set(ref(database, `${ruangAktif}/pertandingan/${gel}/trigger_animasi`), { ronde: 1, token: Math.random() });
             } 
 
         else if (state === "PAUSE") { 
@@ -1247,8 +1252,8 @@
             
             jalankanHitungMundur(); 
             
-            set(ref(database, `pertandingan/${gel}/ronde_aktif`), rondeSaatIni);
-            set(ref(database, `pertandingan/${gel}/trigger_animasi`), { ronde: rondeSaatIni, token: Math.random() });
+            set(ref(database, `${ruangAktif}/pertandingan/${gel}/ronde_aktif`), rondeSaatIni);
+            set(ref(database, `${ruangAktif}/pertandingan/${gel}/trigger_animasi`), { ronde: rondeSaatIni, token: Math.random() });
         }
         }
 
@@ -1256,7 +1261,7 @@
             if (state !== "RONDE" && state !== "ISTIRAHAT") return; 
             clearInterval(intervalUtama); clearInterval(intervalPause); 
             elBtnPlay.disabled = false; elBtnPause.disabled = true; state = "PAUSE"; setStatusTampilan("JEDA KOTOR", "bg-warning text-dark"); 
-            set(ref(database, `pertandingan/${elPilihGelanggang.value}/timer_run`), false); 
+            set(ref(database, `${ruangAktif}/pertandingan/${elPilihGelanggang.value}/timer_run`), false); 
            
             updateLayarDanFirebase(elLayarTimerLokal.innerText);
             
@@ -1297,7 +1302,7 @@
         window.eksekusiReset = function() {
             clearInterval(intervalUtama); clearInterval(intervalPause); state = "PERSIAPAN"; rondeSaatIni = 1; sisaDetik = 0; idPauseAktif = 0;
             setStatusTampilan("PERSIAPAN", "bg-secondary"); setTemaTimer(false); alasanMenangGlobal = ""; 
-            let gel = elPilihGelanggang.value; let base = `pertandingan/${gel}`;
+            let gel = elPilihGelanggang.value; let base = `${ruangAktif}/pertandingan/${gel}`;
             
             let waktuReset = modeKategoriAktif === 'tanding' ? konversiDetikKeMenit(hitungTotalDetikTanding(elCfgWaktu.value)) : "00:00";
             updateLayarDanFirebase(waktuReset);

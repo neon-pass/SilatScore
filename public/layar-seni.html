@@ -180,7 +180,10 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
         import { getDatabase, ref, set, get, onValue, onDisconnect } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js";
-
+const ruangAktif = localStorage.getItem('kode_voucer_aktif');
+if (!ruangAktif) {
+    window.location.href = 'index.html'; 
+}
         const firebaseConfig = {
             apiKey: "AIzaSyCNsOk8MsIhBoZ44Nd9WGGl6eBJOEKu3nI",
             authDomain: "tesapksilat99.firebaseapp.com",
@@ -211,7 +214,7 @@
             for(let i=1; i<=7; i++) {
                 let optEl = document.getElementById(`opt_g${i}`);
                 if(optEl) {
-                    onValue(ref(database, `pertandingan/g${i}/locks/layar_utama`), (snap) => {
+                    onValue(ref(database, `${ruangAktif}/pertandingan/g${i}/locks/layar_utama`), (snap) => {
                         if(snap.exists() && snap.val() === true) {
                             optEl.innerText = `Gelanggang ${i} (Sedang Dipakai)`;
                             optEl.disabled = true;
@@ -260,7 +263,7 @@
 
             btnLogin.innerText = "MEMBUKA SOKET SENI..."; btnLogin.disabled = true;
 
-            let lockRef = ref(database, `pertandingan/${gel}/locks/layar_utama`);
+            let lockRef = ref(database, `${ruangAktif}/pertandingan/${gel}/locks/layar_utama`);
             let snap = await get(lockRef);
             if(snap.exists() && snap.val() === true && !window.isDiLayarTV) { 
                 errorEl.innerHTML = `❌ Monitor TV Gelanggang ini sedang menyala!`; errorEl.style.display = "block"; btnLogin.innerText = "TAYANGKAN KATEGORI SENI"; btnLogin.disabled = false; return; 
@@ -269,7 +272,7 @@
             await set(lockRef, true); onDisconnect(lockRef).remove();
 
             GELANGGANG = gel; 
-            baseRefPath = `pertandingan/${GELANGGANG}`; 
+            baseRefPath = `${ruangAktif}/pertandingan/${GELANGGANG}`; 
 
             let modalSetup = bootstrap.Modal.getInstance(document.getElementById('modalSetupLayar'));
             if (modalSetup) modalSetup.hide();

@@ -302,14 +302,14 @@
         /* 🔥 UPDATE GRADASI & WARNA SKOR                      */
         /* =================================================== */
         .bg-biru-terang { background: linear-gradient(180deg, #0b5ed7 30%, #000000 100%) !important; }
-        .bg-merah-terang { background: linear-gradient(180deg, #dc3545 30%, #000000 100%) !important; }
+        .bg-merah-terang { background: linear-gradient(180deg, #cc0000 30%, #000000 100%) !important; }
 
         #panelSkorBiru.kalah, #panelSkorMerah.kalah { 
             background: linear-gradient(180deg, #ffffff 30%, #080808 100%) !important; 
         }
 
         #panelSkorBiru.kalah .skor-besar { color: #0b5ed7 !important; }
-        #panelSkorMerah.kalah .skor-besar { color: #dc3545 !important; }
+        #panelSkorMerah.kalah .skor-besar { color:#cc0000 !important; }
         
         /* Angka Skor Utama */
         .skor-besar { 
@@ -552,44 +552,41 @@
         </div>
         
         <!-- 🔥 WADAH PUSAT ANTI-GESER 🔥 -->
-        <!-- Tingginya dikunci di 260px. Apa pun yang muncul di dalam sini tidak akan merusak layout luar -->
-        <div style="height: 260px; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%;">
+        <div style="height: 220px; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%;">
             
-            <!-- 1. Cincin Emas Berputar -->
+            <!-- 1. Cincin Emas Berputar (Hanya Muncul Saat Voting) -->
             <div id="tvVerifLoader" class="var-loader-ring"></div>
             
-            <!-- 2. Teks Hasil (S A H) -->
-            <h1 id="tvVerifHasil" class="var-result" style="margin-top: 0 !important; margin-bottom: 25px !important;"></h1>
-            
-            <!-- 3. Kotak Identitas Sudut (SUDUT MERAH) -->
-            <!-- Dipindah ke dalam wadah ini agar tidak mendorong layout saat muncul -->
-            <div id="tvVerifSudut" class="var-box" style="margin-top: 10px;">SUDUT</div>
+            <!-- 2. Bungkus Hasil & Sudut ke dalam 1 Kontainer -->
+            <div id="tvVerifHasilContainer" style="display: none; flex-direction: column; align-items: center; gap: 40px;">
+                <h1 id="tvVerifHasil" class="var-result" style="margin-top: 0 !important; margin-bottom: 15px !important;"></h1>
+                <div id="tvVerifSudut" class="var-box">SUDUT</div>
+            </div>
             
         </div>
         
         <!-- WADAH VOTING 3 JURI -->
-        <div id="tvVerifJuriVotes" style="display: none; justify-content: center; gap: 70px; margin-top: 10px; z-index: 2;">
+        <!-- 🔥 PERBAIKAN: display diubah jadi flex secara default, hapus 'display: none' -->
+        <div id="tvVerifJuriVotes" style="display: flex; justify-content: center; gap: 70px; margin-top: 20px; z-index: 10;">
             
             <!-- KOTAK JURI 1 -->
-            <div style="background: rgba(0,0,0,0.7); border: 3px solid #555; border-radius: 14px; width: 250px; height: 130px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 14px 28px rgba(0,0,0,0.8);">
+            <div style="background: rgba(0,0,0,0.8); border: 3px solid #ffc107; border-radius: 14px; width: 250px; height: 130px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 10px 25px rgba(0,0,0,0.9);">
                 <div style="font-size: 20px; color: #ccc; letter-spacing: 3px; font-weight: bold; border-bottom: 1px solid #444; padding-bottom: 4px; margin-bottom: 7px; width: 80%; text-align: center;">JURI 1</div>
-                <div id="tvResJ1" style="font-family: 'FontGadugi', Arial; font-size: 42px; font-weight: 900; text-shadow: 0 0 14px rgba(0,0,0,0.8); line-height: 1; text-align: center;">-</div>
+                <div id="tvResJ1" style="font-family: 'FontGadugi', Arial; font-size: 42px; font-weight: 900; text-shadow: 0 0 14px rgba(0,0,0,1); line-height: 1; text-align: center;">-</div>
             </div>
 
             <!-- KOTAK JURI 2 -->
-            <div style="background: rgba(0,0,0,0.7); border: 3px solid #555; border-radius: 14px; width: 250px; height: 130px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 14px 28px rgba(0,0,0,0.8);">
+            <div style="background: rgba(0,0,0,0.8); border: 3px solid #ffc107; border-radius: 14px; width: 250px; height: 130px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 10px 25px rgba(0,0,0,0.9);">
                 <div style="font-size: 20px; color: #ccc; letter-spacing: 3px; font-weight: bold; border-bottom: 1px solid #444; padding-bottom: 4px; margin-bottom: 7px; width: 80%; text-align: center;">JURI 2</div>
-                <div id="tvResJ2" style="font-family: 'FontGadugi', Arial; font-size: 42px; font-weight: 900; text-shadow: 0 0 14px rgba(0,0,0,0.8); line-height: 1; text-align: center;">-</div>
+                <div id="tvResJ2" style="font-family: 'FontGadugi', Arial; font-size: 42px; font-weight: 900; text-shadow: 0 0 14px rgba(0,0,0,1); line-height: 1; text-align: center;">-</div>
             </div>
 
             <!-- KOTAK JURI 3 -->
-            <div style="background: rgba(0,0,0,0.7); border: 3px solid #555; border-radius: 14px; width: 250px; height: 130px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 14px 28px rgba(0,0,0,0.8);">
+            <div style="background: rgba(0,0,0,0.8); border: 3px solid #ffc107; border-radius: 14px; width: 250px; height: 130px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 10px 25px rgba(0,0,0,0.9);">
                 <div style="font-size: 20px; color: #ccc; letter-spacing: 3px; font-weight: bold; border-bottom: 1px solid #444; padding-bottom: 4px; margin-bottom: 7px; width: 80%; text-align: center;">JURI 3</div>
-                <div id="tvResJ3" style="font-family: 'FontGadugi', Arial; font-size: 42px; font-weight: 900; text-shadow: 0 0 14px rgba(0,0,0,0.8); line-height: 1; text-align: center;">-</div>
+                <div id="tvResJ3" style="font-family: 'FontGadugi', Arial; font-size: 42px; font-weight: 900; text-shadow: 0 0 14px rgba(0,0,0,1); line-height: 1; text-align: center;">-</div>
             </div>
-
         </div>
-        
     </div>
 
 
@@ -713,7 +710,12 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
         import { getDatabase, ref, set, get, onValue, onDisconnect } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js";
 
-        // 🔥 CACHING DOM ELEMENTS (MENYIMPAN ELEMEN KE MEMORI) 🔥
+        const ruangAktif = localStorage.getItem('kode_voucer_aktif');
+if (!ruangAktif) {
+    window.location.href = 'index.html'; 
+}
+        
+
         const elTimer = document.getElementById('t_timer');
         const elTeksRonde = document.getElementById('teksRonde');
         const elSkorBiru = document.getElementById('skorTotalBiru');
@@ -772,7 +774,7 @@
             for(let i=1; i<=7; i++) {
                 let optEl = document.getElementById(`opt_g${i}`);
                 if(optEl) {
-                    onValue(ref(database, `pertandingan/g${i}/locks/layar_utama`), (snap) => {
+                    onValue(ref(database, `${ruangAktif}/pertandingan/g${i}/locks/layar_utama`), (snap) => {
                         if(snap.exists() && snap.val() === true) {
                             optEl.innerText = `Gelanggang ${i} (Sedang Dipakai)`;
                             optEl.disabled = true;
@@ -821,7 +823,7 @@
 
             btnLogin.innerText = "MEMBUKA SOKET..."; btnLogin.disabled = true;
 
-            let lockRef = ref(database, `pertandingan/${gel}/locks/layar_utama`);
+            let lockRef = ref(database, `${ruangAktif}/pertandingan/${gel}/locks/layar_utama`);
             let snap = await get(lockRef);
             if(snap.exists() && snap.val() === true && !window.isDiLayarTV) { 
                 errorEl.innerHTML = `❌ Layar TV Gelanggang ini sedang aktif!`; errorEl.style.display = "block"; btnLogin.innerText = "TAYANGKAN KE MONITOR"; btnLogin.disabled = false; return; 
@@ -830,7 +832,7 @@
             await set(lockRef, true); onDisconnect(lockRef).remove();
 
             GELANGGANG = gel; 
-            baseRefPath = `pertandingan/${GELANGGANG}`; 
+            baseRefPath = `${ruangAktif}/pertandingan/${GELANGGANG}`; 
 
             document.getElementById('kamarTanding').style.display = "flex";
             document.getElementById('labelGelanggangBar').innerText = GELANGGANG.toUpperCase();
@@ -882,16 +884,11 @@
                 let overlay = document.getElementById('tvVerifikasiOverlay');
                 
                 if (data && data.aktif) {
+                    // Munculkan layar hitam overlay (yang di dalamnya SUDAH otomatis ada kotak juri)
                     overlay.style.display = 'flex';
-                    
-                    // 1. UBAH TEMA BACKGROUND MENDADAK SESUAI SUDUT (DIBUAT LEBIH TRANSPARAN)
-                    if (data.sudut === 'biru') {
-                        overlay.style.background = 'radial-gradient(circle at center, rgba(5, 30, 80, 0.3) 0%, rgba(0,0,0,0.6) 100%)';
-                    } else {
-                        overlay.style.background = 'radial-gradient(circle at center, rgba(80, 5, 15, 0.3) 0%, rgba(0,0,0,0.6) 100%)';
-                    }
+                    overlay.style.background = 'radial-gradient(circle at center, rgba(50, 50, 50, 0.6) 0%, rgba(0,0,0,0.8) 100%)';
 
-                    // 2. NYALAKAN MESIN PARTIKEL (BOKEH) TERBANG
+                    // 1. EFEK PARTIKEL BOKEH
                     let pContainer = document.getElementById('varParticles');
                     if(pContainer.innerHTML === '') {
                         clearInterval(varBokehInterval);
@@ -903,39 +900,22 @@
                             b.style.left = Math.random() * 100 + '%';
                             let dur = Math.random() * 4 + 3;
                             b.style.animationDuration = dur + 's';
-                            b.style.backgroundColor = data.sudut === 'biru' ? 'rgba(13, 110, 253, 0.4)' : 'rgba(220, 53, 69, 0.4)';
+                            b.style.backgroundColor = 'rgba(255, 193, 7, 0.3)'; 
                             pContainer.appendChild(b);
                             setTimeout(() => b.remove(), dur * 1000);
-                        }, 250); // Kecepatan peluncuran partikel
+                        }, 250);
                     }
 
-                    // 3. SET TEKS & KOTAK IDENTITAS MENGKILAP
-                    let tipeTeks = data.tipe === 'jatuhan' ? 'KEABSAHAN JATUHAN' : 'PELANGGARAN';
+                    // 2. SET TEKS JUDUL
+                    let tipeTeks = data.tipe === 'jatuhan' ? 'JATUHAN' : 'PELANGGARAN';
                     document.getElementById('tvVerifTipe').innerText = tipeTeks;
                     
-                    let elSudut = document.getElementById('tvVerifSudut');
-                    elSudut.innerText = "SUDUT " + data.sudut.toUpperCase();
-                    if (data.sudut === 'biru') {
-                        elSudut.style.background = 'linear-gradient(135deg, #003679 0%, #0b5ed7 100%)';
-                        elSudut.style.border = '2px solid #6ea8fe';
-                        elSudut.style.boxShadow = '0 10px 30px rgba(11, 94, 215, 0.6)';
-                    } else {
-                        elSudut.style.background = 'linear-gradient(135deg, #6b0000 0%, #dc3545 100%)';
-                        elSudut.style.border = '2px solid #ea868f';
-                        elSudut.style.boxShadow = '0 10px 30px rgba(220, 53, 69, 0.6)';
-                    }
-
-                    // SEMBUNYIKAN KOTAK SUDUT SAAT MASIH VOTING
-                    elSudut.style.display = 'none'; 
-                    
-                    // 4. DETEKSI & TAMPILKAN VOTING JURI SECARA REAL-TIME!
+                    let elHasilContainer = document.getElementById('tvVerifHasilContainer');
                     let elHasil = document.getElementById('tvVerifHasil');
+                    let elSudut = document.getElementById('tvVerifSudut');
                     let elLoader = document.getElementById('tvVerifLoader');
-                    let elJuriVotes = document.getElementById('tvVerifJuriVotes');
                     
-                    // 🔥 WADAH VOTING LANGSUNG DIMUNCULKAN SEJAK AWAL 🔥
-                    elJuriVotes.style.display = 'flex';
-                    
+                    // 3. RENDER KOTAK JURI (Real-time tanpa error crash)
                     let terjemahkanVote = (v) => {
                         if (v === 'biru') return '<span style="color: #0b5ed7;">BIRU</span>';
                         if (v === 'merah') return '<span style="color: #dc3545;">MERAH</span>';
@@ -943,43 +923,57 @@
                         return '<span style="color: #ffc107; font-size: 14px; letter-spacing: 0.1vw;">Voting</span>';
                     };
                     
-                    // 👉 Update teks kotak juri setiap kali ada juri yang pencet tombol!
-                    document.getElementById('tvResJ1').innerHTML = terjemahkanVote(data.votes?.j1);
-                    document.getElementById('tvResJ2').innerHTML = terjemahkanVote(data.votes?.j2);
-                    document.getElementById('tvResJ3').innerHTML = terjemahkanVote(data.votes?.j3);
+                    // Pengaman jika `data.votes` telat masuk dari database agar tidak blank
+                    let vJ1 = (data.votes && data.votes.j1) ? data.votes.j1 : "";
+                    let vJ2 = (data.votes && data.votes.j2) ? data.votes.j2 : "";
+                    let vJ3 = (data.votes && data.votes.j3) ? data.votes.j3 : "";
                     
-                    // DETEKSI HASIL KEPUTUSAN FINAL DEWAN (BOM ANIMASI)
+                    document.getElementById('tvResJ1').innerHTML = terjemahkanVote(vJ1);
+                    document.getElementById('tvResJ2').innerHTML = terjemahkanVote(vJ2);
+                    document.getElementById('tvResJ3').innerHTML = terjemahkanVote(vJ3);
+                    
+                    // 4. KONDISI TAMPILAN (LOADING vs HASIL KELUAR)
                     if (data.hasil && data.hasil !== "") {
-                        elLoader.style.display = 'none'; // Matikan cincin emas loading
-                        clearInterval(varBokehInterval); // Hentikan produksi partikel baru
+                        // HASIL SUDAH DITEKAN DEWAN JURI
+                        elLoader.style.display = 'none';
+                        elHasilContainer.style.display = 'flex'; 
                         
-                        // MUNCULKAN KOTAK SUDUT KARENA HASIL SUDAH KELUAR
-                        elSudut.style.display = 'block'; 
-
-                        // TAMPILKAN TEKS HASIL AKHIR
                         if (data.hasil === 'biru' || data.hasil === 'merah') {
-                            elHasil.innerHTML = `<span style="font-size: 0.6em; color: #ccc;">KEPUTUSAN DEWAN:</span><br><span style="color:#ffffff; font-size:1.5em; text-shadow: 0 0 30px #c7a314;">S A H</span>`;
+                            elSudut.style.display = 'block';
+                            elSudut.innerText = "SUDUT " + data.hasil.toUpperCase();
+                            
+                            if (data.hasil === 'biru') {
+                                elSudut.style.background = 'linear-gradient(135deg, #003679 0%, #0b5ed7 100%)';
+                                elSudut.style.border = '2px solid #6ea8fe';
+                                elSudut.style.boxShadow = '0 10px 30px rgba(11, 94, 215, 0.6)';
+                            } else {
+                                elSudut.style.background = 'linear-gradient(135deg, #6b0000 0%, #dc3545 100%)';
+                                elSudut.style.border = '2px solid #ea868f';
+                                elSudut.style.boxShadow = '0 10px 30px rgba(220, 53, 69, 0.6)';
+                            }
+                            elHasil.innerHTML = `<span style="font-size: 0.6em; color: #ccc;">KEPUTUSAN :</span><br><span style="color:#ffffff; font-size:1.2em; text-shadow: 0 0 30px #c7a314;">${data.tipe === 'jatuhan' ? 'JATUHAN' : 'PELANGGARAN'} SAH UNTUK</span>`;
                         } else if (data.hasil === 'imbang_batal') {
-                            elHasil.innerHTML = `<span style="font-size: 0.6em; color: #ccc;">KEPUTUSAN DEWAN:</span><br><span style="color:#ffffff; font-size:1.5em; text-shadow: 0 0 30px #c7a314;">B A T A L (SUARA IMBANG)</span>`;
+                            elSudut.style.display = 'none';
+                            elHasil.innerHTML = `<span style="font-size: 0.6em; color: #ccc;">KEPUTUSAN :</span><br><span style="color:#ffffff; font-size:1.2em; text-shadow: 0 0 30px #c7a314;">B A T A L (SUARA IMBANG)</span>`;
                         } else {
-                            elHasil.innerHTML = `<span style="font-size: 0.6em; color: #ccc;">KEPUTUSAN DEWAN:</span><br><span style="color:#ffffff; font-size:1.5em; text-shadow: 0 0 30px #c7a314;">T I D A K SAH</span>`;
+                            elSudut.style.display = 'none';
+                            elHasil.innerHTML = `<span style="font-size: 0.6em; color: #ccc;">KEPUTUSAN :</span><br><span style="color:#ffffff; font-size:1.2em; text-shadow: 0 0 30px #c7a314;">${data.tipe === 'jatuhan' ? 'JATUHAN' : 'PELANGGARAN'} TIDAK SAH</span>`;
                         }
                         
-                        elHasil.classList.add('show-result'); 
+                        setTimeout(() => elHasil.classList.add('show-result'), 50); 
                     } else {
-                        elLoader.style.display = 'block'; 
+                        // SEDANG LOADING & JURI MASIH MEMILIH (KOTAK JURI TETAP TAMPIL)
+                        elLoader.style.display = 'block';
+                        elHasilContainer.style.display = 'none';
                         elHasil.classList.remove('show-result');
                     }
                 } else {
-                    // BERSIHKAN STUDIO SAAT VAR SELESAI
+                    // TUTUP LAYAR VERIFIKASI (KEMBALI KE PERTANDINGAN NORMAL)
                     overlay.style.display = 'none';
                     clearInterval(varBokehInterval);
                     document.getElementById('varParticles').innerHTML = '';
                     document.getElementById('tvVerifHasil').classList.remove('show-result');
-                    document.getElementById('tvVerifJuriVotes').style.display = 'none';
-                    
-                    // PASTIKAN KOTAK SUDUT DIRESET
-                    document.getElementById('tvVerifSudut').style.display = 'none';
+                    // Tidak perlu menghidden kotak juri satu-satu karena parent-nya (overlay) sudah disembunyikan
                 }
             });
 
