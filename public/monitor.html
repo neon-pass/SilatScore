@@ -79,8 +79,8 @@
 
             <div class="col-md-4">
                 <div class="custom-card">
-                    <h5 class="card-title-text">Layar Skor Seni</h5>
-                    <select id="selectSeni" class="form-select mb-4">
+                    <h5 class="card-title-text">Layar Skor Jurus</h5>
+                    <select id="selectJurus" class="form-select mb-4">
                         <option value="" disabled selected>-- Pilih Gelanggang --</option>
                         <option value="g1" id="opt_s_g1">Gelanggang 1</option>
                         <option value="g2" id="opt_s_g2">Gelanggang 2</option>
@@ -90,7 +90,7 @@
                         <option value="g6" id="opt_s_g6">Gelanggang 6</option>
                         <option value="g7" id="opt_s_g7">Gelanggang 7</option>
                     </select>
-                    <button class="btn-action" onclick="bukaLayar('seni')">Tayangkan</button>
+                    <button class="btn-action" onclick="bukaLayar('Jurus')">Tayangkan</button>
                 </div>
             </div>
 
@@ -111,7 +111,7 @@
                     <select id="selectJadwalKat" class="form-select mb-4">
                         <option value="" disabled selected>-- Pilih Kategori --</option>
                         <option value="tanding">Kategori Tanding</option>
-                        <option value="jurus">Kategori Seni</option>
+                        <option value="jurus">Kategori Jurus</option>
                     </select>
                     <button class="btn-action" onclick="bukaLayar('jadwal')">Tayangkan</button>
                 </div>
@@ -147,16 +147,16 @@ if (!ruangAktif) {
             for(let i = 1; i <= 7; i++) {
                 onValue(ref(database, `${ruangAktif}/pertandingan/g${i}/locks/layar_utama`), (snap) => {
                     let optTanding = document.getElementById(`opt_t_g${i}`);
-                    let optSeni = document.getElementById(`opt_s_g${i}`); // 🔥 KABEL 3 TERSAMBUNG
+                    let optJurus = document.getElementById(`opt_s_g${i}`); // 🔥 KABEL 3 TERSAMBUNG
                     let isLocked = snap.exists() && snap.val() === true;
                     
                     if(optTanding) {
                         optTanding.innerText = isLocked ? `Gelanggang ${i} (Sedang Dipakai)` : `Gelanggang ${i} (Tersedia)`;
                         optTanding.disabled = isLocked;
                     }
-                    if(optSeni) {
-                        optSeni.innerText = isLocked ? `Gelanggang ${i} (Sedang Dipakai)` : `Gelanggang ${i} (Tersedia)`;
-                        optSeni.disabled = isLocked;
+                    if(optJurus) {
+                        optJurus.innerText = isLocked ? `Gelanggang ${i} (Sedang Dipakai)` : `Gelanggang ${i} (Tersedia)`;
+                        optJurus.disabled = isLocked;
                     }
                 });
             }
@@ -176,19 +176,19 @@ window.bukaLayar = function(jenis) {
             window.open(`layar-utama.html?gelanggang=${gel}`, '_blank');
         }
     } 
-    else if (jenis === 'seni') {
-        let gel = document.getElementById('selectSeni').value;
-        if(!gel) { alert("Silakan pilih Gelanggang Seni!"); return; }
+    else if (jenis === 'Jurus') {
+        let gel = document.getElementById('selectJurus').value;
+        if(!gel) { alert("Silakan pilih Gelanggang Jurus!"); return; }
         
         if (typeof AndroidApp !== "undefined" && AndroidApp.isTvConnected()) {
-            AndroidApp.bukaDiTV(gel, "seni");
+            AndroidApp.bukaDiTV(gel, "Jurus");
         } else {
-            window.open(`layar-seni.html?gelanggang=${gel}`, '_blank');
+            window.open(`layar-Jurus.html?gelanggang=${gel}`, '_blank');
         }
     } 
     else if (jenis === 'jadwal') {
         let gel = document.getElementById('selectJadwalGel').value; // menghasilkan 'g1', 'g2', atau 'semua'
-        let kat = document.getElementById('selectJadwalKat').value; // menghasilkan 'tanding' atau 'seni'
+        let kat = document.getElementById('selectJadwalKat').value; // menghasilkan 'tanding' atau 'Jurus'
         
         if (typeof AndroidApp !== "undefined" && AndroidApp.isTvConnected()) {
             // Sesuai pesanan Mesin APK di jadwal-tv.html, parameter pertama wajib diawali "JADWAL_"

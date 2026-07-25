@@ -22,6 +22,17 @@
 
         label { display: block; color: #aaa; font-size: 13px; letter-spacing: 1.5px; margin-bottom: 8px; text-transform: uppercase; font-weight: bold; }
         
+        /* Mengubah lingkaran biru bawaan Bootstrap menjadi merah saat dipilih */
+.form-check-input:checked {
+    background-color: red !important;
+    border-color: red !important;
+}
+
+/* Jika ingin efek bayangan (glow) saat diklik juga menjadi merah */
+.form-check-input:focus {
+    border-color: red !important;
+    box-shadow: 0 0 0 0.25rem rgba(255, 0, 0, 0.25) !important;
+}
         input[type="url"], input[type="text"], input[type="number"], .form-select { width: 100%; background-color: #050505; border: 1px solid #444; color: #fff; padding: 12px 15px; font-size: 15px; border-radius: 6px; transition: 0.3s; }
         input[type="url"]:focus, input[type="text"]:focus, input[type="number"]:focus, .form-select:focus { outline: none; border-color: #bf953f; box-shadow: 0 0 8px rgba(191, 149, 63, 0.3); }
 
@@ -73,47 +84,123 @@
         <div class="panel-box">
             <div class="panel-header">2. SINKRONISASI DATA JADWAL</div>
             <div class="panel-body">
+                
+                <!-- BAGIAN ATAS: TOMBOL UPLOAD DAN KOTAK NAMA FILE -->
                 <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
                     <div style="flex: 1;">
-                        <label class="m-0 text-white" style="font-size: 14px;">Import Data (Excel: Jadwal atau Pendaftaran)</label>
-                        <small class="text-secondary d-block mt-1" style="text-transform: none;">Upload file peserta</small>
+                        <label class="m-0 text-white" style="font-size: 14px;">Upload file peserta</label>
+                        
                     </div>
-                    <div>
-                        <input type="file" id="fileExcel" accept=".xlsx, .xls, .csv" class="d-none" onchange="prosesExcelJadwal(this)">
-                        <button class="btn btn-emas px-4 py-3 shadow" onclick="document.getElementById('fileExcel').click()">📂 PILIH FILE EXCEL</button>
+                    
+                    <div class="d-flex align-items-stretch gap-2" style="flex: 1.5;">
+                        <input type="text" id="namaFileTerpilih" class="form-control bg-black text-warning border-secondary px-3 fw-bold" placeholder="Belum ada file..." readonly style="cursor: not-allowed;">
+                        
+                        <input type="file" id="fileExcel" accept=".xlsx, .xls, .csv" class="d-none" onchange="document.getElementById('namaFileTerpilih').value = this.files[0] ? this.files[0].name : ''; prosesExcelJadwal(this);">
+                        
+                        <button class="btn btn-emas px-4 shadow fw-bold" style="white-space: nowrap;" onclick="document.getElementById('fileExcel').click()">📂 PILIH FILE</button>
                     </div>
                 </div>
                 <div id="statusExcel" class="text-success fw-bold mt-3 text-center" style="display: none; font-size: 14px;"></div>
                 
-                <!-- 🔥 TOMBOL BARU: DOWNLOAD JADWAL MATANG 🔥 -->
-                <button id="btnDownloadJadwalMatang" class="btn btn-outline-success fw-bold w-100 mt-3 py-3 shadow-sm" onclick="downloadJadwalMatang()" style="border-width: 2px; letter-spacing: 1px;">
-                    📥 DOWNLOAD JADWAL MATANG (URUT & TANPA DAMI)
-                </button>
+                <!-- BAGIAN TENGAH: PENGATURAN DRAWING OTOMATIS (DIPINDAH DARI POPUP) -->
+                <div class="mt-4 pt-4 border-top border-secondary">
+                    <p class="fs-6 mb-3 text-info fw-bold lh-base">⚙️ PENGATURAN DRAWING OTOMATIS</p>
+                    
+                    <div class="row text-start mb-4 bg-black p-3 rounded border border-secondary mx-0 shadow-sm">
+                        <div class="col-md-3 mb-3 mb-md-0">
+                            <label class="form-label text-info fw-bold mb-2" style="font-size: 11px;">GELANGGANG</label>
+                            <select id="setJmlGelanggang" class="form-select form-select-sm bg-dark text-white border-secondary fw-bold shadow-none">
+                                <option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-3 mb-md-0">
+                            <label class="form-label text-info fw-bold mb-2" style="font-size: 11px;">POOL PRESTASI</label>
+                            <select id="setPoolPrestasi" class="form-select form-select-sm bg-dark text-white border-secondary fw-bold shadow-none">
+                                <option value="6" selected>Maks 6</option>
+                                <option value="8">Maks 8</option>
+                                <option value="16">Maks 16</option>
+                                <option value="32">Maks 32</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-3 mb-md-0">
+                            <label class="form-label text-info fw-bold mb-2" style="font-size: 11px;">POOL PEMASALAN</label>
+                            <select id="setPoolPemasalan" class="form-select form-select-sm bg-dark text-white border-secondary fw-bold shadow-none">
+                                <option value="2" selected>Maks 2</option><option value="4">Maks 4</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label text-info fw-bold mb-2" style="font-size: 11px;">URUTAN USIA</label>
+                            <select id="setUrutanUsia" class="form-select form-select-sm bg-dark text-white border-secondary fw-bold shadow-none">
+                                <option value="naik" selected>Dini ➔ Master</option><option value="turun">Master ➔ Dini</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <button class="btn btn-primary fw-bold py-3 w-100 fs-6 shadow" onclick="if(window.jsonMentahGlobal && window.jsonMentahGlobal.length > 0){ prosesDataMentahVIP('download'); } else { showCustomAlert('⚠️ Data Kosong', 'Harap Pilih File Excel dulu!', 'text-warning'); }">Unduh Data + Dami</button>
+                        </div>
+                        <div class="col-md-6">
+                            <button id="btnDownloadJadwalMatang" class="btn btn-success fw-bold py-3 w-100 fs-6 text-dark shadow" onclick="downloadJadwalMatang()" style="border-width: 2px; letter-spacing: 1px;">
+                    Unduh Data Tanpa Dami</button>
+                            
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PILIHAN TAMPILKAN/SEMBUNYIKAN DAMI -->
+                <div class="d-flex justify-content-center gap-4 mb-3 p-3 bg-black rounded border border-secondary shadow-sm">
+                    <div class="form-check form-check-inline m-0 d-flex align-items-center gap-2">
+                        <input class="form-check-input m-0" type="radio" name="opsiDamiLayar" id="damiTampil" value="tampil" checked style="cursor: pointer; accent-color: #bf953f; width: 1.2rem; height: 1.2rem;">
+                        <label class="form-check-label text-info fw-bold m-0" for="damiTampil" style="cursor: pointer; font-size: 13px; text-transform: uppercase;">Tampilkan Dami</label>
+                    </div>
+                    <div class="form-check form-check-inline m-0 d-flex align-items-center gap-2">
+                        <input class="form-check-input m-0" type="radio" name="opsiDamiLayar" id="damiSembunyi" value="sembunyi" style="cursor: pointer; accent-color: #bf953f; width: 1.2rem; height: 1.2rem;">
+                        <label class="form-check-label text-info fw-bold m-0" for="damiSembunyi" style="cursor: pointer; font-size: 13px; text-transform: uppercase;">Sembunyikan Dami</label>
+                    </div>
+                </div>
+
+                <!-- BAGIAN BAWAH: TOMBOL JADWAL MATANG -->
+                <button class="btn btn-outline-success fw-bold w-100 py-3 shadow-sm" onclick="if(window.jsonMentahGlobal && window.jsonMentahGlobal.length > 0){ prosesDataMentahVIP('tampilkan'); } else { showCustomAlert('⚠️ Data Kosong', 'Harap Pilih File Excel dulu!', 'text-warning'); }">Berbagi Ke Layar Sekretaris</button>
             </div>
+            <div class="mt-4 pt-4 border-top border-secondary">
+                    <p class="fs-6 mb-3 text-info fw-bold lh-base">👨‍⚖️ UPLOAD DATA WASIT & JURI</p>
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 bg-black p-3 rounded border border-secondary shadow-sm">
+                        <div style="flex: 1;"><label class="m-0 text-white" style="font-size: 13px;">Format: File Excel (Daftar Nama di Kolom A)</label></div>
+                        <div class="d-flex align-items-center gap-2">
+                            <input type="file" id="fileWasit" accept=".xlsx, .xls, .csv" class="d-none" onchange="prosesExcelWasit(this)">
+                            <button class="btn btn-outline-info fw-bold px-4 shadow-sm" onclick="document.getElementById('fileWasit').click()">📂 UPLOAD NAMA</button>
+                        </div>
+                    </div>
+                </div>
         </div>
 
-        <div class="panel-box">
-            <div class="panel-header">3. KONTROL SKALA MONITOR TV (LIVE REAL-TIME)</div>
+            <div class="panel-box">
+            <div class="panel-header">3. KONTROL SKALA MONITOR TV</div>
             <div class="panel-body" style="padding-bottom: 10px;">
                 <div class="row mb-4 pb-3 border-bottom border-secondary g-3">
                     <div class="col-md-6">
                         <label class="text-info mb-2" style="font-size: 13px;">1. Pilih Gelanggang TV:</label>
                         <select id="pilihGelanggangSkala" class="form-select bg-dark text-warning fw-bold border-secondary" onchange="gantiKonteksSkala()">
-                            <option value="g1">Gelanggang 1</option><option value="g2">Gelanggang 2</option><option value="g3">Gelanggang 3</option><option value="g4">Gelanggang 4</option><option value="g5">Gelanggang 5</option><option value="g6">Gelanggang 6</option><option value="semua">Semua Gelanggang (Khusus Jadwal)</option>
+                            <!-- Opsi Semua Gelanggang sudah dihapus dari sini -->
+                            <option value="g1">Gelanggang 1</option><option value="g2">Gelanggang 2</option><option value="g3">Gelanggang 3</option><option value="g4">Gelanggang 4</option><option value="g5">Gelanggang 5</option><option value="g6">Gelanggang 6</option>
                         </select>
                     </div>
                     <div class="col-md-6">
                         <label class="text-info mb-2" style="font-size: 13px;">2. Pilih Tampilan Layar:</label>
                         <select id="pilihJenisLayarSkala" class="form-select bg-dark text-white fw-bold border-secondary" onchange="gantiKonteksSkala()">
-                            <option value="skala">Layar Skor TANDING</option><option value="skala_seni">Layar Skor SENI / JURUS</option><option value="skala_jadwal">Layar Papan JADWAL</option>
+                            <option value="skala">Layar Skor TANDING</option>
+                            <option value="skala_Jurus">Layar Skor Jurus / JURUS</option>
+                            <option value="skala_jadwal">Layar JADWAL (Per Gelanggang)</option>
+                            <option value="skala_jadwal_semua">Layar JADWAL (Semua Gelanggang)</option>
                         </select>
                     </div>
                 </div>
                 <div id="wadahSlidersSkala"></div>
             </div>
-        </div>
+            </div>
 
-        <div class="panel-box">
+            <div class="panel-box">
             <div class="panel-header">4. MEDIA & TAYANGAN</div>
             <div class="panel-body">
                 <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 mb-4 pb-3 border-bottom border-dark">
@@ -129,11 +216,11 @@
                     <div><button class="btn btn-info px-4 py-2 fw-bold text-dark border-0 shadow-sm" onclick="panggilMenuCast()">SAMBUNGKAN PERANGKAT NIRKABEL</button></div>
                 </div>
             </div>
-        </div>
+            </div>
 
-        <button class="btn btn-emas btn-save-master" onclick="simpanPengaturan()">SIMPAN SEMUA PENGATURAN</button>
-        <a href="index.html" class="btn-back-link">❮ KEMBALI KE MENU UTAMA</a>
-    </div>
+            <button class="btn btn-emas btn-save-master" onclick="simpanPengaturan()">SIMPAN SEMUA PENGATURAN</button>
+            <a href="index.html" class="btn-back-link">❮ KEMBALI KE MENU UTAMA</a>
+        </div>
 
     <!-- MODAL SKENARIO A: KONFIRMASI JADWAL MATANG -->
     <div class="modal fade" id="modalKonfirmasiJadwal" tabindex="-1" data-bs-backdrop="static">
@@ -156,69 +243,63 @@
         </div>
     </div>
 
-    <!-- MODAL SKENARIO B: PILIHAN DATA MENTAH -->
-    <div class="modal fade" id="modalPilihanMentah" tabindex="-1" data-bs-backdrop="static">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content dark-theme border-warning" style="border-width: 2px;">
-                <div class="modal-header dark-theme bg-warning text-dark py-2">
-                    <h5 class="modal-title fw-black m-0 fs-5">⚠️ DATA MENTAH PESERTA TERDETEKSI</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <!-- MODAL MEDIA LAINNYA -->
+    <div class="modal fade" id="modalScreensaver" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content dark-theme">
+                <div class="modal-header dark-theme">
+                    <h5 class="modal-title fw-bold text-warning">MANAJER GAMBAR SCREENSAVER</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body text-center p-4">
-                    <p class="fs-6 mb-3 text-light lh-base">Sistem akan melakukan <b>Drawing Otomatis</b></p>
-                    
-                    <div class="row text-start mb-4 bg-black p-3 rounded border border-secondary mx-1 shadow-sm">
-                        <div class="col-md-6 mb-3 mb-md-0">
-                            <label class="form-label text-info fw-bold mb-2" style="font-size: 11px;">JUMLAH GELANGGANG</label>
-                            <select id="setJmlGelanggang" class="form-select form-select-sm bg-dark text-white border-secondary fw-bold shadow-none">
-                                <option value="1">1 Gelanggang</option>
-                                <option value="2">2 Gelanggang</option>
-                                <option value="3" selected>3 Gelanggang</option>
-                                <option value="4">4 Gelanggang</option>
-                                <option value="5">5 Gelanggang</option>
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label text-info fw-bold mb-2" style="font-size: 11px;">URUTAN KATEGORI USIA</label>
-                            <select id="setUrutanUsia" class="form-select form-select-sm bg-dark text-white border-secondary fw-bold shadow-none">
-                                <option value="naik" selected>Usia Dini ➔ Master</option>
-                                <option value="turun">Master ➔ Usia Dini</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="row g-3 mt-2">
-                        <div class="col-md-6">
-                            <button class="btn btn-primary fw-bold py-3 w-100 fs-6 shadow" onclick="tutupModalDanKirim('download')">
-                                📥 OLAH & DOWNLOAD EXCEL
-                            </button>
-                        </div>
-                        <div class="col-md-6">
-                            <button class="btn btn-success fw-bold py-3 w-100 fs-6 text-dark shadow" onclick="tutupModalDanKirim('tampilkan')">
-                                📺 TAMPILKAN LANGSUNG KE LAYAR
-                            </button>
-                        </div>
-                    </div>
+                <div class="modal-body py-4 bg-dark">
+                    <div class="row g-3 justify-content-center" id="wadahScreensaver"></div>
+                </div>
+                <div class="modal-footer dark-theme">
+                    <button type="button" class="btn btn-emas px-5 fw-bold" data-bs-dismiss="modal">SELESAI & TUTUP</button>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- MODAL INFO & MEDIA -->
-    <div class="modal fade" id="modalScreensaver" tabindex="-1"><div class="modal-dialog modal-xl modal-dialog-centered"><div class="modal-content dark-theme"><div class="modal-header dark-theme"><h5 class="modal-title fw-bold text-warning">MANAJER GAMBAR SCREENSAVER</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body py-4 bg-dark"><div class="row g-3 justify-content-center"><script>for(let i=1; i<=10; i++) { document.write(`<div class="col-6 col-sm-4 col-md-3 col-lg-2"><div class="logo-box"><span class="badge-slot">GAMBAR ${i}</span><div class="screensaver-preview" id="prev_s${i}">KOSONG</div><input type="file" id="file_s${i}" accept="image/png, image/jpeg" class="d-none" onchange="prosesScreensaver(this, 's${i}')"><button class="btn btn-sm btn-outline-warning w-100 mb-1 fw-bold" style="font-size: 10px;" onclick="document.getElementById('file_s${i}').click()">PILIH</button><button class="btn btn-sm btn-outline-danger w-100 fw-bold" style="font-size: 10px;" onclick="hapusScreensaver('s${i}')">HAPUS</button></div></div>`); }</script></div></div><div class="modal-footer dark-theme"><button type="button" class="btn btn-emas px-5 fw-bold" data-bs-dismiss="modal">SELESAI & TUTUP</button></div></div></div></div>
-    <div class="modal fade" id="modalSponsor" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content dark-theme"><div class="modal-header dark-theme"><h5 class="modal-title fw-bold text-warning">🤝 MANAJER LOGO SPONSOR</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body py-4 bg-dark"><div class="row g-4"><div class="col-md-6 border-end border-secondary"><h6 class="text-center text-info mb-3 border-bottom border-dark pb-2">SPONSOR SUDUT KIRI</h6><div class="row g-2 justify-content-center"><script>for(let i=1; i<=4; i++) { document.write(`<div class="col-6 col-sm-5"><div class="logo-box"><div class="logo-preview" id="prev_kiri${i}">KOSONG</div><input type="file" id="file_kiri${i}" accept="image/png, image/jpeg" class="d-none" onchange="prosesGambar(this, 'kiri${i}')"><button class="btn btn-sm btn-outline-warning w-100 mb-1" style="font-size: 10px;" onclick="document.getElementById('file_kiri${i}').click()">PILIH L-${i}</button><button class="btn btn-sm btn-outline-danger w-100" style="font-size: 10px;" onclick="hapusGambar('kiri${i}')">HAPUS</button></div></div>`); }</script></div></div><div class="col-md-6"><h6 class="text-center text-info mb-3 border-bottom border-dark pb-2">SPONSOR SUDUT KANAN</h6><div class="row g-2 justify-content-center"><script>for(let i=1; i<=4; i++) { document.write(`<div class="col-6 col-sm-5"><div class="logo-box"><div class="logo-preview" id="prev_kanan${i}">KOSONG</div><input type="file" id="file_kanan${i}" accept="image/png, image/jpeg" class="d-none" onchange="prosesGambar(this, 'kanan${i}')"><button class="btn btn-sm btn-outline-warning w-100 mb-1" style="font-size: 10px;" onclick="document.getElementById('file_kanan${i}').click()">PILIH R-${i}</button><button class="btn btn-sm btn-outline-danger w-100" style="font-size: 10px;" onclick="hapusGambar('kanan${i}')">HAPUS</button></div></div>`); }</script></div></div></div></div><div class="modal-footer dark-theme"><button type="button" class="btn btn-emas px-5 fw-bold" data-bs-dismiss="modal">SELESAI & TUTUP</button></div></div></div></div>
+    
+    <div class="modal fade" id="modalSponsor" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content dark-theme">
+                <div class="modal-header dark-theme">
+                    <h5 class="modal-title fw-bold text-warning">🤝 MANAJER LOGO SPONSOR</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body py-4 bg-dark">
+                    <div class="row g-4">
+                        <div class="col-md-6 border-end border-secondary">
+                            <h6 class="text-center text-info mb-3 border-bottom border-dark pb-2">SPONSOR SUDUT KIRI</h6>
+                            <div class="row g-2 justify-content-center" id="wadahSponsorKiri"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-center text-info mb-3 border-bottom border-dark pb-2">SPONSOR SUDUT KANAN</h6>
+                            <div class="row g-2 justify-content-center" id="wadahSponsorKanan"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer dark-theme">
+                    <button type="button" class="btn btn-emas px-5 fw-bold" data-bs-dismiss="modal">SELESAI & TUTUP</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <div class="modal fade" id="modalInfo" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered"><div class="modal-content dark-theme shadow-lg"><div class="modal-header dark-theme"><h5 class="modal-title fw-bold" id="modalInfoTitle">Informasi</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body text-center py-4"><p id="modalInfoBody" class="mb-0 fs-6" style="line-height: 1.5;"></p></div><div class="modal-footer dark-theme justify-content-center"><button type="button" class="btn btn-emas px-5 fw-bold text-dark" data-bs-dismiss="modal">MENGERTI</button></div></div></div></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- PANGGIL MESIN BAGAN DI SINI -->
+    <script src="mesin_bagan.js"></script>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
         import { getDatabase, ref, set, update, onValue, get } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js";
 
         const ruangAktif = localStorage.getItem('kode_voucer_aktif');
-if (!ruangAktif) {
-    window.location.href = 'index.html'; 
-}
-
+        if (!ruangAktif) { window.location.href = 'index.html'; }
 
         const firebaseConfig = { apiKey: "AIzaSyCNsOk8MsIhBoZ44Nd9WGGl6eBJOEKu3nI", authDomain: "tesapksilat99.firebaseapp.com", databaseURL: "https://tesapksilat99-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "tesapksilat99", storageBucket: "tesapksilat99.firebasestorage.app", messagingSenderId: "747533449255", appId: "1:747533449255:web:358edf3c6032c22cdbb602" };
         const app = initializeApp(firebaseConfig);
@@ -245,43 +326,98 @@ if (!ruangAktif) {
 
         let targetGelSkala = "g1"; let targetJenisSkala = "skala"; let unsubSkala = null; 
         const configSliders = {
-            skala: [ { id: "global", label: "Zoom Keseluruhan", min: 8, max: 22, step: 0.5, def: 13, unit: "px" }, { id: "skor", label: "Angka Skor Besar", min: 10, max: 50, step: 0.5, def: 17.5, unit: "rem" }, { id: "ikon", label: "Ikon Pelanggaran", min: 1, max: 5, step: 0.1, def: 1.5, unit: "rem" } ],
-            skala_seni: [ { id: "global", label: "Zoom Keseluruhan", min: 8, max: 22, step: 0.5, def: 13, unit: "px" }, { id: "skor_juri", label: "Angka Skor Juri (Biru)", min: 2, max: 15, step: 0.5, def: 4.5, unit: "rem" }, { id: "skor_akhir", label: "Angka Skor Final (Hijau)", min: 5, max: 25, step: 0.5, def: 9.5, unit: "rem" } ],
-            skala_jadwal: [ { id: "global", label: "Zoom Keseluruhan", min: 8, max: 22, step: 0.5, def: 13, unit: "px" }, { id: "teks_partai", label: "Ukuran Teks Partai & Kelas", min: 0.8, max: 5, step: 0.1, def: 1.5, unit: "rem" }, { id: "teks_nama", label: "Ukuran Teks Nama Pesilat", min: 0.8, max: 5, step: 0.1, def: 1.4, unit: "rem" } ]
+            skala: [ { id: "global", label: "Zoom Keseluruhan", min: 1, max: 30, step: 0.5, def: 13, unit: "px" }, { id: "skor", label: "Angka Skor Besar", min: 10, max: 50, step: 0.5, def: 17.5, unit: "rem" }, { id: "ikon", label: "Ikon Pelanggaran", min: 1, max: 5, step: 0.1, def: 1.5, unit: "rem" } ],
+            skala_Jurus: [ { id: "global", label: "Zoom Keseluruhan", min: 1, max: 30, step: 0.5, def: 13, unit: "px" }, { id: "skor_juri", label: "Angka Skor Juri (Biru)", min: 2, max: 15, step: 0.5, def: 4.5, unit: "rem" }, { id: "skor_akhir", label: "Angka Skor Final (Hijau)", min: 5, max: 25, step: 0.5, def: 9.5, unit: "rem" } ],
+            skala_jadwal: [ { id: "global", label: "Zoom Keseluruhan", min: 1, max: 30, step: 0.5, def: 13, unit: "px" }, { id: "teks_partai", label: "Ukuran Teks Partai & Kelas", min: 0.8, max: 5, step: 0.1, def: 1.5, unit: "rem" }, { id: "teks_nama", label: "Ukuran Teks Nama Pesilat", min: 0.8, max: 5, step: 0.1, def: 1.4, unit: "rem" } ],
+            
+            // Konfigurasi baru khusus Semua Gelanggang
+            skala_jadwal_semua: [ { id: "global", label: "Zoom Semua Gelanggang", min: 1, max: 30, step: 0.5, def: 12, unit: "px" }, { id: "teks_partai", label: "Ukuran Partai (Semua)", min: 0.8, max: 5, step: 0.1, def: 1.4, unit: "rem" }, { id: "teks_nama", label: "Ukuran Nama (Semua)", min: 0.8, max: 5, step: 0.1, def: 1.3, unit: "rem" } ]
         };
+
         window.gantiKonteksSkala = function() { targetGelSkala = document.getElementById('pilihGelanggangSkala').value; targetJenisSkala = document.getElementById('pilihJenisLayarSkala').value; renderUI_Sliders(); pantauSkalaFirebase(targetGelSkala, targetJenisSkala); }
         function renderUI_Sliders() { let conf = configSliders[targetJenisSkala]; let html = ""; conf.forEach(c => { html += `<div class="slider-row"><label class="slider-label">${c.label}</label><input type="range" class="slider-input" id="slide_${c.id}" min="${c.min}" max="${c.max}" step="${c.step}" oninput="updateSkalaLive('${c.id}', this.value, '${c.unit}')"><span class="slider-val" id="val_${c.id}">-</span></div>`; }); document.getElementById('wadahSlidersSkala').innerHTML = html; }
-        function pantauSkalaFirebase(gelId, jenisId) { if (unsubSkala) unsubSkala(); unsubSkala = onValue(ref(database, `${ruangAktif}/pertandingan/${gelId}/${jenisId}`), (snap) => { let data = snap.val() || {}; let conf = configSliders[jenisId]; conf.forEach(c => { let val = data[c.id] !== undefined ? data[c.id] : c.def; let elSlide = document.getElementById(`slide_${c.id}`); let elVal = document.getElementById(`val_${c.id}`); if(elSlide) elSlide.value = val; if(elVal) elVal.innerText = val + ' ' + c.unit; }); }); }
+        
+        function pantauSkalaFirebase(gelId, jenisId) { 
+            if (unsubSkala) unsubSkala(); 
+            // Cerdas: Jika pilih 'skala_jadwal_semua', abaikan dropdown gelanggang dan paksa rute ke 'semua'
+            let targetJalurFirebase = jenisId === 'skala_jadwal_semua' ? 'semua' : gelId;
+            unsubSkala = onValue(ref(database, `${ruangAktif}/pertandingan/${targetJalurFirebase}/${jenisId}`), (snap) => { 
+                let data = snap.val() || {}; let conf = configSliders[jenisId]; 
+                conf.forEach(c => { let val = data[c.id] !== undefined ? data[c.id] : c.def; let elSlide = document.getElementById(`slide_${c.id}`); let elVal = document.getElementById(`val_${c.id}`); if(elSlide) elSlide.value = val; if(elVal) elVal.innerText = val + ' ' + c.unit; }); 
+            }); 
+        }
+
         let timerDebounce = null;
-        window.updateSkalaLive = function(kunciVar, nilai, satuan) { document.getElementById(`val_${kunciVar}`).innerText = `${nilai} ${satuan}`; clearTimeout(timerDebounce); timerDebounce = setTimeout(() => { update(ref(database, `${ruangAktif}/pertandingan/${targetGelSkala}/${targetJenisSkala}`), { [kunciVar]: parseFloat(nilai) }); }, 100); }
+        window.updateSkalaLive = function(kunciVar, nilai, satuan) { 
+            document.getElementById(`val_${kunciVar}`).innerText = `${nilai} ${satuan}`; clearTimeout(timerDebounce); 
+            timerDebounce = setTimeout(() => { 
+                // Cerdas: Simpan ke rute 'semua' jika layar semua gelanggang dipilih
+                let targetJalurFirebase = targetJenisSkala === 'skala_jadwal_semua' ? 'semua' : targetGelSkala;
+                update(ref(database, `${ruangAktif}/pertandingan/${targetJalurFirebase}/${targetJenisSkala}`), { [kunciVar]: parseFloat(nilai) }); 
+            }, 100); 
+        }
+
+        window.prosesExcelWasit = function(input) {
+            let file = input.files[0];
+            if(!file) return;
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    let data = new Uint8Array(e.target.result);
+                    let workbook = XLSX.read(data, {type: 'array'});
+                    let sheet = workbook.Sheets[workbook.SheetNames[0]];
+                    // Baca Excel sebagai Array murni
+                    let json = XLSX.utils.sheet_to_json(sheet, {header: 1}); 
+                    
+                    let daftarNama = [];
+                    json.forEach(row => {
+                        // Ambil Kolom A (index 0). Abaikan jika baris kosong atau berisi judul "NAMA"
+                        if (row[0] && typeof row[0] === 'string' && row[0].trim() !== "" && row[0].toUpperCase() !== "NAMA") {
+                            daftarNama.push(row[0].trim().toUpperCase());
+                        }
+                    });
+                    
+                    if(daftarNama.length > 0) {
+                        set(ref(database, `${ruangAktif}/pengaturan/daftar_wasit_juri`), daftarNama)
+                        .then(() => { 
+                            showCustomAlert("✅ Upload Sukses", `${daftarNama.length} Nama Wasit/Juri berhasil disimpan ke server!`, "text-success"); 
+                        });
+                    } else {
+                        showCustomAlert("❌ Tabel Kosong", "Tidak ada daftar nama di kolom pertama Excel.", "text-warning");
+                    }
+                } catch(error) {
+                    showCustomAlert("❌ Format File Salah", "Pastikan file berupa Excel yang valid.", "text-danger");
+                }
+            };
+            reader.readAsArrayBuffer(file);
+            input.value = ""; // Reset input
+        }
 
         document.addEventListener("DOMContentLoaded", () => {
             gantiKonteksSkala();
             onValue(ref(database, `${ruangAktif}/pengaturan`), (snap) => {
                 let data = snap.val() || {};
                 if(data.nama_kejuaraan) document.getElementById('inputNamaKejuaraan').value = data.nama_kejuaraan;
-                if(data && data.silat_sheet_url) { 
-    document.getElementById('sheetUrl').value = data.silat_sheet_url; 
-} else { 
-    document.getElementById('sheetUrl').value = ""; 
-}
+                if(data && data.silat_sheet_url) { document.getElementById('sheetUrl').value = data.silat_sheet_url; } else { document.getElementById('sheetUrl').value = ""; }
                 if(data.logos) { Object.keys(dataLogos).forEach(key => { if(data.logos[key]) { dataLogos[key] = data.logos[key]; let pEl = document.getElementById(`prev_${key}`); if(pEl) pEl.innerHTML = `<img src="${dataLogos[key]}">`; } }); }
                 if(data.screensavers) { Object.keys(dataScreensavers).forEach(key => { if(data.screensavers[key]) { dataScreensavers[key] = data.screensavers[key]; let sEl = document.getElementById(`prev_${key}`); if(sEl) sEl.innerHTML = `<img src="${dataScreensavers[key]}">`; } }); }
                 if(data.waktu_screensaver) { document.getElementById('inputWaktuScreensaver').value = data.waktu_screensaver; }
             }, { onlyOnce: true });
         });
 
-        // =============================================================
-        // FUNGSI PEMBACA EXCEL (Kebal Huruf Besar/Kecil)
-        // =============================================================
+
+        window.updateStatusDami = function(status) {
+    update(ref(database, `${ruangAktif}/pengaturan`), { status_dami: status });
+}
+
+        // 🔥 LOGIKA DETEKSI TAB GELANGGANG & PEMBUATAN OBJEK (DENGAN LEVEL) 🔥
         window.prosesExcelJadwal = function(input) {
             let file = input.files[0]; 
             if(!file) return;
 
             if (typeof XLSX === 'undefined') {
                 showCustomAlert("❌ Mode Offline Aktif", "Sistem tidak terhubung ke internet.", "text-danger");
-                input.value = ""; 
-                return;
+                input.value = ""; return;
             }
 
             let reader = new FileReader();
@@ -290,814 +426,479 @@ if (!ruangAktif) {
                     let data = new Uint8Array(e.target.result);
                     let workbook = XLSX.read(data, {type: 'array'});
                     
-                    window.tempJadwalTanding = []; 
-                    window.tempJadwalJurus = [];
+                    window.tempJadwalTanding = []; window.tempJadwalJurus = [];
                     window.jsonMentahGlobal = [];
+                    
+                    let jsonGelanggang = [];
+                    let jsonUtama = [];
+                    let jsonPendaftar = [];
+                    let modeManualTabAktif = false; 
 
                     workbook.SheetNames.forEach(sheetName => {
                         let sheet = workbook.Sheets[sheetName];
                         let json = XLSX.utils.sheet_to_json(sheet, {defval: ""});
-                        window.jsonMentahGlobal = window.jsonMentahGlobal.concat(json);
+                        if (json.length === 0) return;
+                        
+                        let nameUp = sheetName.toUpperCase().trim();
+                        
+                        if (/(GELANGGANG|GEL|G)\s*\d+/.test(nameUp)) {
+                            let gelStr = nameUp.replace(/[^\d]/g, '');
+                            json.forEach(r => r['GELANGGANG_MUTLAK_DARI_TAB'] = "G" + (gelStr || "1"));
+                            jsonGelanggang = jsonGelanggang.concat(json);
+                        } 
+                        else if (nameUp === "DATA SELURUH PESERTA") {
+                            jsonUtama = jsonUtama.concat(json);
+                        } 
+                        else if (nameUp === "Pertandingan PRESTASI" || nameUp === "Pertandingan PEMASALAN" || nameUp === "Jurus TGR" || nameUp === "Jurus / TGR") {
+                            // Abaikan
+                        } 
+                        else {
+                            jsonPendaftar = jsonPendaftar.concat(json);
+                        }
                     });
 
-                    // Cek cerdas dengan mengubah semua key header ke Huruf Besar
-                    let isJadwal = window.jsonMentahGlobal.some(row => {
-                        let nRow = {}; 
-                        for(let k in row) nRow[k.toUpperCase().trim()] = row[k];
+                    if (jsonGelanggang.length > 0) {
+                        window.jsonMentahGlobal = jsonGelanggang;
+                        modeManualTabAktif = true;
+                    } else if (jsonUtama.length > 0) {
+                        window.jsonMentahGlobal = jsonUtama;
+                    } else {
+                        window.jsonMentahGlobal = jsonPendaftar;
+                    }
+
+                    let isJadwalMatang = window.jsonMentahGlobal.some(row => {
+                        let nRow = {}; for(let k in row) nRow[k.toUpperCase().trim()] = row[k];
                         return nRow['SUDUT MERAH'] || nRow['VS'] || nRow['NO UNDIAN'] || nRow['NAMA MERAH'];
                     });
 
-                    if (isJadwal) {
-                        // --- SKENARIO A: EXCEL HASIL UNDIAN MATANG ---
+                    if (isJadwalMatang || modeManualTabAktif) {
                         window.jsonMentahGlobal.forEach(row => {
-                            // Konversi Key agar tidak sensitif huruf
-                            let nRow = {};
-                            for(let key in row) { nRow[key.toUpperCase().trim()] = row[key]; }
-
+                            let nRow = {}; for(let key in row) nRow[key.toUpperCase().trim()] = row[key];
+                            
                             let namaBiru = String(nRow['SUDUT BIRU'] || nRow['NAMA BIRU'] || nRow['NAMA ATLET'] || "").toUpperCase();
                             let namaMerah = String(nRow['SUDUT MERAH'] || nRow['NAMA MERAH'] || "").toUpperCase();
+                            if (namaBiru === "" && namaMerah === "") return;
                             
-                            if (namaBiru.includes("BYE") || namaMerah.includes("BYE") || (namaBiru === "" && namaMerah === "")) return;
+                            let gelanggangFinal = row['GELANGGANG_MUTLAK_DARI_TAB'] || nRow['GELANGGANG'] || "G1";
+                            let kategoriNya = nRow['KATEGORI'] || "-";
 
                             let obj = {
-                                mapped_partai: nRow['PARTAI'] || nRow['NO'] || nRow['NO UNDIAN'] || "-",
-                                mapped_gelanggang: nRow['GELANGGANG'] || nRow['GEL'] || nRow['ARENA'] || "G1",
-                                mapped_kategori: nRow['KATEGORI'] || nRow['KATEGORI SENI'] || "-",
-                                mapped_tingkat: nRow['TINGKAT'] || nRow['TINGKAT PENDIDIKAN / KLASIFIKASI'] || "-",
-                                mapped_babak: nRow['BABAK'] || "-",
-                                mapped_kelas: nRow['KELAS'] || "-",
-                                mapped_biru: nRow['SUDUT BIRU'] || nRow['NAMA BIRU'] || nRow['NAMA ATLET'] || "-",
-                                mapped_kont_biru: nRow['KONTINGEN BIRU'] || nRow['KONTINGEN'] || "-",
-                                mapped_merah: nRow['SUDUT MERAH'] || nRow['NAMA MERAH'] || "-",
-                                mapped_kont_merah: nRow['KONTINGEN MERAH'] || "-"
+                                mapped_partai: nRow['PARTAI'] || "-", mapped_gelanggang: gelanggangFinal, mapped_pool: nRow['POOL'] || "-", 
+                                mapped_kategori: kategoriNya, mapped_level: nRow['LEVEL'] || "-", mapped_tingkat: nRow['TINGKAT'] || nRow['TINGKAT PENDIDIKAN / KLASIFIKASI'] || "-", 
+                                mapped_babak: nRow['BABAK'] || "-", mapped_kelas: nRow['KELAS'] || "-",
+                                mapped_biru: nRow['SUDUT BIRU'] || nRow['NAMA BIRU'] || "-", mapped_kont_biru: nRow['KONTINGEN BIRU'] || nRow['KONTINGEN'] || "-",
+                                mapped_merah: nRow['SUDUT MERAH'] || "-", mapped_kont_merah: nRow['KONTINGEN MERAH'] || "-"
                             };
 
-                            let katStr = (obj.mapped_kategori + " " + obj.mapped_kelas).toLowerCase();
-                            if (katStr.includes('tgr') || katStr.includes('seni') || katStr.includes('tunggal') || katStr.includes('ganda') || katStr.includes('regu')) {
+                            if (kategoriNya.toUpperCase().includes('Jurus') || kategoriNya.toUpperCase().includes('TGR')) {
                                 window.tempJadwalJurus.push(obj);
                             } else { 
                                 window.tempJadwalTanding.push(obj); 
                             }
                         });
 
-                        document.getElementById('teksRingkasanJadwal').innerHTML = `${window.tempJadwalTanding.length} Partai Tanding <br> ${window.tempJadwalJurus.length} Partai Seni/TGR`;
+                        let infoTab = modeManualTabAktif ? "<br><span class='badge bg-primary mt-2 text-white shadow-sm'>🎮 MODE MANUAL (Membaca Tab Gelanggang)</span>" : "<br><span class='badge bg-secondary mt-2 text-white shadow-sm'>⚙️ MODE OTOMATIS (Jadwal Bawaan Sistem)</span>";
+                        document.getElementById('teksRingkasanJadwal').innerHTML = `${window.tempJadwalTanding.length} Pertandingan <br> ${window.tempJadwalJurus.length} Jurus ${infoTab}`;
                         new bootstrap.Modal(document.getElementById('modalKonfirmasiJadwal')).show();
 
                     } else {
-                        // --- SKENARIO B: EXCEL DATA MENTAH PENDAFTARAN ---
-                        new bootstrap.Modal(document.getElementById('modalPilihanMentah')).show();
+                        let isDataPeserta = window.jsonMentahGlobal.some(row => {
+                            let nRow = {}; for(let k in row) nRow[k.toUpperCase().trim()] = row[k];
+                            return nRow['NAMA ATLET'] || nRow['NAMA'];
+                        });
+
+                        if (isDataPeserta) {
+    showCustomAlert("✅ File Terbaca!", "Data mentah berhasil dimuat. Silakan atur setingan Drawing Otomatis di layar utama, lalu Pilih tombol Unduh.", "text-success");
+} else {
+    showCustomAlert("❌ Tabel Kosong", "Struktur tabel tidak dikenali.", "text-warning");
+}
                     }
                 } catch (error) { 
-                    console.error(error); 
-                    showCustomAlert("❌ Format File Salah", "Format file rusak atau struktur kolom Excel tidak terbaca.<br>Pastikan tabel tidak ada *Merge Cell* di area data.", "text-danger"); 
+                    showCustomAlert("❌ Format File Salah", "Pastikan tidak ada Merge Cell di data Excel.", "text-danger"); 
                 }
             };
-            reader.readAsArrayBuffer(file); 
-            input.value = ""; 
+            reader.readAsArrayBuffer(file); input.value = ""; 
         }
 
-        // =============================================================
-        // FUNGSI ANTI TABRAKAN ANIMASI MODAL BOOTSTRAP
-        // =============================================================
         window.tutupModalDanKirim = function(tipeAksi) {
             let modalEl = document.getElementById('modalPilihanMentah');
             let myModal = bootstrap.Modal.getInstance(modalEl);
-            if(myModal) {
-                myModal.hide();
-            }
-            
-            // Memberikan jeda waktu setengah detik agar animasi layar bersih, mencegah crash
+            if(myModal) { myModal.hide(); }
             setTimeout(() => {
-                prosesDataMentahVIP(tipeAksi);
+                if (typeof window.prosesDataMentahVIP === "function") window.prosesDataMentahVIP(tipeAksi);
+                else showCustomAlert("❌ Error Skrip", "File mesin_bagan.js gagal dimuat.", "text-danger");
             }, 500);
         };
 
-        const ageWeights = { "[Usia Dini 1 (SD)]": 1, "[Usia Dini 2 (SD)]": 2, "[Pra Remaja]": 3, "[Remaja]": 4, "[Dewasa]": 5, "[Master]": 6, "[Kategori Tidak Valid]": 99, "[Kategori Kosong]": 99 };
-        function getWeight(name) { 
-            let safeName = name ? name.toString() : ""; 
-            for (let key in ageWeights) { 
-                if (safeName.startsWith(key)) return ageWeights[key]; 
-            } 
-            return 99; 
-        }
-        function shuffleArray(array) { 
-            for (let i = array.length - 1; i > 0; i--) { 
-                const j = Math.floor(Math.random() * (i + 1)); 
-                [array[i], array[j]] = [array[j], array[i]]; 
-            } 
-        }
+        
+      
+window.eksekusiKirimKeLayar = async function () {
 
-        window.prosesDataMentahVIP = function(actionType) {
-            let numGel = parseInt(document.getElementById('setJmlGelanggang').value) || 1;
-            let sortDir = document.getElementById('setUrutanUsia').value || 'naik';
+    const tombol = document.querySelectorAll("button");
+    tombol.forEach(btn => btn.disabled = true);
 
-            window.tempJadwalTanding = []; 
-            window.tempJadwalJurus = [];
-            let prestasi = [], pemasalan = [], tgr = [];
+    showCustomAlert(
+        "⏳ Membangun Cetak Biru...",
+        "Menyusun jadwal dan mengirim ke seluruh gelanggang...",
+        "text-info"
+    );
 
-           window.jsonMentahGlobal.forEach(row => {
-                // 🔥 KACAMATA PINTAR: Meratakan semua huruf besar/kecil dari Excel 🔥
-                let nRow = {};
-                for (let key in row) { nRow[key.toUpperCase().trim()] = row[key]; }
+    try {
 
-                // Mulai sekarang, sistem akan selalu mengenali apapun format huruf di Excel Anda!
-                let nama = String(nRow['NAMA ATLET'] || nRow['NAMA'] || "").trim();
-                if(!nama || nama.toUpperCase().includes("BYE")) return;
+        // =====================================================
+        // MEMBERSIHKAN OBJECT AGAR VALID UNTUK FIREBASE
+        // =====================================================
 
-                let kontingen = String(nRow['KONTINGEN'] || "-").trim();
-                let kategoriRaw = String(nRow['KATEGORI'] || "").trim();
-                let tingkatRaw = String(nRow['TINGKAT PENDIDIKAN / KLASIFIKASI'] || nRow['TINGKAT'] || "").trim();
-                let kelasRaw = String(nRow['KELAS'] || "").trim();
-                let jkRaw = String(nRow['JENIS KELAMIN'] || "").toLowerCase();
-                let bb = parseFloat(nRow['BERAT']) || 0; 
-                let tb = parseFloat(nRow['TINGGI']) || 0;
-                
-                let checkSeni = kelasRaw.toLowerCase() + kategoriRaw.toLowerCase();
-                let isTGR = checkSeni.includes('tgr') || checkSeni.includes('seni') || checkSeni.includes('tunggal') || checkSeni.includes('ganda') || checkSeni.includes('regu') || checkSeni.includes('solo');
-                let isPemasalan = kategoriRaw.toLowerCase().includes('pemasalan') || (!isTGR && kelasRaw === '');
+        function clean(data) {
 
-                let isPutri = (jkRaw.includes('p') && !jkRaw.includes('putra')) || jkRaw.includes('wanita') || jkRaw === 'pi';
-                let gender = isPutri ? "Putri" : "Putra";
+            if (data === undefined) return undefined;
+            if (data === null) return null;
 
-                let cleanKat = tingkatRaw.toLowerCase().replace(/[^a-z0-9]/g, ''); 
-                let finalKat = "[Kategori Kosong]";
-                if (cleanKat !== '') {
-                    if (cleanKat.includes('dini1') || cleanKat.includes('sd1')) finalKat = "[Usia Dini 1 (SD)]";
-                    else if (cleanKat.includes('dini2') || cleanKat.includes('sd2') || cleanKat.includes('dini') || cleanKat.includes('sd')) finalKat = "[Usia Dini 2 (SD)]";
-                    else if (cleanKat.includes('pra') || cleanKat.includes('smp')) finalKat = "[Pra Remaja]";
-                    else if (cleanKat.includes('remaja') || cleanKat.includes('sma')) finalKat = "[Remaja]";
-                    else if (cleanKat.includes('dewasa') || cleanKat.includes('umum')) finalKat = "[Dewasa]";
-                    else if (cleanKat.includes('master') || cleanKat.includes('veteran')) finalKat = "[Master]";
-                    else finalKat = "[Kategori Tidak Valid]";
+            if (Array.isArray(data)) {
+                return data
+                    .map(clean)
+                    .filter(v => v !== undefined);
+            }
+
+            if (typeof data === "object") {
+
+                const hasil = {};
+
+                for (const [key, value] of Object.entries(data)) {
+
+                    if (key === "_refOriginal") continue;
+
+                    const bersih = clean(value);
+
+                    if (bersih !== undefined) {
+                        hasil[key] = bersih;
+                    }
+
                 }
 
-                let displayNama = nama;
-                if (!kelasRaw && (bb > 0 || tb > 0)) displayNama = `${nama} (${bb}kg / ${tb}cm)`;
+                return hasil;
 
-                let atlet = { 
-                    Nama: displayNama, Kontingen: kontingen, Gender: gender, 
-                    Kategori: finalKat, Kelas: kelasRaw, Berat: bb, Tinggi: tb, weight: getWeight(finalKat) 
+            }
+
+            return data;
+
+        }
+
+        // =====================================================
+        // SIAPKAN STRUKTUR GELANGGANG
+        // =====================================================
+
+        const gelanggang = {};
+
+        for (let i = 1; i <= 7; i++) {
+
+            gelanggang[i] = {
+                tanding: [],
+                jurus: []
+            };
+
+        }
+
+        // =====================================================
+        // HAPUS DUPLIKAT PARTAI TANDING
+        // =====================================================
+
+        const mapPartai = new Map();
+
+        for (const item of (window.tempJadwalTanding || [])) {
+
+            const partai =
+                item.mapped_partai ??
+                item.PARTAI ??
+                item.Partai ??
+                "";
+
+            if (!partai) continue;
+
+            if (!mapPartai.has(partai)) {
+
+                mapPartai.set(partai, clean(item));
+
+            }
+
+        }
+
+        const tandingBersih = [...mapPartai.values()];
+
+        // =====================================================
+        // MASUKKAN TANDING KE MASING-MASING GELANGGANG
+        // =====================================================
+
+        for (const item of tandingBersih) {
+
+            const nomor = String(
+
+                item.mapped_gelanggang ??
+                item.GELANGGANG ??
+                item.Gelanggang ??
+                "1"
+
+            ).match(/\d+/)?.[0] || "1";
+
+            if (!gelanggang[nomor]) {
+
+                gelanggang[nomor] = {
+                    tanding: [],
+                    jurus: []
                 };
 
-                if(isTGR) tgr.push(atlet); 
-                else if(isPemasalan) pemasalan.push(atlet); 
-                else prestasi.push(atlet);
-            });
-
-            let groupsPrestasi = []; let groupsPemasalan = []; let groupsTGR = [];
-
-            // OLAH PRESTASI
-            let groupPres = {};
-            prestasi.forEach(a => {
-                let kelasStr = a.Kelas ? a.Kelas.toString().toUpperCase().replace(/PUTRA|PUTRI|KELAS/g, '').trim() : '';
-                let key = `${a.Kategori} Kelas ${a.Gender} ${kelasStr}`;
-                if(!groupPres[key]) groupPres[key] = { name: key, tingkat: a.Kategori, gender: a.Gender, kelasRaw: kelasStr, weight: a.weight, members: [] };
-                groupPres[key].members.push(a);
-            });
-            
-            Object.values(groupPres).forEach(cat => {
-                let members = [...cat.members]; 
-                let numP = Math.ceil(members.length / 6) || 1; 
-
-                let kMap = {}; 
-                members.forEach(m => { if(!kMap[m.Kontingen]) kMap[m.Kontingen] = []; kMap[m.Kontingen].push(m); });
-                
-                let contKeys = Object.keys(kMap).sort((a, b) => kMap[b].length - kMap[a].length);
-                 
-                let slotSequence = [2, 5, 0, 3, 1, 4];
-                let globalSlots = [];
-                for (let b = 0; b < numP; b++) {
-                    for (let s of slotSequence) { globalSlots.push({ bracket: b, slot: s }); }
-                }
-
-                let sortedAthletes = []; 
-                let hasMore = true;
-                while(hasMore) {
-                    hasMore = false;
-                    for (let k of contKeys) {
-                        if (kMap[k].length > 0) { sortedAthletes.push(kMap[k].shift()); hasMore = true; }
-                    }
-                }
-
-                let filledBrackets = Array.from({length: numP}, () => Array(6).fill(null));
-                sortedAthletes.forEach((athlete, i) => { filledBrackets[globalSlots[i].bracket][globalSlots[i].slot] = athlete; });
-
-                let matches = [];
-                filledBrackets.forEach(slots => {
-                    for(let i=0; i<6; i++) { if(!slots[i]) slots[i] = {Nama:"DAMI99", Kontingen:"-", IsDami:true}; }
-                    
-                    // 1. Modifikasi addM agar mengembalikan "titik koordinat" partainya
-                    let addM = (type, p1, p2) => { 
-                        let isGhost = (p1.IsDami || p1.Nama === "DAMI99") && (p2.IsDami || p2.Nama === "DAMI99");
-                        if (type !== "Final" && !isGhost) {
-                            let matchObj = { type: type, tingkat: cat.tingkat, kelasLengkap: `Kelas ${cat.gender} ${cat.kelasRaw}`, p1: p1, p2: p2, isGhost: false };
-                            matches.push(matchObj);
-                            return matchObj; // <-- Kunci Pelacaknya di sini
-                        }
-                        return null;
-                    };
-                    
-                    // 2. Pasang pelacak ke partai penyisihan
-                    let mPenyisihan1 = addM("Penyisihan", slots[0], slots[1]); 
-                    let mPenyisihan2 = addM("Penyisihan", slots[3], slots[4]); 
-                    
-                    // 3. Tautkan pelacak tersebut ke dalam Semi Final
-                    let sf1_w1 = (slots[0].IsDami && slots[1].IsDami) ? { Nama: "DAMI99", Kontingen: "-" } : { Nama: "Pemenang Atas", refMatch: mPenyisihan1, Kontingen: "-" }; 
-                    addM("Semi Final", slots[2], sf1_w1); 
-                    
-                    let sf2_w2 = (slots[3].IsDami && slots[4].IsDami) ? { Nama: "DAMI99", Kontingen: "-" } : { Nama: "Pemenang Bawah", refMatch: mPenyisihan2, Kontingen: "-" }; 
-                    addM("Semi Final", sf2_w2, slots[5]); 
-                });
-                groupsPrestasi.push({ name: cat.name, weight: cat.weight, matches: matches });
-            });
-
-            // OLAH PEMASALAN
-            let groupPem = {};
-            pemasalan.forEach(a => { 
-                let kelasStr = a.Kelas ? a.Kelas.toString().toUpperCase().replace(/PUTRA|PUTRI|KELAS/g, '').trim() : '';
-                let key = `${a.Kategori} Pemasalan ${a.Gender} ${kelasStr}`; 
-                if(!groupPem[key]) groupPem[key] = { name: key, tingkat: a.Kategori, gender: a.Gender, kelasRaw: kelasStr, weight: a.weight, members: [] }; 
-                groupPem[key].members.push(a); 
-            });
-            
-            Object.values(groupPem).forEach(cat => {
-                let unassigned = [...cat.members].sort((a,b) => a.Berat - b.Berat);
-                let pairs = [];
-                while(unassigned.length > 0) {
-                    let p1 = unassigned.shift(); let p2Index = -1;
-                    for(let i=0; i<unassigned.length; i++) { if(unassigned[i].Kontingen !== p1.Kontingen) { p2Index = i; break; } }
-                    if(p2Index === -1 && unassigned.length > 0) p2Index = 0;
-                    let p2 = (p2Index !== -1) ? unassigned.splice(p2Index, 1)[0] : {Nama: "DAMI99", Kontingen: "-", IsDami: true};
-                    pairs.push([p1, p2]);
-                }
-                
-                let matches = [];
-                let labelKelas = cat.kelasRaw ? `Kelas ${cat.kelasRaw} ${cat.gender}` : `Bebas ${cat.gender}`;
-                pairs.forEach(pair => {
-                    if(Math.random() > 0.5) pair.reverse(); 
-                    if (!(pair[0].IsDami && pair[1].IsDami)) {
-                        matches.push({ type: "Final", tingkat: cat.tingkat, kelasLengkap: labelKelas, p1: pair[0], p2: pair[1], isGhost: false });
-                    }
-                });
-                groupsPemasalan.push({ name: cat.name, weight: cat.weight, matches: matches });
-            });
-
-            // OLAH TGR
-            let groupTGR = {};
-            tgr.forEach(a => {
-                let kategoriSeni = a.Kelas ? a.Kelas.toString().toUpperCase().trim() : 'SENI';
-                let key = `${a.Kategori} ${a.Gender} ${kategoriSeni}`; 
-                if(!groupTGR[key]) groupTGR[key] = { name: key, tingkat: a.Kategori, kategoriSeni: kategoriSeni, gender: a.Gender, weight: a.weight, members: [] };
-                groupTGR[key].members.push(a);
-            });
-            
-            Object.values(groupTGR).forEach(cat => {
-                let members = [...cat.members]; 
-                shuffleArray(members); 
-                let matches = members.map(m => {
-                    return { type: "Penampilan", catName: `${cat.gender} ${cat.kategoriSeni}`, tingkat: cat.tingkat, p1: m, isGhost: false };
-                });
-                groupsTGR.push({ name: cat.name, weight: cat.weight, matches: matches });
-            });
-
-            let sortFn = (a, b) => sortDir === 'naik' ? a.weight - b.weight || a.name.localeCompare(b.name) : b.weight - a.weight || a.name.localeCompare(b.name);
-            groupsPrestasi.sort(sortFn); groupsPemasalan.sort(sortFn); groupsTGR.sort(sortFn);
-
-            function assignGelanggangAndPartai(groupsTarget) {
-                let totalReal = 0;
-                groupsTarget.forEach(g => totalReal += g.matches.length);
-                if (totalReal === 0) return;
-
-                let targetPerGel = Math.ceil(totalReal / numGel);
-                let curGelIdx = 1; let currentLoad = 0; let MIN_SPLIT = 5; 
-                let globalPartyCounter = 1;
-
-                groupsTarget.forEach(group => {
-                    let classMatches = group.matches;
-                    let realCount = classMatches.length;
-                    if(realCount === 0) return;
-
-                    let spaceLeft = targetPerGel - currentLoad;
-                    let splitIndex = -1;
-
-                    if (curGelIdx < numGel && realCount > spaceLeft) {
-                        if (spaceLeft >= MIN_SPLIT && (realCount - spaceLeft) >= MIN_SPLIT) {
-                            splitIndex = spaceLeft;
-                        } else {
-                            if ((realCount - spaceLeft) < MIN_SPLIT) { splitIndex = -1; } 
-                            else { curGelIdx++; currentLoad = 0; splitIndex = -1; }
-                        }
-                    }
-
-                    let realProcessed = 0;
-                    classMatches.forEach(m => {
-                        if (splitIndex !== -1 && realProcessed === splitIndex) { curGelIdx++; currentLoad = 0; }
-                        m.gelanggang = `G${curGelIdx}`;
-                        m.partyNo = globalPartyCounter++; 
-                        currentLoad++; realProcessed++;
-                    });
-                });
             }
 
-            assignGelanggangAndPartai(groupsPrestasi);
-            assignGelanggangAndPartai(groupsPemasalan);
-            assignGelanggangAndPartai(groupsTGR);
+            gelanggang[nomor].tanding.push(item);
 
-            // 🔥 TRANSLATOR OTOMATIS: UBAH ATAS/BAWAH MENJADI NOMOR PARTAI 🔥
-            // Setelah nomor partai resmi didapatkan, kita langsung update teksnya!
-            groupsPrestasi.forEach(g => {
-                g.matches.forEach(m => {
-                    if (m.p1.refMatch && m.p1.refMatch.partyNo) {
-                        m.p1.Nama = `PEMENANG PARTAI ${m.p1.refMatch.partyNo}`;
-                    }
-                    if (m.p2.refMatch && m.p2.refMatch.partyNo) {
-                        m.p2.Nama = `PEMENANG PARTAI ${m.p2.refMatch.partyNo}`;
-                    }
-                });
-            });
+        }
 
-            groupsPrestasi.forEach(g => {
-                g.matches.forEach(m => {
-                    window.tempJadwalTanding.push({
-                        mapped_partai: m.partyNo, mapped_gelanggang: m.gelanggang,
-                        mapped_kategori: "Prestasi", mapped_tingkat: m.tingkat, mapped_kelas: m.kelasLengkap, mapped_babak: m.type, 
-                        mapped_biru: m.p1.Nama, mapped_kont_biru: m.p1.Kontingen, mapped_merah: m.p2.Nama, mapped_kont_merah: m.p2.Kontingen
-                    });
-                });
-            });
+        // =====================================================
+        // MASUKKAN JURUS KE MASING-MASING GELANGGANG
+        // =====================================================
 
-            groupsPemasalan.forEach(g => {
-                g.matches.forEach(m => {
-                    window.tempJadwalTanding.push({
-                        mapped_partai: m.partyNo, mapped_gelanggang: m.gelanggang,
-                        mapped_kategori: "Pemasalan", mapped_tingkat: m.tingkat, mapped_kelas: m.kelasLengkap, mapped_babak: m.type, 
-                        mapped_biru: m.p1.Nama, mapped_kont_biru: m.p1.Kontingen, mapped_merah: m.p2.Nama, mapped_kont_merah: m.p2.Kontingen
-                    });
-                });
-            });
+        for (const item of (window.tempJadwalJurus || [])) {
 
-            groupsTGR.forEach(g => {
-                g.matches.forEach(m => {
-                    window.tempJadwalJurus.push({
-                        mapped_partai: m.partyNo, mapped_gelanggang: m.gelanggang,
-                        mapped_kategori: m.catName, mapped_tingkat: m.tingkat, 
-                        mapped_biru: m.p1.Nama, mapped_kont_biru: m.p1.Kontingen
-                    });
-                });
-            });
+            const data = clean(item);
 
-            if (actionType === 'tampilkan') { window.eksekusiKirimKeLayar(); } 
-            else { window.downloadHasilOlahanExcel(); }
-        };
+            const nomor = String(
 
-        window.eksekusiKirimKeLayar = async function() {
-            let btnElements = document.querySelectorAll('button');
-            btnElements.forEach(btn => btn.disabled = true); // Kunci semua tombol sementara
-            showCustomAlert("⏳ Membangun Cetak Biru...", "Sistem sedang mengunci Nomor Partai dan mengeksekusi Auto-Win untuk peserta BYE. Harap tunggu...", "text-info");
+                data.mapped_gelanggang ??
+                data.GELANGGANG ??
+                data.Gelanggang ??
+                "1"
 
-            try {
-                // 1. Ambil memori gelanggang saat ini (untuk digabungkan)
-                let snapPertandingan = await get(ref(database, 'pertandingan'));
-                let dataPertandingan = snapPertandingan.val() || {};
+            ).match(/\d+/)?.[0] || "1";
 
-                let updates = {};
-                
-                // 2. Tulis CETAK BIRU UTUH ke server (Tetap ada Dami/Bye untuk arsip Bagan)
-                updates[`${ruangAktif}/pengaturan/jadwal_tanding`] = window.tempJadwalTanding;
-updates[`${ruangAktif}/pengaturan/jadwal_jurus`] = window.tempJadwalJurus;
+            if (!gelanggang[nomor]) {
 
-                let ts = Date.now();
-                let countAutoWin = 0;
-                let himpunanSelesaiGelanggang = {};
+                gelanggang[nomor] = {
+                    tanding: [],
+                    jurus: []
+                };
 
-                // 3. Mesin Auto-Win Bekerja Diam-diam!
-                window.tempJadwalTanding.forEach((row, index) => {
-                    let biru = String(row.mapped_biru).toUpperCase();
-                    let merah = String(row.mapped_merah).toUpperCase();
-                    
-                    let isDamiBiru = biru.includes("DAMI") || biru.includes("BYE") || biru === "" || biru === "-";
-                    let isDamiMerah = merah.includes("DAMI") || merah.includes("BYE") || merah === "" || merah === "-";
-
-                    // Jika Partai Penyisihan bertemu DAMI / BYE
-                    if ((isDamiBiru && !isDamiMerah) || (!isDamiBiru && isDamiMerah)) {
-                        let gelRaw = String(row.mapped_gelanggang).toLowerCase().replace(/[^0-9]/g, '');
-                        let gelId = "g" + (gelRaw || "1"); 
-                        
-                        let pemenangAsli = isDamiBiru ? 'merah' : 'biru';
-                        let namaMenang = isDamiBiru ? row.mapped_merah : row.mapped_biru;
-                        let kontMenang = isDamiBiru ? row.mapped_kont_merah : row.mapped_kont_biru;
-
-                        // Siapkan data pemenang
-                        let dataPemenang = JSON.parse(JSON.stringify(row));
-                        dataPemenang['SUDUT_MENANG'] = pemenangAsli;
-                        dataPemenang['NAMA ATLET'] = namaMenang;
-                        dataPemenang['KONTINGEN'] = kontMenang;
-
-                        // Kirim ke brankas Pemenang di Gelanggang tersebut
-                        updates[`${ruangAktif}/pertandingan/${gelId}/riwayat_pemenang/${ts + countAutoWin}`] = dataPemenang;
-
-                        // Kumpulkan ID index yang sudah selesai (Auto-Win)
-                        if (!himpunanSelesaiGelanggang[gelId]) {
-                            himpunanSelesaiGelanggang[gelId] = dataPertandingan[gelId]?.partai_selesai_tanding || [];
-                        }
-                        if (!himpunanSelesaiGelanggang[gelId].includes(index)) {
-                            himpunanSelesaiGelanggang[gelId].push(index);
-                        }
-                        
-                        countAutoWin++;
-                    }
-                });
-
-                // Terapkan status partai selesai ke update list
-                for (let gelId in himpunanSelesaiGelanggang) {
-                    updates[`${ruangAktif}/pertandingan/${gelId}/partai_selesai_tanding`] = himpunanSelesaiGelanggang[gelId];
-                }
-
-                // 4. Eksekusi Kirim Massal ke Database
-                await update(ref(database), updates);
-
-                showCustomAlert("✅ Cetak Biru Berhasil Dibuat!", `Jadwal resmi telah dikunci. <br>Sistem juga telah mengeksekusi <b>${countAutoWin} partai Auto-Win (BYE)</b> secara otomatis di latar belakang.<br><br>Layar Panitia kini 100% siap!`, "text-success");
-
-            } catch (err) {
-                showCustomAlert("❌ Gagal Sinkronisasi", "Terjadi kesalahan jaringan: " + err.message, "text-danger");
-            } finally {
-                btnElements.forEach(btn => btn.disabled = false); // Buka kunci tombol
             }
-        };
+
+            gelanggang[nomor].jurus.push(data);
+
+        }
+
+        // =====================================================
+        // URUTKAN PARTAI TANDING
+        // =====================================================
+
+        Object.values(gelanggang).forEach(gel => {
+
+            gel.tanding.sort((a, b) => {
+
+                return (
+                    Number(a.mapped_partai || 999999)
+                    -
+                    Number(b.mapped_partai || 999999)
+                );
+
+            });
+
+        });
+
+        // =====================================================
+        // URUTKAN JURUS
+        // =====================================================
+
+        Object.values(gelanggang).forEach(gel => {
+
+            gel.jurus.sort((a, b) => {
+
+                return (
+                    Number(a.mapped_partai || a.mapped_urutan || 999999)
+                    -
+                    Number(b.mapped_partai || b.mapped_urutan || 999999)
+                );
+
+            });
+
+        });
+
+        // =====================================================
+        // KIRIM SATU KALI KE FIREBASE
+        // =====================================================
+
+        await set(
+            ref(database, `${ruangAktif}/jadwal`),
+            {
+                gelanggang,
+                updateTerakhir: Date.now()
+            }
+        );
+
+        showCustomAlert(
+            "✅ Sinkronisasi Berhasil",
+            "Seluruh jadwal berhasil dikirim ke Firebase.",
+            "text-success"
+        );
+
+    }
+    catch (err) {
+
+        console.error(err);
+
+        showCustomAlert(
+            "❌ Gagal Sinkronisasi",
+            err.message,
+            "text-danger"
+        );
+
+    }
+    finally {
+
+        tombol.forEach(btn => btn.disabled = false);
+
+    }
+
+};
 
         window.downloadHasilOlahanExcel = function() {
+            buatExcelPerGelanggang("Data_dengan_Dami.xlsx", "Data berhasil diunduh!<br>Susunan Tab disesuaikan untuk pegangan fisik panitia.");
+        };
+
+        window.downloadJadwalMatang = function() {
+            if (typeof window.eksekusiBuatJadwalMatang === "function") window.eksekusiBuatJadwalMatang(); 
+            buatExcelPerGelanggang("Data_Tanpa_Dami.xlsx", "Jadwal Master berhasil diunduh!<br>File Excel berisi Tab Master dan Tab Pegangan Fisik.");
+        };
+
+        window.simpanPengaturan = function() {
+            let urlInput = document.getElementById('sheetUrl').value.trim(); 
+            let namaKejuaraan = document.getElementById('inputNamaKejuaraan').value.trim(); 
+            let waktuTunggu = parseInt(document.getElementById('inputWaktuScreensaver').value) || 60;
+            let btn = document.querySelector('.btn-save-master'); 
+            let teksAsli = btn.innerText; 
+            btn.innerText = "MENYIMPAN KE SERVER..."; 
+            btn.disabled = true;
+            
+            update(ref(database, `${ruangAktif}/pengaturan`), { 
+                nama_kejuaraan: namaKejuaraan, silat_sheet_url: urlInput, logos: dataLogos, screensavers: dataScreensavers, waktu_screensaver: waktuTunggu 
+            }).then(() => { 
+                showCustomAlert("✅ Sukses Disimpan!", "Semua konfigurasi telah disinkronkan ke Server Cloud.", "text-success"); 
+                btn.innerText = teksAsli; btn.disabled = false; 
+            }).catch((error) => { 
+                showCustomAlert("❌ Gagal Menyimpan", "Terjadi kesalahan jaringan: " + error, "text-danger"); 
+                btn.innerText = teksAsli; btn.disabled = false; 
+            });
+        }
+
+        // 🔥 LOGIKA CETAK TAB EXCEL (PRESTASI, PEMASALAN, TGR) 🔥
+        function buatExcelPerGelanggang(namaFile, pesanSukses) {
+            if (window.tempJadwalTanding.length === 0 && window.tempJadwalJurus.length === 0) {
+                showCustomAlert("⚠️ Jadwal Kosong", "Tidak ada data jadwal untuk di-download.", "text-warning"); return;
+            }
             try {
-                let workbook = XLSX.utils.book_new();
-                
+                let wb = XLSX.utils.book_new();
                 const createStyledSheet = (data, headers) => {
-                    if(data.length === 0) return null;
                     let ws_data = [headers]; 
-                    data.forEach(row => ws_data.push(row));
+                    if(data && data.length > 0) data.forEach(row => ws_data.push(row));
                     let ws = XLSX.utils.aoa_to_sheet(ws_data);
                     let range = XLSX.utils.decode_range(ws['!ref']);
                     for (let C = range.s.c; C <= range.e.c; ++C) {
                         let addr = XLSX.utils.encode_cell({ r: 0, c: C });
                         if (!ws[addr]) continue;
-                        ws[addr].s = {
-                            fill: { fgColor: { rgb: "FFFFCC00" } },
-                            font: { bold: true, color: { rgb: "FF000000" } },
-                            alignment: { horizontal: "center", vertical: "center" }
-                        };
+                        ws[addr].s = { fill: { fgColor: { rgb: "FFFFCC00" } }, font: { bold: true }, alignment: { horizontal: "center" } };
                     }
                     return ws;
                 };
 
-                let dataPrestasi = window.tempJadwalTanding.filter(item => item.mapped_kategori === "Prestasi");
-                let dataPemasalan = window.tempJadwalTanding.filter(item => item.mapped_kategori === "Pemasalan");
-                let dataTGR = window.tempJadwalJurus;
-
-                let headerTanding = ["PARTAI", "GELANGGANG", "BABAK", "KATEGORI", "TINGKAT", "KELAS", "SUDUT BIRU", "KONTINGEN BIRU", "SUDUT MERAH", "KONTINGEN MERAH"];
-                const formatTandingData = (arr) => arr.map(item => [
-                    item.mapped_partai, item.mapped_gelanggang, item.mapped_babak, 
-                    item.mapped_kategori, item.mapped_tingkat, item.mapped_kelas, 
-                    item.mapped_biru, item.mapped_kont_biru, 
-                    item.mapped_merah, item.mapped_kont_merah
-                ]);
-
-                if (dataPrestasi.length > 0) XLSX.utils.book_append_sheet(workbook, createStyledSheet(formatTandingData(dataPrestasi), headerTanding), "Jadwal Prestasi");
-                if (dataPemasalan.length > 0) XLSX.utils.book_append_sheet(workbook, createStyledSheet(formatTandingData(dataPemasalan), headerTanding), "Jadwal Pemasalan");
+                let headerUniversal = ["PARTAI", "GELANGGANG", "POOL", "KATEGORI", "LEVEL", "BABAK", "TINGKAT", "KELAS", "SUDUT BIRU", "KONTINGEN BIRU", "SUDUT MERAH", "KONTINGEN MERAH"];
+                let semuaJadwal = [...window.tempJadwalTanding, ...window.tempJadwalJurus];
                 
-                if (dataTGR.length > 0) {
-                    let headerTGR = ["NO UNDIAN", "GELANGGANG", "KATEGORI SENI", "TINGKAT", "NAMA ATLET", "KONTINGEN"];
-                    const formatTgrData = (arr) => arr.map(item => [
-                        item.mapped_partai, item.mapped_gelanggang, item.mapped_kategori, 
-                        item.mapped_tingkat, item.mapped_biru, item.mapped_kont_biru
-                    ]);
-                    XLSX.utils.book_append_sheet(workbook, createStyledSheet(formatTgrData(dataTGR), headerTGR), "Jadwal TGR");
-                }
-
-                if (dataPrestasi.length === 0 && dataPemasalan.length === 0 && dataTGR.length === 0) {
-                     showCustomAlert("⚠️ Kosong", "Tidak ada data jadwal untuk di-download.", "text-warning");
-                     return;
-                }
-
-                XLSX.writeFile(workbook, "Jadwal_Pertandingan_Otomatis.xlsx");
-                showCustomAlert("✅ Download Berhasil", "Data berhasil diunduh menjadi format Jadwal Excel dengan <b>Warna Header</b> dan <b>Tab (Sheet) yang terpisah</b>.", "text-success");
-            } catch(e) { 
-                showCustomAlert("❌ Gagal Download", e.message, "text-danger"); 
-            }
-        };
-
-        window.simpanPengaturan = function() {
-    let urlInput = document.getElementById('sheetUrl').value.trim(); 
-    let namaKejuaraan = document.getElementById('inputNamaKejuaraan').value.trim(); 
-    let waktuTunggu = parseInt(document.getElementById('inputWaktuScreensaver').value) || 60;
-    
-
-    let btn = document.querySelector('.btn-save-master'); 
-    let teksAsli = btn.innerText; 
-    btn.innerText = "MENYIMPAN KE SERVER..."; 
-    btn.disabled = true;
-    
-    update(ref(database, `${ruangAktif}/pengaturan`), { 
-        nama_kejuaraan: namaKejuaraan, 
-        silat_sheet_url: urlInput, 
-        logos: dataLogos, 
-        screensavers: dataScreensavers, 
-        waktu_screensaver: waktuTunggu 
-    }).then(() => { 
-        showCustomAlert("✅ Sukses Disimpan!", "Semua konfigurasi telah disinkronkan ke Server Cloud.", "text-success"); 
-        btn.innerText = teksAsli; 
-        btn.disabled = false; 
-    }).catch((error) => { 
-        showCustomAlert("❌ Gagal Menyimpan", "Terjadi kesalahan jaringan: " + error, "text-danger"); 
-        btn.innerText = teksAsli; 
-        btn.disabled = false; 
-    });
-}
-
-
-        // =============================================================
-        // 🔥 MESIN PEMBUAT JADWAL MATANG (DYNAMIC RUNDOWN ENGINE) 🔥
-        // =============================================================
-        window.eksekusiBuatJadwalMatang = function() {
-            if (window.tempJadwalTanding.length === 0) {
-                showCustomAlert("⚠️ Jadwal Kosong", "Silakan Pilih File Excel terlebih dahulu!", "text-warning");
-                return;
-            }
-
-            let jadwalMentah = window.tempJadwalTanding;
-            let jadwalMatang = [];
-            
-            // Simpan data siapa menang WO dari partai ke-berapa
-            let autoWinMap = {}; 
-            // Simpan perubahan nomor partai (misal Partai 5 asli jadi Partai 2)
-            let perubahanNomorMap = {}; 
-
-            let babakPenyisihan = [];
-            let babakLanjutan = []; // Semi Final, Final, dll
-
-            // 1. PISAHKAN BABAK DAN BASMI DAMI
-            jadwalMentah.forEach((row) => {
-                let biru = String(row.mapped_biru).toUpperCase();
-                let merah = String(row.mapped_merah).toUpperCase();
-                let babak = String(row.mapped_babak).toUpperCase();
-                let partaiAsli = String(row.mapped_partai);
+                // TAB 1: DATA SELURUH PESERTA (Kronologis Mutlak)
+                let dataAll = [...semuaJadwal].sort((a,b) => (parseInt(a.mapped_partai) || 999) - (parseInt(b.mapped_partai) || 999));
                 
-                let isDamiBiru = biru.includes("DAMI") || biru.includes("BYE") || biru === "" || biru === "-";
-                let isDamiMerah = merah.includes("DAMI") || merah.includes("BYE") || merah === "" || merah === "-";
-
-                // Jika Partai ini ketemu DAMI
-                if ((isDamiBiru && !isDamiMerah) || (!isDamiBiru && isDamiMerah)) {
-                    let atletMenang = isDamiBiru ? row.mapped_merah : row.mapped_biru;
-                    let kontMenang = isDamiBiru ? row.mapped_kont_merah : row.mapped_kont_biru;
-                    // Catat bahwa nomor partai ini dimenangkan oleh atlet ini
-                    autoWinMap[partaiAsli] = { nama: atletMenang, kontingen: kontMenang };
-                } else {
-                    // Jika Partai Riil (Manusia vs Manusia ATAU Pemenang vs Pemenang)
-                    if (babak.includes("PENYISIHAN") || babak === "-") {
-                        babakPenyisihan.push(row);
-                    } else {
-                        babakLanjutan.push(row);
-                    }
-                }
-            });
-
-            // 2. SUSUN ULANG NOMOR PARTAI (MENGALIR DARI 1)
-            let nomorUrutBaru = 1;
-
-            // A. Susun Penyisihan Duluan
-            babakPenyisihan.forEach(row => {
-                let pAsli = row.mapped_partai;
-                perubahanNomorMap[pAsli] = nomorUrutBaru; // Catat nomor barunya
-                row.mapped_partai = nomorUrutBaru; 
-                jadwalMatang.push(row);
-                nomorUrutBaru++;
-            });
-
-            // B. Susun Babak Lanjutan (Semi Final, Final) di urutan berikutnya
-            babakLanjutan.forEach(row => {
-                let nB = String(row.mapped_biru);
-                let nM = String(row.mapped_merah);
-
-                // Cek Sudut Biru: Apakah dia merujuk ke partai yang menang Dami?
-                Object.keys(autoWinMap).forEach(keyDami => {
-                    // Jika teksnya "Pemenang 1" atau "Pemenang Partai 1"
-                    let regex = new RegExp(`\\b${keyDami}\\b`, 'g');
-                    if (nB.match(regex) || nB.toUpperCase().includes(keyDami)) {
-                        row.mapped_biru = autoWinMap[keyDami].nama;
-                        row.mapped_kont_biru = autoWinMap[keyDami].kontingen;
-                    }
-                    if (nM.match(regex) || nM.toUpperCase().includes(keyDami)) {
-                        row.mapped_merah = autoWinMap[keyDami].nama;
-                        row.mapped_kont_merah = autoWinMap[keyDami].kontingen;
-                    }
+                // 🔥 LOGIKA DATABASE INDUK (Mencari letak baris tiap partai) 🔥
+                let mapBaris = {};
+                dataAll.forEach((item, idx) => { 
+                    mapBaris[item.mapped_partai] = idx + 2; // +2 karena Baris 1 di Excel adalah Header
                 });
+                
+                // Fungsi cerdas mengubah Dami menjadi Rumus Excel Terhubung
+                const prosesDamiLink = (namaAtlet, defaultNama, defaultKont, baris, kolNama, kolKont) => {
+                    if (String(namaAtlet).includes("DAMI")) {
+                        return { 
+                            nama: { f: `='DATA SELURUH PESERTA'!${kolNama}${baris}` }, 
+                            kontingen: { f: `='DATA SELURUH PESERTA'!${kolKont}${baris}` } 
+                        };
+                    }
+                    return { nama: defaultNama, kontingen: defaultKont };
+                };
 
-                // Cek Nomor Partai Baru: Update tulisan "Pemenang 5" jadi "Pemenang 2" (sesuai nomor baru)
-                Object.keys(perubahanNomorMap).forEach(oldKey => {
-                    let newNum = perubahanNomorMap[oldKey];
-                    let regex = new RegExp(`\\b${oldKey}\\b`, 'g');
+                let formatAll = dataAll.map(item => [ item.mapped_partai, item.mapped_gelanggang, item.mapped_pool || "-", item.mapped_kategori, item.mapped_level, item.mapped_babak, item.mapped_tingkat, item.mapped_kelas, item.mapped_biru, item.mapped_kont_biru, item.mapped_merah, item.mapped_kont_merah ]);
+                XLSX.utils.book_append_sheet(wb, createStyledSheet(formatAll, headerUniversal), "DATA SELURUH PESERTA");
+
+                // TAB 2: Pertandingan PRESTASI (Diurutkan hierarki: Gelanggang > Usia > Kelas > Pool > Partai)
+                let dPrestasi = window.tempJadwalTanding.filter(i => String(i.mapped_level).toUpperCase() === "PRESTASI");
+                
+                // Fungsi pembobot usia agar urutannya logis (Dini -> Dewasa)
+                const getWeightExcel = (tingkat) => {
+                    const w = { "[USIA DINI 1 (SD)]": 1, "[USIA DINI 2 (SD)]": 2, "[PRA REMAJA]": 3, "[REMAJA]": 4, "[DEWASA]": 5, "[MASTER]": 6 };
+                    return w[String(tingkat).toUpperCase().trim()] || 99;
+                };
+
+                dPrestasi.sort((a, b) => {
+                    let gelA = parseInt(String(a.mapped_gelanggang).replace(/[^0-9]/g, '')) || 99;
+                    let gelB = parseInt(String(b.mapped_gelanggang).replace(/[^0-9]/g, '')) || 99;
+                    let weightA = getWeightExcel(a.mapped_tingkat);
+                    let weightB = getWeightExcel(b.mapped_tingkat);
+                    let kA = String(a.mapped_kelas || "").toUpperCase();   let kB = String(b.mapped_kelas || "").toUpperCase();
+                    let pA = String(a.mapped_pool || "").toUpperCase();    let pB = String(b.mapped_pool || "").toUpperCase();
+                    let partA = parseInt(a.mapped_partai) || 99999;        let partB = parseInt(b.mapped_partai) || 99999;
                     
-                    // Update teks asalkan belum berubah jadi nama orang
-                    if (String(row.mapped_biru).match(regex) && !row.mapped_biru.includes(autoWinMap[oldKey]?.nama)) {
-                        row.mapped_biru = String(row.mapped_biru).replace(regex, newNum);
-                    }
-                    if (String(row.mapped_merah).match(regex) && !row.mapped_merah.includes(autoWinMap[oldKey]?.nama)) {
-                        row.mapped_merah = String(row.mapped_merah).replace(regex, newNum);
-                    }
+                    if (gelA !== gelB) return gelA - gelB;             // Kunci Gelanggang
+                    if (weightA !== weightB) return weightA - weightB; // Urut Usia
+                    if (kA !== kB) return kA.localeCompare(kB);        // Urut Kelas
+                    if (pA !== pB) return pA.localeCompare(pB);        // Urut Pool
+                    return partA - partB;                              // Urut Partai
                 });
+                
+                // 🔥 Terapkan Rumus Link ke Tab Prestasi 🔥
+                let formatPrestasi = dPrestasi.map(item => {
+                    let b = mapBaris[item.mapped_partai];
+                    let biruData = prosesDamiLink(item.mapped_biru, item.mapped_biru, item.mapped_kont_biru, b, 'I', 'J');
+                    let merahData = prosesDamiLink(item.mapped_merah, item.mapped_merah, item.mapped_kont_merah, b, 'K', 'L');
+                    return [ item.mapped_partai, item.mapped_gelanggang, item.mapped_pool || "-", item.mapped_kategori, item.mapped_level, item.mapped_babak, item.mapped_tingkat, item.mapped_kelas, biruData.nama, biruData.kontingen, merahData.nama, merahData.kontingen ];
+                });
+                XLSX.utils.book_append_sheet(wb, createStyledSheet(formatPrestasi, headerUniversal), "Pertandingan PRESTASI");
 
-                row.mapped_partai = nomorUrutBaru;
-                jadwalMatang.push(row);
-                nomorUrutBaru++;
-            });
+                // TAB 3: Pertandingan PEMASALAN (Khusus Pemasalan, Diurut Kronologis Mutlak)
+                let dPemasalan = window.tempJadwalTanding.filter(i => String(i.mapped_level).toUpperCase() === "PEMASALAN");
+                dPemasalan.sort((a,b) => (parseInt(a.mapped_partai)||999) - (parseInt(b.mapped_partai)||999));
+                
+                // 🔥 Terapkan Rumus Link ke Tab Pemasalan 🔥
+                let formatPem = dPemasalan.map(item => {
+                    let b = mapBaris[item.mapped_partai];
+                    let biruData = prosesDamiLink(item.mapped_biru, item.mapped_biru, item.mapped_kont_biru, b, 'I', 'J');
+                    let merahData = prosesDamiLink(item.mapped_merah, item.mapped_merah, item.mapped_kont_merah, b, 'K', 'L');
+                    return [ item.mapped_partai, item.mapped_gelanggang, item.mapped_pool || "-", item.mapped_kategori, item.mapped_level, item.mapped_babak, item.mapped_tingkat, item.mapped_kelas, biruData.nama, biruData.kontingen, merahData.nama, merahData.kontingen ];
+                });
+                XLSX.utils.book_append_sheet(wb, createStyledSheet(formatPem, headerUniversal), "Pertandingan PEMASALAN");
 
-            // 3. TERAPKAN JADWAL MATANG KE SISTEM
-            window.tempJadwalTanding = jadwalMatang;
-            
-            // Susun juga untuk kategori Seni (Jika ada, diurutkan setelah Tanding)
-            let jadwalSeniBersih = [];
-            window.tempJadwalJurus.forEach(row => {
-                let isGaib = String(row.mapped_biru).toUpperCase().includes("DAMI") || String(row.mapped_biru).toUpperCase().includes("BYE");
-                if(!isGaib) {
-                    row.mapped_partai = nomorUrutBaru;
-                    jadwalSeniBersih.push(row);
-                    nomorUrutBaru++;
+                // TAB 4: Jurus TGR (Khusus Jurus)
+                let dJurus = [...window.tempJadwalJurus];
+                let formatJurus = dJurus.map(item => [ item.mapped_partai, item.mapped_gelanggang, "-", item.mapped_kategori, item.mapped_level, "Penampilan", item.mapped_tingkat, item.mapped_kelas, item.mapped_biru, item.mapped_kont_biru, "-", "-" ]);
+                XLSX.utils.book_append_sheet(wb, createStyledSheet(formatJurus, headerUniversal), "Jurus TGR");
+
+                // TAB GELANGGANG (Siap diisi manual)
+                let jmlGel = parseInt(document.getElementById('setJmlGelanggang').value) || 3; 
+                for(let i = 1; i <= jmlGel; i++) {
+                    XLSX.utils.book_append_sheet(wb, createStyledSheet([], headerUniversal), `GELANGGANG ${i}`);
                 }
-            });
-            window.tempJadwalJurus = jadwalSeniBersih;
 
-            // Refresh UI
-            document.getElementById('teksRingkasanJadwal').innerHTML = `<span class="text-success">${jadwalMatang.length} Partai Tanding</span> (Sudah Diurutkan & Dami Dibuang) <br> <span class="text-success">${window.tempJadwalJurus.length} Partai Seni/TGR</span>`;
-            
-            showCustomAlert("✅ Jadwal Matang Tercipta!", "Dami telah dibasmi! Pemenang BYE otomatis dinaikkan ke babak selanjutnya.<br><br>Nomor partai telah disusun rapi dari 1 hingga selesai.<br>Silakan klik <b>TAMPILKAN LANGSUNG KE LAYAR</b>.", "text-success");
+                XLSX.writeFile(wb, namaFile);
+                showCustomAlert("✅ Unduhan Sukses!", pesanSukses, "text-success");
+            } catch(e) { showCustomAlert("❌ Gagal Download", e.message, "text-danger"); }
         }
 
-
-
-
-        // =============================================================
-        // 🔥 MESIN DOWNLOAD EXCEL JADWAL (PISAH NOMOR URUT & FILTER WO) 🔥
-        // =============================================================
-        window.downloadJadwalMatang = function() {
-            if (window.tempJadwalTanding.length === 0) {
-                showCustomAlert("⚠️ Jadwal Kosong", "Silakan proses data mentah terlebih dahulu untuk memunculkan jadwal.", "text-warning");
-                return;
-            }
-
-            let jadwalMentah = JSON.parse(JSON.stringify(window.tempJadwalTanding));
-            
-            // 🔥 KITA SIAPKAN 3 WADAH & 3 PENGHITUNG TERPISAH 🔥
-            let jadwalPrestasi = []; let noPrestasi = 1;
-            let jadwalPemasalan = []; let noPemasalan = 1;
-            let jadwalSeni = []; let noSeni = 1;
-            
-            let autoWinMap = {}; 
-            let perubahanNomorMap = {}; 
-
-            let babakPenyisihan = [];
-            let babakLanjutan = []; 
-
-            // 1. PISAHKAN BABAK DAN TANGKAP JUARA WO AWAL
-            jadwalMentah.forEach((row) => {
-                let biru = String(row.mapped_biru).toUpperCase();
-                let merah = String(row.mapped_merah).toUpperCase();
-                let babak = String(row.mapped_babak).toUpperCase();
-                let partaiAsli = String(row.mapped_partai);
-                
-                let isDamiBiru = biru.includes("DAMI") || biru.includes("BYE") || biru === "" || biru === "-";
-                let isDamiMerah = merah.includes("DAMI") || merah.includes("BYE") || merah === "" || merah === "-";
-
-                // Jika Partai Penyisihan/Final Pemasalan langsung ketemu DAMI
-                if ((isDamiBiru && !isDamiMerah) || (!isDamiBiru && isDamiMerah)) {
-                    let atletMenang = isDamiBiru ? row.mapped_merah : row.mapped_biru;
-                    let kontMenang = isDamiBiru ? row.mapped_kont_merah : row.mapped_kont_biru;
-                    autoWinMap[partaiAsli] = { nama: atletMenang, kontingen: kontMenang };
-                } 
-                else if (!isDamiBiru && !isDamiMerah) {
-                    // Jika Partai Riil (Manusia vs Manusia)
-                    if (babak.includes("PENYISIHAN") || babak === "-") {
-                        babakPenyisihan.push(row);
-                    } else {
-                        babakLanjutan.push(row);
-                    }
-                }
-            });
-
-            // 2. SUSUN PENYISIHAN DENGAN NOMOR URUT TERPISAH
-            babakPenyisihan.forEach(row => {
-                let pAsli = String(row.mapped_partai);
-                let kat = String(row.mapped_kategori).toUpperCase();
-                
-                // Pisahkan nomor urut berdasarkan kategori
-                let nomorBaru = kat.includes("PRESTASI") ? noPrestasi : noPemasalan;
-                
-                perubahanNomorMap[pAsli] = nomorBaru; 
-                row.mapped_partai = nomorBaru; 
-                
-                if (kat.includes("PRESTASI")) {
-                    jadwalPrestasi.push(row);
-                    noPrestasi++;
-                } else {
-                    jadwalPemasalan.push(row);
-                    noPemasalan++;
-                }
-            });
-
-            // 3. SUSUN BABAK LANJUTAN & FILTER LAPIS KEDUA (KHUSUS 1 ORANG)
-            babakLanjutan.forEach(row => {
-                let nB = String(row.mapped_biru);
-                let nM = String(row.mapped_merah);
-
-                function prosesWadahPemenang(teks, isBiru) {
-                    let hasilTeks = teks;
-                    let hasilKontingen = isBiru ? row.mapped_kont_biru : row.mapped_kont_merah;
-                    let match = teks.match(/PEMENANG\s+PARTAI\s*(\d+)/i);
-                    
-                    if (match) {
-                        let nomorLama = match[1];
-                        if (autoWinMap[nomorLama]) {
-                            hasilTeks = autoWinMap[nomorLama].nama;
-                            hasilKontingen = autoWinMap[nomorLama].kontingen;
-                        } else if (perubahanNomorMap[nomorLama]) {
-                            hasilTeks = "Pemenang Partai " + perubahanNomorMap[nomorLama];
-                        }
-                    }
-                    return { teks: hasilTeks, kontingen: hasilKontingen };
-                }
-
-                let biruBaru = prosesWadahPemenang(nB, true);
-                row.mapped_biru = biruBaru.teks;
-                row.mapped_kont_biru = biruBaru.kontingen;
-
-                let merahBaru = prosesWadahPemenang(nM, false);
-                row.mapped_merah = merahBaru.teks;
-                row.mapped_kont_merah = merahBaru.kontingen;
-
-                // 🔥 FILTER LAPIS KEDUA (Solusi Kelas 1 Orang) 🔥
-                // Cek apakah setelah ditranslate, lawannya ternyata DAMI?
-                let cekB = row.mapped_biru.toUpperCase();
-                let cekM = row.mapped_merah.toUpperCase();
-                let isGaibLanjutan = cekB.includes("DAMI") || cekM.includes("DAMI") || cekB.includes("BYE") || cekM.includes("BYE");
-
-                // Jika TIDAK GAIB, baru masukkan ke jadwal cetak
-                if (!isGaibLanjutan) {
-                    let kat = String(row.mapped_kategori).toUpperCase();
-                    if (kat.includes("PRESTASI")) {
-                        row.mapped_partai = noPrestasi++;
-                        jadwalPrestasi.push(row);
-                    } else {
-                        row.mapped_partai = noPemasalan++;
-                        jadwalPemasalan.push(row);
-                    }
-                }
-            });
-
-            // 4. PROSES KATEGORI SENI (PENGHITUNG SENDIRI)
-            let jadwalSeniMentah = JSON.parse(JSON.stringify(window.tempJadwalJurus));
-            jadwalSeniMentah.forEach(row => {
-                let isGaib = String(row.mapped_biru).toUpperCase().includes("DAMI") || String(row.mapped_biru).toUpperCase().includes("BYE");
-                if(!isGaib) {
-                    row.mapped_partai = noSeni++;
-                    jadwalSeni.push(row);
-                }
-            });
-
-            // 5. BUNGKUS KE 3 SHEET EXCEL TERPISAH
-            let wb = XLSX.utils.book_new();
-            
-            const createStyledSheet = (data, headers) => {
-                if(data.length === 0) return null;
-                let ws_data = [headers]; 
-                data.forEach(row => ws_data.push(row));
-                let ws = XLSX.utils.aoa_to_sheet(ws_data);
-                let range = XLSX.utils.decode_range(ws['!ref']);
-                for (let C = range.s.c; C <= range.e.c; ++C) {
-                    let addr = XLSX.utils.encode_cell({ r: 0, c: C });
-                    if (!ws[addr]) continue;
-                    ws[addr].s = { fill: { fgColor: { rgb: "FFFFCC00" } }, font: { bold: true, color: { rgb: "FF000000" } }, alignment: { horizontal: "center", vertical: "center" } };
-                }
-                return ws;
-            };
-
-            let headerTanding = ["PARTAI", "GELANGGANG", "BABAK", "KATEGORI", "TINGKAT", "KELAS", "SUDUT BIRU", "KONTINGEN BIRU", "SUDUT MERAH", "KONTINGEN MERAH"];
-            const formatTandingData = (arr) => arr.map(item => [ item.mapped_partai, item.mapped_gelanggang, item.mapped_babak, item.mapped_kategori, item.mapped_tingkat, item.mapped_kelas, item.mapped_biru, item.mapped_kont_biru, item.mapped_merah, item.mapped_kont_merah ]);
-            
-            let headerTGR = ["NO URUT", "GELANGGANG", "KATEGORI SENI", "TINGKAT", "NAMA ATLET", "KONTINGEN"];
-            const formatTgrData = (arr) => arr.map(item => [ item.mapped_partai, item.mapped_gelanggang, item.mapped_kategori, item.mapped_tingkat, item.mapped_biru, item.mapped_kont_biru ]);
-
-            // Tulis Sheet sesuai urutan: Prestasi -> Pemasalan -> Seni
-            if (jadwalPrestasi.length > 0) XLSX.utils.book_append_sheet(wb, createStyledSheet(formatTandingData(jadwalPrestasi), headerTanding), "Jadwal Prestasi");
-            if (jadwalPemasalan.length > 0) XLSX.utils.book_append_sheet(wb, createStyledSheet(formatTandingData(jadwalPemasalan), headerTanding), "Jadwal Pemasalan");
-            if (jadwalSeni.length > 0) XLSX.utils.book_append_sheet(wb, createStyledSheet(formatTgrData(jadwalSeni), headerTGR), "Jadwal Seni");
-
-            if (jadwalPrestasi.length === 0 && jadwalPemasalan.length === 0 && jadwalSeni.length === 0) {
-                showCustomAlert("⚠️ Data Kosong", "Semua jadwal terdeteksi sebagai WO / DAMI, tidak ada yang perlu ditandingkan.", "text-warning");
-                return;
-            }
-
-            XLSX.writeFile(wb, "Jadwal_Matang_Siap_Tanding.xlsx");
-            showCustomAlert("✅ Unduhan Sempurna!", "Jadwal berhasil diunduh!<br><br>• Prestasi, Pemasalan & TGR dipisah ke <b>3 Sheet berbeda</b>.<br>• Nomor partai di setiap kategori <b>dimulai dari angka 1</b>.<br>• Peserta tunggal & Pemasalan Dami <b>dibersihkan</b> dari jadwal.", "text-success");
-        }
-
-
-
+        // Script untuk UI Image Upload
+        let htmlSponsorKiri = ""; for(let i=1; i<=4; i++) { htmlSponsorKiri += `<div class="col-6 col-sm-5"><div class="logo-box"><div class="logo-preview" id="prev_kiri${i}">KOSONG</div><input type="file" id="file_kiri${i}" accept="image/png, image/jpeg" class="d-none" onchange="prosesGambar(this, 'kiri${i}')"><button class="btn btn-sm btn-outline-warning w-100 mb-1" style="font-size: 10px;" onclick="document.getElementById('file_kiri${i}').click()">PILIH L-${i}</button><button class="btn btn-sm btn-outline-danger w-100" style="font-size: 10px;" onclick="hapusGambar('kiri${i}')">HAPUS</button></div></div>`; } document.getElementById("wadahSponsorKiri").innerHTML = htmlSponsorKiri;
+        let htmlSponsorKanan = ""; for(let i=1; i<=4; i++) { htmlSponsorKanan += `<div class="col-6 col-sm-5"><div class="logo-box"><div class="logo-preview" id="prev_kanan${i}">KOSONG</div><input type="file" id="file_kanan${i}" accept="image/png, image/jpeg" class="d-none" onchange="prosesGambar(this, 'kanan${i}')"><button class="btn btn-sm btn-outline-warning w-100 mb-1" style="font-size: 10px;" onclick="document.getElementById('file_kanan${i}').click()">PILIH R-${i}</button><button class="btn btn-sm btn-outline-danger w-100" style="font-size: 10px;" onclick="hapusGambar('kanan${i}')">HAPUS</button></div></div>`; } document.getElementById("wadahSponsorKanan").innerHTML = htmlSponsorKanan;
+        let htmlScreensaver = ""; for(let i=1; i<=10; i++) { htmlScreensaver += `<div class="col-6 col-sm-4 col-md-3 col-lg-2"><div class="logo-box"><span class="badge-slot">GAMBAR ${i}</span><div class="screensaver-preview" id="prev_s${i}">KOSONG</div><input type="file" id="file_s${i}" accept="image/png, image/jpeg" class="d-none" onchange="prosesScreensaver(this, 's${i}')"><button class="btn btn-sm btn-outline-warning w-100 mb-1 fw-bold" style="font-size: 10px;" onclick="document.getElementById('file_s${i}').click()">PILIH</button><button class="btn btn-sm btn-outline-danger w-100 fw-bold" style="font-size: 10px;" onclick="hapusScreensaver('s${i}')">HAPUS</button></div></div>`; } document.getElementById("wadahScreensaver").innerHTML = htmlScreensaver;
 
         window.prosesGambar = function(input, slotKey) { const file = input.files[0]; if (!file) return; const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = function(event) { const img = new Image(); img.src = event.target.result; img.onload = function() { const canvas = document.createElement('canvas'); const MAX_HEIGHT = 150; let width = img.width; let height = img.height; if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; } canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height); dataLogos[slotKey] = canvas.toDataURL('image/png'); document.getElementById(`prev_${slotKey}`).innerHTML = `<img src="${dataLogos[slotKey]}">`; } }; }
         window.prosesScreensaver = function(input, slotKey) { const file = input.files[0]; if (!file) return; const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = function(event) { const img = new Image(); img.src = event.target.result; img.onload = function() { const canvas = document.createElement('canvas'); const MAX_HEIGHT = 720; let width = img.width; let height = img.height; if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; } canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.fillStyle = "#000000"; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.drawImage(img, 0, 0, width, height); dataScreensavers[slotKey] = canvas.toDataURL('image/jpeg', 0.8); document.getElementById(`prev_${slotKey}`).innerHTML = `<img src="${dataScreensavers[slotKey]}">`; } }; }

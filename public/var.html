@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VAR Silat - Live + Ambil Momen Buffer</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root { color-scheme: dark; }
+    body {
+      background: linear-gradient(180deg, #1f1f1f 0%, #000 100%);
+      color: #fff;
+      font-family: Arial, sans-serif;
+      min-height: 100vh;
+      margin: 0;
+      padding: 18px;
+    }
+    .header-title {
+      text-align: center;
+      font-weight: 900;
+      color: #ffc107;
+      letter-spacing: 1.5px;
+      margin-bottom: 18px;
+      text-shadow: 0 0 14px rgba(255,193,7,.45);
+    }
+    .video-container {
+      background: #111;
+      border: 3px solid #444;
+      border-radius: 14px;
+      padding: 10px;
+      box-shadow: 0 10px 20px rgba(0,0,0,.8);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      height: 100%;
+    }
+    .video-container.recording {
+      border-color: #dc3545;
+      box-shadow: 0 0 20px rgba(220,53,69,.55);
+      animation: pulse-red 2s infinite;
+    }
+    @keyframes pulse-red {
+      0% { box-shadow: 0 0 10px rgba(220,53,69,.35); }
+      50% { box-shadow: 0 0 25px rgba(220,53,69,.75); }
+      100% { box-shadow: 0 0 10px rgba(220,53,69,.35); }
+    }
+    video {
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+      background: #000;
+      aspect-ratio: 16/9;
+      object-fit: contain;
+    }
+    .panel-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #ddd;
+      text-align: center;
+      margin-bottom: 0;
+      letter-spacing: .8px;
+    }
+    .badge-live {
+      background-color: #dc3545;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 5px;
+      font-size: 12px;
+      font-weight: 800;
+      display: none;
+      white-space: nowrap;
+    }
+    .small-note { font-size: 12px; color: #a9a9a9; }
+    .timeline-wrap {
+      background: #171717;
+      border: 1px solid #444;
+      border-radius: 10px;
+      padding: 10px;
+    }
+    .btn-group .btn { white-space: nowrap; }
+    .status-dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #6c757d;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    .status-dot.on { background: #dc3545; box-shadow: 0 0 8px rgba(220,53,69,.8); }
+    .label-badge {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .4px;
+      color: #bbb;
+    }
+  </style>
+</head>
+<body>
+  <h2 class="header-title">VIDEO ASSISTANT REFEREE (VAR) — LIVE + AMBIL MOMEN BUFFER</h2>
+
+  <div class="container-fluid">
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="video-container" id="panelLive">
+          <div class="d-flex justify-content-between align-items-center gap-2">
+            <div class="panel-title text-info">Kamera Utama (Live Feed)</div>
+            <div class="badge-live" id="indikatorRekam"><span class="status-dot on"></span>MEREKAM</div>
+          </div>
+
+          <video id="liveVideo" autoplay muted playsinline></video>
+
+          <div class="row g-2">
+            <div class="col-12 col-md-4">
+              <button id="btnStart" class="btn btn-success fw-bold w-100 py-3" onclick="mulaiRekam()">⏺ MULAI REKAM</button>
+            </div>
+            <div class="col-12 col-md-4">
+              <button id="btnStop" class="btn btn-danger fw-bold w-100 py-3" onclick="hentikanRekam()" disabled>⏹ STOP</button>
+            </div>
+            <div class="col-12 col-md-4">
+              <button id="btnMark" class="btn btn-warning fw-bold w-100 py-3 text-dark" onclick="ambilMomen()" disabled>⏮ AMBIL 120/180 DETIK TERAKHIR</button>
+            </div>
+          </div>
+
+          <div class="timeline-wrap">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <div class="label-badge">BUFFER REWIND</div>
+              <div class="small-note" id="bufferInfo">0 / 120 detik</div>
+            </div>
+            <input type="range" id="bufferBar" class="form-range" min="0" max="120" value="120" step="1" disabled>
+            <div class="d-flex justify-content-between small-note mt-1">
+              <span>0 detik lalu</span>
+              <span>120 detik lalu</span>
+            </div>
+          </div>
+
+          <div class="d-flex gap-2 flex-wrap">
+            <button class="btn btn-dark border border-secondary fw-bold flex-fill" onclick="setBufferLength(60)">60s</button>
+            <button class="btn btn-dark border border-secondary fw-bold flex-fill" onclick="setBufferLength(120)">120s</button>
+            <button class="btn btn-dark border border-secondary fw-bold flex-fill" onclick="setBufferLength(180)">180s</button>
+            <button class="btn btn-dark border border-secondary fw-bold flex-fill" onclick="toggleDiskMode()" id="btnDiskMode">Disk: OFF</button>
+          </div>
+
+          <div class="small-note">
+            Kamera kiri tetap merekam terus tanpa henti. Saat tombol AMBIL MOMEN ditekan, layar kanan akan mengambil cuplikan 120/180 detik terakhir tanpa menghentikan kamera kiri.
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="video-container" id="panelReplay" style="border-color:#0dcaf0;">
+          <div class="panel-title text-warning">Layar Pemutaran Cuplikan</div>
+
+          <div id="replayPlaceholder" class="d-flex align-items-center justify-content-center rounded border border-secondary bg-black text-secondary" style="min-height: 260px; font-weight: 700; letter-spacing: .5px;">
+            Layar kanan kosong. Tekan tombol AMBIL MOMEN untuk menampilkan video.
+          </div>
+
+          <video id="replayVideo" class="d-none" controls playsinline preload="metadata"></video>
+
+          <div class="timeline-wrap d-none" id="replayControls">
+            <div class="d-flex justify-content-between text-secondary mb-1" style="font-size: 12px;">
+              <span id="waktuBerjalan">00:00</span>
+              <span id="totalDurasi">00:00</span>
+            </div>
+            <input type="range" id="replayBar" class="form-range" value="0" min="0" max="100" step="0.1" style="cursor:pointer;">
+          </div>
+
+          <div class="d-flex gap-2 flex-wrap d-none" id="replayButtons">
+            <button class="btn btn-dark border border-secondary w-50 fw-bold" onclick="togglePlayPause()" id="btnPlayPause">▶ Play / Pause</button>
+            <button class="btn btn-dark border border-secondary w-50 fw-bold" onclick="ulangiDariAwal()">🔄 Ulangi</button>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center p-2 bg-dark rounded border border-secondary d-none" id="speedControls">
+            <span class="text-light fw-bold" style="font-size: 13px;">KECEPATAN VIDEO:</span>
+            <div class="btn-group btn-group-sm">
+              <button class="btn btn-outline-light fw-bold" onclick="ubahKecepatan(1.0)" id="btnSpeed1">1.0x</button>
+              <button class="btn btn-outline-warning fw-bold" onclick="ubahKecepatan(0.5)" id="btnSpeed05">0.5x</button>
+              <button class="btn btn-outline-danger fw-bold" onclick="ubahKecepatan(0.25)" id="btnSpeed025">0.25x</button>
+            </div>
+          </div>
+
+          <div class="row g-2 d-none" id="replayActionRow">
+            <div class="col-12 col-md-6">
+              <button id="btnSave" class="btn btn-primary fw-bold w-100 py-2" onclick="simpanVideoKeLaptop()" disabled>💾 SIMPAN REPLAY</button>
+            </div>
+            <div class="col-12 col-md-6">
+              <button id="btnClear" class="btn btn-secondary fw-bold w-100 py-2" onclick="bersihkanReplay()" disabled>🧹 RESET REPLAY</button>
+            </div>
+          </div>
+
+          <div class="small-note" id="diskInfo">
+            Mode disk OFF. Jika ingin simpan ke NVMe/folder khusus, aktifkan mode disk dan pilih folder tujuan.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const liveVideo = document.getElementById('liveVideo');
+    const replayVideo = document.getElementById('replayVideo');
+    const panelLive = document.getElementById('panelLive');
+    const panelReplay = document.getElementById('panelReplay');
+    const indikatorRekam = document.getElementById('indikatorRekam');
+    const btnStart = document.getElementById('btnStart');
+    const btnStop = document.getElementById('btnStop');
+    const btnMark = document.getElementById('btnMark');
+    const btnSave = document.getElementById('btnSave');
+    const btnClear = document.getElementById('btnClear');
+    const btnDiskMode = document.getElementById('btnDiskMode');
+    const bufferBar = document.getElementById('bufferBar');
+    const replayBar = document.getElementById('replayBar');
+    const bufferInfo = document.getElementById('bufferInfo');
+    const waktuBerjalan = document.getElementById('waktuBerjalan');
+    const totalDurasi = document.getElementById('totalDurasi');
+    const btnPlayPause = document.getElementById('btnPlayPause');
+    const diskInfo = document.getElementById('diskInfo');
+
+    let stream = null;
+    let mediaRecorder = null;
+    let recording = false;
+    let useDisk = false;
+    let diskHandle = null;
+    let diskWritable = null;
+
+    let bufferLengthSec = 120;
+    let chunkIntervalMs = 1000;
+    let chunkQueue = [];
+    let chunkMeta = [];
+    let bufferBlob = null;
+    let bufferURL = null;
+    let currentReplayObjectURL = null;
+    let trimTimer = null;
+    let saveSegmentCounter = 0;
+    let recordingStartedAt = 0;
+
+    const hasFSAccess = 'showDirectoryPicker' in window;
+    const supportsRecorder = 'MediaRecorder' in window;
+    const supportsMedia = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+
+    function formatWaktu(detik) {
+      const m = Math.floor(detik / 60);
+      const s = Math.floor(detik % 60);
+      return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    function supportedMimeType() {
+      const candidates = [
+        'video/webm;codecs=vp9,opus',
+        'video/webm;codecs=vp8,opus',
+        'video/webm;codecs=vp9',
+        'video/webm;codecs=vp8',
+        'video/webm'
+      ];
+      for (const type of candidates) {
+        if (MediaRecorder.isTypeSupported(type)) return type;
+      }
+      return '';
+    }
+
+    function setRecordingUI(on) {
+      recording = on;
+      btnStart.disabled = on;
+      btnStop.disabled = !on;
+      btnMark.disabled = !on;
+      btnDiskMode.disabled = on;
+      bufferBar.disabled = !on;
+      indikatorRekam.style.display = on ? 'inline-flex' : 'none';
+      panelLive.classList.toggle('recording', on);
+    }
+
+    function cleanupReplayURL() {
+      if (currentReplayObjectURL) {
+        URL.revokeObjectURL(currentReplayObjectURL);
+        currentReplayObjectURL = null;
+      }
+    }
+
+    function renderBuffer() {
+      const totalSec = Math.min(bufferLengthSec, Math.max(0, Math.ceil((Date.now() - recordingStartedAt) / 1000)));
+      bufferInfo.innerText = `${Math.min(totalSec, bufferLengthSec)} / ${bufferLengthSec} detik`;
+      bufferBar.max = bufferLengthSec;
+      bufferBar.value = Math.min(totalSec, bufferLengthSec);
+    }
+
+    function rebuildBufferBlob() {
+      if (!chunkQueue.length) {
+        bufferBlob = null;
+        cleanupReplayURL();
+        return;
+      }
+      bufferBlob = new Blob(chunkQueue, { type: chunkQueue[0].type || 'video/webm' });
+      cleanupReplayURL();
+      currentReplayObjectURL = URL.createObjectURL(bufferBlob);
+      replayVideo.src = currentReplayObjectURL;
+      btnSave.disabled = false;
+      btnClear.disabled = false;
+      totalDurasi.innerText = formatWaktu(Math.ceil(bufferBlob.size / 125000));
+    }
+
+    function trimOldChunks() {
+      const now = Date.now();
+      const cutoff = now - (bufferLengthSec * 1000);
+      while (chunkMeta.length && chunkMeta[0].ts < cutoff) {
+        chunkQueue.shift();
+        chunkMeta.shift();
+      }
+      rebuildBufferBlob();
+      renderBuffer();
+    }
+
+    async function initCamera() {
+      if (!supportsMedia) {
+        alert('Browser ini tidak mendukung getUserMedia.');
+        return;
+      }
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { width: { ideal: 1920 }, height: { ideal: 1080 }, frameRate: { ideal: 60 } },
+          audio: false
+        });
+        liveVideo.srcObject = stream;
+      } catch (err) {
+        console.error(err);
+        alert('Gagal mengakses kamera. Pastikan izin kamera sudah diberikan.\n\nError: ' + err.message);
+      }
+    }
+
+    async function mulaiRekam() {
+      if (!supportsRecorder) {
+        alert('Browser ini tidak mendukung MediaRecorder.');
+        return;
+      }
+      if (!stream) {
+        alert('Kamera belum aktif.');
+        return;
+      }
+
+      const mimeType = supportedMimeType();
+      if (!mimeType) {
+        alert('Tidak ada codec video WebM yang didukung browser ini.');
+        return;
+      }
+
+      chunkQueue = [];
+      chunkMeta = [];
+      bufferBlob = null;
+      recordingStartedAt = Date.now();
+      saveSegmentCounter = 0;
+      renderBuffer();
+      cleanupReplayURL();
+
+      try {
+        mediaRecorder = new MediaRecorder(stream, { mimeType });
+      } catch (err) {
+        console.error(err);
+        alert('Gagal memulai perekaman.');
+        return;
+      }
+
+      mediaRecorder.ondataavailable = async (event) => {
+        if (!event.data || event.data.size <= 0) return;
+
+        chunkQueue.push(event.data);
+        chunkMeta.push({ ts: Date.now(), size: event.data.size });
+
+        trimOldChunks();
+
+        if (useDisk && diskWritable) {
+          try {
+            const fileName = `VAR_${Date.now()}_${String(saveSegmentCounter++).padStart(4, '0')}.webm`;
+            await diskWritable.write({ type: 'write', data: event.data });
+            await diskWritable.write({ type: 'write', position: null, data: '\n' });
+            // catatan: browser akan menulis blob-chunk ke file; untuk workflow produksi,
+            // biasanya tiap chunk disimpan sebagai file segmen terpisah lewat backend/native app.
+          } catch (err) {
+            console.warn('Gagal menulis ke disk:', err);
+            diskInfo.innerText = 'Mode disk gagal menulis. Tetap lanjut di buffer memori.';
+            useDisk = false;
+            btnDiskMode.innerText = 'Disk: OFF';
+          }
+        }
+      };
+
+      mediaRecorder.onerror = (event) => {
+        console.error('MediaRecorder error:', event.error || event);
+        alert('Terjadi error saat merekam. Silakan cek kamera/perangkat.');
+      };
+
+      mediaRecorder.onstop = () => {
+        rebuildBufferBlob();
+        btnSave.disabled = !bufferBlob;
+        btnClear.disabled = !bufferBlob;
+      };
+
+      mediaRecorder.start(chunkIntervalMs);
+      setRecordingUI(true);
+      indikatorRekam.style.display = 'inline-flex';
+      trimTimer = setInterval(trimOldChunks, 1000);
+      diskInfo.innerText = useDisk
+        ? 'Mode disk ON: browser akan mencoba menyimpan chunk ke folder yang dipilih.'
+        : `Mode buffer ON: hanya ${bufferLengthSec} detik terakhir disimpan di memori.`;
+    }
+
+    function hentikanRekam() {
+      if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+      }
+      if (trimTimer) {
+        clearInterval(trimTimer);
+        trimTimer = null;
+      }
+      setRecordingUI(false);
+      indikatorRekam.style.display = 'none';
+      renderBuffer();
+    }
+
+    function ambilMomen() {
+      if (!bufferBlob) {
+        alert('Buffer belum tersedia.');
+        return;
+      }
+
+      const replayPlaceholder = document.getElementById('replayPlaceholder');
+      const replayControls = document.getElementById('replayControls');
+      const replayButtons = document.getElementById('replayButtons');
+      const speedControls = document.getElementById('speedControls');
+      const replayActionRow = document.getElementById('replayActionRow');
+
+      cleanupReplayURL();
+      currentReplayObjectURL = URL.createObjectURL(bufferBlob);
+      replayVideo.classList.remove('d-none');
+      replayPlaceholder.classList.add('d-none');
+      replayControls.classList.remove('d-none');
+      replayButtons.classList.remove('d-none');
+      speedControls.classList.remove('d-none');
+      replayActionRow.classList.remove('d-none');
+
+      replayVideo.pause();
+      replayVideo.removeAttribute('src');
+      replayVideo.load();
+      replayVideo.src = currentReplayObjectURL;
+      replayVideo.currentTime = 0;
+      replayVideo.play().catch(() => {});
+      btnPlayPause.innerText = '⏸ Pause';
+      btnSave.disabled = false;
+      btnClear.disabled = false;
+      totalDurasi.innerText = formatWaktu(Math.max(1, Math.ceil(bufferBlob.size / 125000)));
+    }
+
+    function togglePlayPause() {
+      if (!replayVideo.src) {
+        ambilMomen();
+        return;
+      }
+      if (replayVideo.paused) {
+        replayVideo.play().catch(() => {});
+        btnPlayPause.innerText = '⏸ Pause';
+      } else {
+        replayVideo.pause();
+        btnPlayPause.innerText = '▶ Play';
+      }
+    }
+
+    function ulangiDariAwal() {
+      if (!replayVideo.src) return;
+      replayVideo.currentTime = 0;
+      replayVideo.play().catch(() => {});
+      btnPlayPause.innerText = '⏸ Pause';
+    }
+
+    function ubahKecepatan(rate) {
+      replayVideo.playbackRate = rate;
+      document.getElementById('btnSpeed1').className = rate === 1.0 ? 'btn btn-light fw-bold' : 'btn btn-outline-light fw-bold';
+      document.getElementById('btnSpeed05').className = rate === 0.5 ? 'btn btn-warning text-dark fw-bold' : 'btn btn-outline-warning fw-bold';
+      document.getElementById('btnSpeed025').className = rate === 0.25 ? 'btn btn-danger text-white fw-bold' : 'btn btn-outline-danger fw-bold';
+    }
+
+    function setBufferLength(seconds) {
+      bufferLengthSec = seconds;
+      bufferBar.max = seconds;
+      bufferBar.value = Math.min(Number(bufferBar.value || seconds), seconds);
+      diskInfo.innerText = `Buffer rewind disetel ke ${seconds} detik.`;
+      if (recording) trimOldChunks();
+      bufferInfo.innerText = `${Math.min(Math.ceil((Date.now() - recordingStartedAt) / 1000), bufferLengthSec)} / ${bufferLengthSec} detik`;
+    }
+
+    async function toggleDiskMode() {
+      if (!hasFSAccess) {
+        alert('Browser ini belum mendukung File System Access API. Gunakan mode buffer memori dulu.');
+        return;
+      }
+      if (recording) {
+        alert('Matikan rekaman dulu sebelum mengubah mode disk.');
+        return;
+      }
+      if (!useDisk) {
+        try {
+          diskHandle = await window.showDirectoryPicker();
+          diskWritable = null;
+          useDisk = true;
+          btnDiskMode.innerText = 'Disk: ON';
+          diskInfo.innerText = 'Mode disk ON. Folder penyimpanan sudah dipilih.';
+        } catch (err) {
+          console.warn(err);
+          useDisk = false;
+          btnDiskMode.innerText = 'Disk: OFF';
+        }
+      } else {
+        useDisk = false;
+        diskHandle = null;
+        diskWritable = null;
+        btnDiskMode.innerText = 'Disk: OFF';
+        diskInfo.innerText = 'Mode disk OFF. Buffer akan disimpan di memori.';
+      }
+    }
+
+    async function simpanVideoKeLaptop() {
+      if (!bufferBlob) {
+        alert('Belum ada buffer video untuk disimpan.');
+        return;
+      }
+
+      const now = new Date();
+      const namaFile = `VAR_Silat_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}.webm`;
+
+      const linkDownload = document.createElement('a');
+      const tempUrl = URL.createObjectURL(bufferBlob);
+      linkDownload.href = tempUrl;
+      linkDownload.download = namaFile;
+      document.body.appendChild(linkDownload);
+      linkDownload.click();
+      document.body.removeChild(linkDownload);
+      setTimeout(() => URL.revokeObjectURL(tempUrl), 1000);
+    }
+
+    function bersihkanReplay() {
+      if (replayVideo) {
+        replayVideo.pause();
+        replayVideo.removeAttribute('src');
+        replayVideo.load();
+      }
+      cleanupReplayURL();
+      bufferBlob = null;
+      chunkQueue = [];
+      chunkMeta = [];
+
+      const replayPlaceholder = document.getElementById('replayPlaceholder');
+      const replayControls = document.getElementById('replayControls');
+      const replayButtons = document.getElementById('replayButtons');
+      const speedControls = document.getElementById('speedControls');
+      const replayActionRow = document.getElementById('replayActionRow');
+
+      replayVideo.classList.add('d-none');
+      replayPlaceholder.classList.remove('d-none');
+      replayControls.classList.add('d-none');
+      replayButtons.classList.add('d-none');
+      speedControls.classList.add('d-none');
+      replayActionRow.classList.add('d-none');
+
+      btnSave.disabled = true;
+      btnClear.disabled = true;
+      btnPlayPause.innerText = '▶ Play / Pause';
+      totalDurasi.innerText = '00:00';
+      waktuBerjalan.innerText = '00:00';
+    }
+
+    replayVideo.addEventListener('loadedmetadata', () => {
+      if (!isNaN(replayVideo.duration)) {
+        replayBar.max = replayVideo.duration;
+        totalDurasi.innerText = formatWaktu(replayVideo.duration);
+      }
+    });
+
+    replayVideo.addEventListener('timeupdate', () => {
+      if (!isNaN(replayVideo.duration)) {
+        replayBar.value = replayVideo.currentTime;
+        waktuBerjalan.innerText = formatWaktu(replayVideo.currentTime);
+      }
+    });
+
+    replayBar.addEventListener('input', () => {
+      replayVideo.pause();
+      replayVideo.currentTime = Number(replayBar.value);
+      waktuBerjalan.innerText = formatWaktu(replayBar.value);
+      btnPlayPause.innerText = '▶ Play';
+    });
+
+    window.addEventListener('beforeunload', () => {
+      if (trimTimer) clearInterval(trimTimer);
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+      cleanupReplayURL();
+    });
+
+    window.addEventListener('pagehide', () => {
+      if (trimTimer) clearInterval(trimTimer);
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+      cleanupReplayURL();
+    });
+
+    window.onload = async () => {
+      await initCamera();
+      bersihkanReplay();
+    };
+  </script>
+</body>
+</html>

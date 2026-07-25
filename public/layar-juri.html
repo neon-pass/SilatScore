@@ -15,8 +15,13 @@
         .form-control::placeholder { color: #888; }
         option:disabled { color: #777; font-style: italic; background-color: #222; }
         .header-box { padding: 7px; font-weight: bold; text-align: center; border: 1px solid #555; }
-        .bg-sudut-biru { background-color: #0056b3; }
-        .bg-sudut-merah { background-color: #bd0000; }
+        /* Kotak Nama dengan Gradasi Hitam di Bawah */
+        .bg-sudut-biru { 
+            background: linear-gradient(to bottom, #0056b3 40%, #001122 100%); 
+        }
+        .bg-sudut-merah { 
+            background: linear-gradient(to bottom, #bd0000 40%, #220000 100%); 
+        }
         .bg-tengah { background-color: #222; }
         .Angka-Total { font-size: 45px; font-weight: bold; }
         .Nama-Pesilat { font-size: 18px; letter-spacing: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
@@ -28,6 +33,28 @@
         .btn-utama { height: 110px; font-size: 24px; font-weight: bold; border-radius: 15px; box-shadow: inset 0px 4px 4px rgba(255, 255, 255, 0.3), 0px 4px 6px rgba(0,0,0,0.5); margin-bottom: 9px; width: 100%; transition: transform 0.03s ease, background-color 0.03s ease; touch-action: manipulation; }
         .btn-utama.tertekan { transform: scale(0.95); background-color: #198754 !important; } 
         
+        /* Tombol Pukulan & Tendangan Biru */
+        .btn-primary.btn-utama {
+            background: linear-gradient(180deg, #001aff 0%, #002868 100%) !important;
+            border: 1px solid #001a4d !important;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+        }
+        
+        /* Tombol Pukulan & Tendangan Merah */
+        .btn-danger.btn-utama {
+            background: linear-gradient(180deg, #ff0000 0%, #5c0000 100%) !important;
+            border: 1px solid #330000 !important;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+        }
+
+        /* Modifikasi Efek Saat Tombol Ditekan (Menjadi Hijau Gradasi) */
+        .btn-utama.tertekan { 
+            transform: scale(0.95); 
+            background: linear-gradient(180deg, #198754 0%, #0a3622 100%) !important; 
+            box-shadow: inset 0px 8px 15px rgba(0,0,0,0.8) !important;
+        }
+
+
         .btn-kecil { background: #111; color: white; border-radius: 8px; width: 100%; height: 50px; font-size: 22px; padding: 0; box-shadow: inset 0px 2px 4px rgba(255,255,255,0.1), 0px 4px 6px rgba(0,0,0,0.5); transition: transform 0.03s ease, background-color 0.03s ease; display: flex; align-items: center; justify-content: center; touch-action: manipulation; }
         .btn-kecil.tertekan { transform: scale(0.9); }
 
@@ -150,7 +177,17 @@
     <div class="row g-1 text-center align-items-center mt-1 justify-content-center">
         <div class="col-1 kolom-angka" id="totalBiruR3"></div>
         <div class="col-4 d-flex align-items-center justify-content-between"><div class="kolom-skor-log flex-grow-1" id="skorBiruR3"></div><button class="btn-undo ms-1" id="resetBiruR3" onclick="undoSkor('biru', 3)" style="visibility: hidden;"><svg width="18" height="18"><use href="#icon-undo"></use></svg></button></div>
-        <div class="col-2"><button class="btn-round" id="btnRonde3" onclick="konfirmasiGantiRonde(3)">III</button></div>
+        <div class="col-2 d-flex flex-column align-items-center">
+            <button class="btn-round" id="btnRonde3" onclick="konfirmasiGantiRonde(3)">III</button>
+            
+            <!-- LABEL IDENTITAS PINTAR MUNCUL DI SINI -->
+            <div id="labelIdentitasJuri" class="text-warning fw-bold mt-2" style="font-size: 12px; display: none; letter-spacing: 1px;">JURI ?</div>
+            
+            <!-- DROPDOWN NAMA JURI MUNCUL DI SINI (WARNA EMAS & TEKS HITAM) -->
+            <select id="pilihNamaJuriTengah" class="form-select form-select-sm fw-bold mt-1 shadow-sm" style="background-color: #ffc107 !important; color: #000 !important; border: 2px solid #b38728 !important; font-size: 11px; width: 100%; display: none; text-align: center; padding: 2px 15px 2px 5px; cursor: pointer;" onchange="updateNamaJuriLangsung(this.value)">
+                <option value="-">- NAMA JURI -</option>
+            </select>
+        </div>
         <div class="col-4 d-flex align-items-center justify-content-between"><button class="btn-undo me-1" id="resetMerahR3" onclick="undoSkor('merah', 3)" style="visibility: hidden;"><svg width="18" height="18"><use href="#icon-undo"></use></svg></button><div class="kolom-skor-log flex-grow-1" id="skorMerahR3"></div></div>
         <div class="col-1 kolom-angka" id="totalMerahR3"></div>
     </div>
@@ -189,15 +226,19 @@
         </div>
     </div>
 
-    <div class="row mt-3 align-items-center justify-content-center px-1 mx-0 w-100" id="panelKontrolJuri">
-        <div class="col-6 d-flex flex-column pe-2">
-            <button class="btn btn-primary btn-utama" onclick="catatPoin('biru', 1)">PUKULAN</button>
-            <button class="btn btn-primary btn-utama" onclick="catatPoin('biru', 2)">TENDANGAN</button>
+  
+    <div class="row mt-5 align-items-center justify-content-center px-1 mx-0 w-100" id="panelKontrolJuri">
+        
+        <div class="col-6 d-flex flex-column pe-2 gap-4">
+            <button class="btn btn-primary btn-utama m-0" onclick="catatPoin('biru', 1)">PUKULAN</button>
+            <button class="btn btn-primary btn-utama m-0" onclick="catatPoin('biru', 2)">TENDANGAN</button>
         </div>
-        <div class="col-6 d-flex flex-column ps-2">
-            <button class="btn btn-danger btn-utama" onclick="catatPoin('merah', 1)">PUKULAN</button>
-            <button class="btn btn-danger btn-utama" onclick="catatPoin('merah', 2)">TENDANGAN</button>
+        
+        <div class="col-6 d-flex flex-column ps-2 gap-4">
+            <button class="btn btn-danger btn-utama m-0" onclick="catatPoin('merah', 1)">PUKULAN</button>
+            <button class="btn btn-danger btn-utama m-0" onclick="catatPoin('merah', 2)">TENDANGAN</button>
         </div>
+        
     </div>
 
     <div class="footer-petugas">
@@ -404,7 +445,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
-    import { getDatabase, ref, set, onValue, get, onDisconnect } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js";
+    import { getDatabase, ref, set, update, onValue, get, onDisconnect } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js";
 
     const ruangAktif = localStorage.getItem('kode_voucer_aktif');
 if (!ruangAktif) {
@@ -669,6 +710,19 @@ if (!ruangAktif) {
 
     function aturPeranUI() {
         let isMaster = (session.pos === "dewan");
+        
+        // Memunculkan dropdown nama hanya jika yang login adalah Juri
+        document.getElementById('pilihNamaJuriTengah').style.display = isMaster ? "none" : "block";
+        
+        // --- LOGIKA PINTAR LABEL IDENTITAS JURI ---
+        let elLabelJuri = document.getElementById('labelIdentitasJuri');
+        if (!isMaster && session.pos === 'juri') {
+            elLabelJuri.style.display = "block";
+            // Menyulap 'j1' menjadi 'JURI 1'
+            elLabelJuri.innerText = session.slotId.toUpperCase().replace('J', 'JURI ');
+        } else {
+            elLabelJuri.style.display = "none";
+        }
         
         document.querySelectorAll('.btn-undo').forEach(el => el.style.display = isMaster ? "flex" : "none");
         document.querySelectorAll('.btn-round').forEach(el => el.style.pointerEvents = isMaster ? "auto" : "none");
@@ -1008,9 +1062,64 @@ window.tutupVerifikasi = function(hasilVar) {
         let baseRef = `${ruangAktif}/pertandingan/${session.gel}`;
         rondeRef = ref(database, `${baseRef}/ronde_aktif`);
 
-        onValue(ref(database, `${baseRef}/timer`), (snap) => {
-            let t = snap.val() || "00:00";
-            if(elJTimerDisplay) elJTimerDisplay.innerText = t;
+        // ========================================================
+        // 🔥 MESIN TIMER TIMESTAMP (BEBAS LAG & REFRESH) 🔥
+        // ========================================================
+        let intervalTimerLayar = null;
+        let lastServerStart = 0;
+        let localStartRef = 0;
+        
+        function formatMenitDetik(totalDetik) {
+            let m = Math.floor(totalDetik / 60).toString().padStart(2, '0');
+            let s = (totalDetik % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        onValue(ref(database, `${baseRef}/timer_sync`), (snap) => {
+            let data = snap.val();
+            if(!data) return;
+
+            clearInterval(intervalTimerLayar);
+
+            if(data.status === "running") {
+                
+                // 🔥 LOGIKA AUTO-KALIBRASI WAKTU JURI 🔥
+                if (lastServerStart !== data.startTimestamp) {
+                    lastServerStart = data.startTimestamp;
+                    let bedaWaktu = Math.abs(Date.now() - data.startTimestamp);
+                    if (bedaWaktu < 2500) {
+                        localStartRef = Date.now(); // Gunakan jam tablet Juri sebagai patokan
+                    } else {
+                        localStartRef = data.startTimestamp;
+                    }
+                }
+
+                intervalTimerLayar = setInterval(() => {
+                    let elapsed = Math.max(0, Math.floor((Date.now() - localStartRef) / 1000));
+                    let currentSec = 0;
+                    
+                    if (data.mode === 'tanding') currentSec = Math.max(0, data.durasiAwal - elapsed);
+                    else currentSec = data.durasiAwal + elapsed; 
+                    
+                    if(elJTimerDisplay) elJTimerDisplay.innerText = formatMenitDetik(currentSec);
+
+                    // --- FITUR BUKA KUNCI 3 DETIK (DIPERTAHANKAN) ---
+                    if (statusTerakhirJuri === "ISTIRAHAT" && currentSec <= 3 && currentSec > 0) {
+                        kunciSeluruhTombol(false);
+                        if (modalRondeSelesaiInstance) {
+                            modalRondeSelesaiInstance.hide();
+                            document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                            document.body.classList.remove('modal-open');
+                            document.body.style.overflow = '';
+                            document.body.style.paddingRight = '';
+                        }
+                    }
+
+                }, 250); 
+            } 
+            else if (data.status === "pause" || data.status === "reset") {
+                if(elJTimerDisplay) elJTimerDisplay.innerText = formatMenitDetik(data.remaining || 0);
+            }
         });
 
         onValue(ref(database, `${baseRef}/verifikasi`), (snap) => {
@@ -1088,6 +1197,20 @@ if(data) {
     elJNamaJ1.innerText = data.juri1 || "-";
     elJNamaJ2.innerText = data.juri2 || "-"; 
     elJNamaJ3.innerText = data.juri3 || "-";
+
+    if (session.pos === 'juri') {
+                    let myKey = session.slotId.replace('j', 'juri'); // misal 'juri1'
+                    let namaDiServer = data[myKey];
+                    let elNamaJuri = document.getElementById('pilihNamaJuriTengah');
+                    
+                    if (elNamaJuri && namaDiServer) {
+                        if (elNamaJuri.value !== namaDiServer) {
+                            let opsiAda = Array.from(elNamaJuri.options).some(opt => opt.value === namaDiServer);
+                            if(opsiAda) elNamaJuri.value = namaDiServer;
+                        }
+                    }
+                }
+    
 }
         });
 
@@ -1143,13 +1266,14 @@ if(data) {
             statusTerakhirJuri = status;
             
             let isTerkunci = false;
-            const statusUmum = ["ISTIRAHAT", "SELESAI", "PERTANDINGAN SELESAI", "PAUSE", "JEDA KOTOR"];
-            
-            if (statusUmum.includes(status)) {
-                isTerkunci = true;
-            } else if (status.includes("SIAP RONDE")) { 
-                isTerkunci = true;
-            }
+        const statusUmum = ["ISTIRAHAT", "SELESAI", "PERTANDINGAN SELESAI", "PAUSE", "JEDA KOTOR"];
+        
+        if (statusUmum.includes(status)) {
+            isTerkunci = true;
+        } else if (status.includes("SIAP RONDE")) { 
+            // --- MODIFIKASI: BIARKAN JURI DAN DEWAN TERBUKA SAAT SIAP RONDE ---
+            isTerkunci = false; 
+        }
             
             if (isTerkunci) {
                 if (penundaKunciOtomatis) clearTimeout(penundaKunciOtomatis);
@@ -1339,6 +1463,39 @@ if(data) {
         set(ref(database, `${ruangAktif}/pertandingan/${session.gel}/izin_play`), true);
         set(ref(database, `${ruangAktif}/pertandingan/${session.gel}/sinyal_dewan`), null);
     }
+
+    // A. AMBIL DAFTAR NAMA DARI EXCEL PENGATURAN
+    onValue(ref(database, `${ruangAktif}/pengaturan/daftar_wasit_juri`), (snap) => {
+        let daftar = snap.val() || [];
+        let options = `<option value="-">- PILIH NAMA -</option>`;
+        daftar.forEach(nama => {
+            options += `<option value="${nama}">${nama}</option>`;
+        });
+        
+        let elNamaJuri = document.getElementById('pilihNamaJuriTengah');
+        if (elNamaJuri) {
+            let prevVal = elNamaJuri.value;
+            elNamaJuri.innerHTML = options;
+            // Pertahankan pilihan juri jika datanya refresh
+            let opsiAda = Array.from(elNamaJuri.options).some(opt => opt.value === prevVal);
+            if(opsiAda && prevVal !== "-") elNamaJuri.value = prevVal;
+        }
+    });
+
+    // B. FUNGSI JIKA JURI MEMILIH NAMANYA SENDIRI
+    window.updateNamaJuriLangsung = function(namaPilihan) {
+        let gel = session.gel;
+        if(!gel || session.pos !== 'juri') return; // Pastikan hanya juri yang bisa mengirim
+        
+        // Ubah format slotId 'j1' menjadi 'juri1' agar cocok dengan database Panitia
+        let dbJuriKey = session.slotId.replace('j', 'juri'); 
+        
+        update(ref(database, `${ruangAktif}/pertandingan/${gel}/setup`), {
+            [dbJuriKey]: namaPilihan
+        });
+    }
+
+
 </script>
 </body>
 </html>

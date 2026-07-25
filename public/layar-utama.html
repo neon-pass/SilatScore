@@ -846,7 +846,8 @@ if (!ruangAktif) {
         }
 
         function jalankanMesinFirebase() {
-            onValue(ref(database, `pengaturan`), (snap) => {
+            // Tambahkan ${ruangAktif}/ agar TV mencari di laci data yang benar
+            onValue(ref(database, `${ruangAktif}/pengaturan`), (snap) => {
                 let data = snap.val() || {};
                 if(data.nama_kejuaraan) elJudulKejuaraan.innerText = data.nama_kejuaraan.toUpperCase();
                 if(data.logos) {
@@ -983,7 +984,63 @@ if (!ruangAktif) {
                 if(isScreensaverAktifManual) tampilkanScreensaver(); else { sembunyikanScreensaver(); resetIdleTimer(); }
             });
 
-            onValue(ref(database, `${baseRefPath}/timer`), (snap) => { elTimer.innerText = snap.val() || "00:00"; resetIdleTimer(); });
+           // ========================================================
+        // 🔥 MESIN TIMER TIMESTAMP (LAYAR TV UTAMA) 🔥
+        // ========================================================
+        let intervalTimerLayar = null;
+        let lastServerStart = 0;
+        let localStartRef = 0;
+        
+        function formatMenitDetik(totalDetik) {
+            let m = Math.floor(totalDetik / 60).toString().padStart(2, '0');
+            let s = (totalDetik % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        onValue(ref(database, `${baseRefPath}/timer_sync`), (snap) => {
+            let data = snap.val();
+            if(!data) return;
+
+            clearInterval(intervalTimerLayar);
+
+            if(data.status === "running") {
+                // 🔥 MATIKAN TIMER SCREENSAVER 1 KALI SAJA DI SINI 
+                if (typeof idleTimer !== 'undefined') clearTimeout(idleTimer);
+                if (typeof sembunyikanScreensaver === 'function' && !isScreensaverAktifManual) {
+                    sembunyikanScreensaver();
+                }
+
+                // 🔥 LOGIKA AUTO-KALIBRASI WAKTU (Mencegah Angka 10 Terlalu Lama) 🔥
+                if (lastServerStart !== data.startTimestamp) {
+                    lastServerStart = data.startTimestamp;
+                    // Deteksi selisih jam laptop panitia dan jam layar TV ini
+                    let bedaWaktu = Math.abs(Date.now() - data.startTimestamp);
+                    // Jika baru saja di-play oleh panitia (selisih di bawah 2.5 detik)
+                    if (bedaWaktu < 2500) {
+                        localStartRef = Date.now(); // Kunci pakai jam lokal TV agar turunnya pas 1 detik
+                    } else {
+                        localStartRef = data.startTimestamp; // Jika layar baru di-refresh di tengah jalan, ikuti panitia
+                    }
+                }
+
+                // TV menghitung sendiri dengan presisi tinggi
+                intervalTimerLayar = setInterval(() => {
+                    // Tidak ada lagi nilai minus
+                    let elapsed = Math.max(0, Math.floor((Date.now() - localStartRef) / 1000));
+                    let currentSec = 0;
+                    
+                    if (data.mode === 'tanding') currentSec = Math.max(0, data.durasiAwal - elapsed);
+                    else currentSec = data.durasiAwal + elapsed; 
+                    
+                    if (elTimer) elTimer.innerText = formatMenitDetik(currentSec);
+                }, 250); 
+            } 
+            else if (data.status === "pause" || data.status === "reset" || data.status === "ready") {
+                if (elTimer) elTimer.innerText = formatMenitDetik(data.remaining || 0);
+                if (typeof resetIdleTimer === 'function') resetIdleTimer();
+            }
+        });
+   
             
             onValue(ref(database, `${baseRefPath}/setup`), (snap) => {
                 let data = snap.val();
@@ -993,8 +1050,9 @@ if (!ruangAktif) {
                     elNamaMerah.innerText = data.nama_merah || "SUDUT MERAH"; 
                     elKonMerah.innerText = data.kontingen_merah || "-";
                     elPartai.innerText = data.partai ? `PARTAI ${data.partai}` : "-"; 
-                    elBabak.innerText = data.babak || "-";
-                    elKelas.innerText = data.kelas ? ` ${data.kelas}` : "-";
+                    elBabak.innerText = data.babak || "-";let teksKelas = data.kelas ? data.kelas.toUpperCase() : "-";
+                    teksKelas = teksKelas.replace(/(PUTRA|PUTRI)\s+([A-Z])/g, "$2 $1");
+                    elKelas.innerText = teksKelas;
                     elNamaBiruTV.innerText = data.nama_biru || "SUDUT BIRU";
                     elNamaMerahTV.innerText = data.nama_merah || "SUDUT MERAH";
                 }
@@ -1032,13 +1090,34 @@ if (!ruangAktif) {
                 onValue(ref(database, `${baseRefPath}/merah/r${r}_log`), (snap) => { riwayatMerah[r] = snap.val() ? Object.values(snap.val()) : []; updateLayarTanding(); });
             });
 
+            // MEMORI ANTI-GHOSTING UNTUK LAYAR TV
+            let memoriSinyalTV = {};
+
             onValue(ref(database, `${baseRefPath}/sinyal`), (snap) => {
-                let dataSinyal = snap.val(); if(!dataSinyal) return; resetIdleTimer();
+                let dataSinyal = snap.val(); 
+                
+                // Jika sinyal kosong (dibersihkan dari server), bersihkan juga memori TV agar tidak menumpuk
+                if(!dataSinyal) { memoriSinyalTV = {}; return; } 
+                
+                resetIdleTimer();
+                
                 for (let kA in dataSinyal) {
                     let sudut = kA.split('_')[0]; let nilai = parseInt(kA.split('_')[1]); let aktif = dataSinyal[kA]; 
+                    
                     for (let jId in aktif) {
-                        let tL = document.getElementById(`${sudut==='biru'?'b':'m'}_${jId}_${nilai===2?'bot':'top'}`);
-                        if(tL && !tL.classList.contains('active')) { tL.classList.add('active'); setTimeout(() => tL.classList.remove('active'), 1500); }
+                        let timestampSinyal = aktif[jId];
+                        let kunciUnik = jId + "_" + timestampSinyal;
+
+                        // CEK MEMORI: Jika sinyal ini belum pernah dinyalakan, baru nyalakan lampunya!
+                        if (!memoriSinyalTV[kunciUnik]) {
+                            memoriSinyalTV[kunciUnik] = true; // Catat ke memori agar tidak dinyalakan 2x
+                            
+                            let tL = document.getElementById(`${sudut==='biru'?'b':'m'}_${jId}_${nilai===2?'bot':'top'}`);
+                            if(tL) { 
+                                tL.classList.add('active'); 
+                                setTimeout(() => tL.classList.remove('active'), 500); // Menyala 0.5 detik
+                            }
+                        }
                     }
                 }
             });

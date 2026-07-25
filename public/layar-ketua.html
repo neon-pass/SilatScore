@@ -222,13 +222,13 @@
     <div class="p-2 bg-dark d-flex justify-content-between border-top border-secondary align-items-center">
         <span id="sessionInfo" class="text-secondary small fw-bold px-2"></span>
         <div class="d-flex gap-2">
-            <button class="btn btn-sm btn-warning fw-bold text-dark px-3" data-bs-toggle="modal" data-bs-target="#modalSetupLaga">⚙️ PANEL SETUP & RESET</button>
+            <button class="btn btn-sm btn-warning fw-bold text-dark px-3" data-bs-toggle="modal" data-bs-target="#modalSetupPertandingan">⚙️ PANEL SETUP & RESET</button>
             <button class="btn btn-sm btn-outline-danger fw-bold" onclick="eksekusiLogout()">🚪 KELUAR</button>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="modalSetupLaga" tabindex="-1">
+<div class="modal fade" id="modalSetupPertandingan" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content dark-theme border-secondary">
             <div class="modal-header border-secondary">
@@ -236,7 +236,7 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-3">
-                <form id="formSetupPartai" onsubmit="event.preventDefault(); kirimSetupLaga();">
+                <form id="formSetupPartai" onsubmit="event.preventDefault(); kirimSetupPertandingan();">
                     <div class="row g-2 mb-2">
                         <div class="col-4">
                             <label class="small text-secondary">Event / Kejuaraan:</label>
@@ -560,7 +560,7 @@ if (!ruangAktif) {
         });
     }
 
-    window.kirimSetupLaga = function() {
+    window.kirimSetupPertandingan = function() {
         let payload = {
             event: document.getElementById('inEvent').value,
             partai: document.getElementById('inPartai').value,
@@ -573,12 +573,12 @@ if (!ruangAktif) {
         };
         set(ref(database, `${ruangAktif}/pertandingan/${session.gel}/setup`), payload).then(() => {
             set(ref(database, `${ruangAktif}/pertandingan/${session.gel}/ronde_aktif`), parseInt(payload.babak));
-            bootstrap.Modal.getInstance(document.getElementById('modalSetupLaga')).hide();
+            bootstrap.Modal.getInstance(document.getElementById('modalSetupPertandingan')).hide();
         });
     };
 
     window.tampilkanKonfirmasiReset = function() {
-        let setupModal = bootstrap.Modal.getInstance(document.getElementById('modalSetupLaga'));
+        let setupModal = bootstrap.Modal.getInstance(document.getElementById('modalSetupPertandingan'));
         if(setupModal) setupModal.hide();
         let resetModalEl = document.getElementById('modalKonfirmasiResetKetua');
         let resetModal = bootstrap.Modal.getInstance(resetModalEl) || new bootstrap.Modal(resetModalEl);

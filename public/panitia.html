@@ -25,7 +25,7 @@
         .timer-istirahat:hover { box-shadow: 0 0 15px rgba(32,201,151,0.25); }
         
         .status-badge { font-size: 15px; padding: 8px 16px; border-radius: 6px; font-weight: 900; letter-spacing: 1.5px; }
-        .pause-list-container { max-height: 220px; overflow-y: auto; background: #121212; border-radius: 8px; padding: 10px; border: 1px solid #2a2a2a; text-align: left; }
+        .pause-list-container { max-height: 270px; overflow-y: auto; background: #121212; border-radius: 8px; padding: 10px; border: 1px solid #2a2a2a; text-align: left; }
         .pause-item { font-family: monospace; font-size: 15px; color: #ff4757; border-bottom: 1px dashed #222; padding: 5px 0; }
         .pause-item.active { color: #ffc107; font-weight: bold; }
         
@@ -86,7 +86,7 @@
                 <select id="lModeSesiPanitia" class="form-select mb-3" style="background-color: #333 !important; color: #fff !important; border: 1px solid #555 !important;">
                     <option value="" disabled selected>-- Pilih Kategori --</option>
                     <option value="tanding">Kategori Tanding / Pemasalan</option>
-                    <option value="jurus">Kategori TGR (Seni)</option>
+                    <option value="jurus">Kategori TGR (Jurus)</option>
                 </select>
 
                 <label class="form-label mb-1 text-secondary" style="font-size: 12px;">3. Masukkan Password Aplikasi:</label>
@@ -108,10 +108,18 @@
                 <button id="btnToggleSS" class="btn btn-outline-info fw-bold px-3 text-nowrap" onclick="toggleScreensaverManual()" style="font-size: 14px; height: 35px; display: flex; align-items: center;">SCREENSAVER (MATI)</button>
                 <button id="btnTanding" class="btn btn-outline-warning fw-bold px-3 text-nowrap" data-bs-toggle="modal" data-bs-target="#modalFormulirTanding" style="font-size: 14px; height: 35px; display: flex; align-items: center;">FORM MANUAL</button>
                 <button class="btn btn-outline-success fw-bold px-3 text-nowrap" data-bs-toggle="modal" data-bs-target="#modalRekapPemenang" style="font-size: 14px; height: 35px; display: flex; align-items: center;">REKAP PEMENANG</button>
+                
+                <!-- TAMBAHAN LABEL TEKS WASIT (Diubah jadi warna Emas) -->
+                <span class="text-warning fw-bold ms-2 text-nowrap" style="font-size: 13px; letter-spacing: 1px;">WASIT :</span>
+                
+                <!-- DROPDOWN WASIT (WARNA EMAS & TEKS HITAM) -->
+                <select id="pilihWasitHeader" class="form-select form-select-sm fw-bold shadow" style="background-color: #ffc107 !important; color: #000 !important; border: 2px solid #b38728 !important; width: auto; height: 35px; font-size: 14px; cursor: pointer;" onchange="updateWasitLangsung(this.value)">
+                    <option value="-">-- Pilih Wasit --</option>
+                </select>
             </div>
             
             <div class="d-flex align-items-center gap-2 ms-2">
-                <button id="btnSimpanHasil" class="btn btn-secondary fw-bold px-3 shadow text-nowrap" onclick="konfirmasiSimpanHasil()" disabled style="font-size: 14px; height: 35px; display: flex; align-items: center;">MENUNGGU LAGA SELESAI...</button>
+                <button id="btnSimpanHasil" class="btn btn-secondary fw-bold px-3 shadow text-nowrap" onclick="konfirmasiSimpanHasil()" disabled style="font-size: 14px; height: 35px; display: flex; align-items: center;">MENUNGGU Pertandingan SELESAI...</button>
                 <div id="statusTanding" class="badge bg-secondary text-white m-0 text-nowrap fw-bold px-3 shadow" style="font-size: 14px; height: 35px; display: flex; align-items: center;">PERSIAPAN</div>
                 <input type="hidden" id="pilihGelanggang" value="">
             </div>
@@ -122,10 +130,23 @@
             <div class="col-md-7">
                 <div class="card-custom border-info">
                     <div class="d-flex justify-content-between align-items-center border-bottom border-secondary pb-2 mb-3">
-                        <h5 class="text-info m-0">🗓️ DAFTAR ANTRIAN EXCEL</h5>
-                        <button id="btnKirimData" class="btn btn-sm btn-secondary fw-bold px-3 py-2 shadow text-nowrap" onclick="kirimSetupData()" disabled>📡 KIRIM DATA KE LAYAR (LIVE ON-AIR)</button>
+                        <!-- Judul Ringkas Tanpa Ikon -->
+                        <h5 class="text-info m-0 fw-bold">DAFTAR PESERTA</h5>
+                        
+                        <!-- DROPDOWN BABAK (DI TENGAH) -->
+                        <select id="lBabakOnAir" class="form-select form-select-sm bg-dark text-warning border-warning fw-bold mx-2" style="width: auto; cursor: pointer; box-shadow: 0 0 5px rgba(255,193,7,0.3);" onchange="renderTabelJadwal()">
+    <option value="SEMUA" selected>Semua Partai</option>
+    <option value="Penyisihan">Penyisihan</option>
+    <option value="Perdelapan Final">Perdelapan Final</option>
+    <option value="Perempat Final">Perempat Final</option>
+    <option value="Semi Final">Semi Final</option>
+    <option value="Final">Final</option>
+</select>
+
+                        <!-- Tombol Ringkas Tanpa Ikon -->
+                        <button id="btnKirimData" class="btn btn-sm btn-secondary fw-bold px-3 py-2 shadow text-nowrap" onclick="kirimSetupData()" disabled>TAMPILKAN KE LAYAR</button>
                     </div>
-                    <div class="table-responsive" style="max-height: 450px; overflow-y: auto; border: 1px solid #333; border-radius: 8px;">
+                    <div class="table-responsive" style="max-height: 500px; overflow-y: auto; border: 1px solid #333; border-radius: 8px;">
                         <table class="table table-dark table-bordered text-center align-middle m-0" style="font-size: 13px;">
                             <thead id="headTabelJadwal" class="table-info text-dark" style="position: sticky; top: 0; z-index: 2;">
                                 <!-- Tabel Dinamis disuntikkan via JS -->
@@ -167,8 +188,8 @@
                         </div>
                     </div>
 
-                    <!-- REM DARURAT SENI -->
-                    <button id="btnSelesaiSeniManual" class="btn btn-outline-success w-100 fw-bold py-2 fs-6 mb-3 border-2 text-nowrap" style="display:none;" onclick="selesaiSeniManual()">⏹ SELESAI PENAMPILAN (KUNCI WAKTU JURUS)</button>
+                    <!-- REM DARURAT Jurus -->
+                    <button id="btnSelesaiJurusManual" class="btn btn-outline-success w-100 fw-bold py-2 fs-6 mb-3 border-2 text-nowrap" style="display:none;" onclick="selesaiJurusManual()">⏹ SELESAI PENAMPILAN (KUNCI WAKTU JURUS)</button>
 
                     <div class="row g-2 mb-3">
                         <div class="col-4">
@@ -331,15 +352,15 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
+    <!-- 🔥 MEMANGGIL MESIN BARU (TUKANG POS GOOGLE SHEETS) 🔥 -->
+    <script src="mesin_sheet.js"></script>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
-        import { getDatabase, ref, set, onValue, get, onDisconnect } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js";
+        import { getDatabase, ref, set, update, onValue, get, onDisconnect } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js";
 
         const ruangAktif = localStorage.getItem('kode_voucer_aktif');
-if (!ruangAktif) {
-    window.location.href = 'index.html'; 
-}
-        
+        if (!ruangAktif) { window.location.href = 'index.html'; }
 
         const elAudioGong = document.getElementById('audioGong');
         const elLGelanggangPanitia = document.getElementById('lGelanggangPanitia');
@@ -362,7 +383,7 @@ if (!ruangAktif) {
         
         const elLayarTimerLokal = document.getElementById('layarTimerLokal');
         const elJudulTimer = document.getElementById('judulTimer');
-        const elBtnSelesaiSeniManual = document.getElementById('btnSelesaiSeniManual');
+        const elBtnSelesaiJurusManual = document.getElementById('btnSelesaiJurusManual');
         const elBtnPlay = document.getElementById('btnPlay');
         const elBtnPause = document.getElementById('btnPause');
         const elBtnToggleSS = document.getElementById('btnToggleSS');
@@ -423,6 +444,7 @@ if (!ruangAktif) {
 
         let modeKategoriAktif = 'tanding'; let indexKuning = null; let indexMerah = null; let himpunanSelesai = new Set();
         let modalInfoInstance = null; let modalBatalLiveInstance = null; let targetBatalLiveIndex = null;
+        let penghitungSemiFinal = {};
 
         window.showCustomAlert = function(title, message, titleColorClass = "text-info") {
             if (!modalInfoInstance) modalInfoInstance = new bootstrap.Modal(elModalInfo); 
@@ -466,26 +488,27 @@ if (!ruangAktif) {
             
             errorEl.style.display = "none"; modeKategoriAktif = mode; elPilihGelanggang.value = gel;
             
-            let labelSesi = (mode === 'tanding') ? "Tanding" : "Seni";
+            let labelSesi = (mode === 'tanding') ? "Tanding" : "Jurus";
             elBannerSesiPermanen.innerText = `${gel.toUpperCase()} - ${labelSesi}`;
             
             if (mode === 'tanding') {
                 elPanelAparaturTanding.style.display = "flex"; elPanelAparaturJurus.style.display = "none";
                 elBoxMerahForm.style.display = "block"; elLabelBiruForm.innerText = "SUDUT BIRU";
-                elBtnSelesaiSeniManual.style.display = "none";
+                elBtnSelesaiJurusManual.style.display = "none";
                 elCfgWaktu.value = "00.00"; elCfgRonde.value = "2"; elLayarTimerLokal.innerText = "00:00";
             } else {
                 elPanelAparaturTanding.style.display = "none"; elPanelAparaturJurus.style.display = "flex";
-                elBoxMerahForm.style.display = "none"; elLabelBiruForm.innerText = "IDENTITAS PESILAT SENI";
-                elBtnSelesaiSeniManual.style.display = "block";
+                elBoxMerahForm.style.display = "none"; elLabelBiruForm.innerText = "IDENTITAS PESILAT Jurus";
+                elBtnSelesaiJurusManual.style.display = "block";
                 elCfgWaktu.value = "00.00"; elCfgRonde.value = "1"; elLayarTimerLokal.innerText = "00:00";
             }
             
             await gantiLockGelanggang(gel); modalLoginPanitiaInstance.hide(); elMainAppPanitia.style.display = "block";
             
-            // 🔥 MENGGUNAKAN MESIN GRANULAR 🔥
             sinkronisasiMemoriAwan(gel); 
             aktifkanSinkronisasiGlobal(); 
+            
+
             pantauSkorDanStatus();
         }
 
@@ -495,32 +518,34 @@ if (!ruangAktif) {
             else { window.location.href = "panitia.html"; }
         }
 
-        let riwayatPemenangGlobal = {}; // 🔥 VARIABEL BARU PENYIMPAN WARNA PEMENANG
+        window.updateWasitLangsung = function(nama) {
+            let gel = elPilihGelanggang.value;
+            if(!gel) return;
+            // Jika Panitia memilih nama di dropdown atas, langsung timpa data wasit di server!
+            update(ref(database, `${ruangAktif}/pertandingan/${gel}/setup`), {
+                wasit: nama
+            });
+        }
 
-        // =============================================================
-        // 🔥 UPDATE 1: SINKRONISASI DIPECAH (TIDAK SEMUA DI-RENDER) 🔥
-        // =============================================================
+        let riwayatPemenangGlobal = {}; 
+
         function sinkronisasiMemoriAwan(gel) {
-            // 1. Telinga Khusus Baris Merah (Live Match)
             onValue(ref(database, `${ruangAktif}/pertandingan/${gel}/baris_merah`), (snap) => {
                 indexMerah = (snap.exists() && snap.val() !== null) ? parseInt(snap.val()) : null;
                 renderTabelJadwal();
             });
 
-            // 2. Telinga Khusus Daftar Partai Selesai
             onValue(ref(database, `${ruangAktif}/pertandingan/${gel}/partai_selesai_${modeKategoriAktif}`), (snap) => {
                 let memoriSelesai = snap.val() || []; 
                 himpunanSelesai = new Set(memoriSelesai);
                 renderTabelJadwal();
             });
 
-            // 3. Telinga Khusus Riwayat Pemenang
             onValue(ref(database, `${ruangAktif}/pertandingan/${gel}/riwayat_pemenang`), (snap) => {
                 riwayatPemenangGlobal = snap.val() || {};
                 renderTabelJadwal();
             });
 
-            // 4. Telinga Khusus Setup (Untuk mengisi form)
             onValue(ref(database, `${ruangAktif}/pertandingan/${gel}/setup`), (snap) => {
                 let setup = snap.val();
                 if (setup && indexMerah !== null && indexKuning === null) {
@@ -550,9 +575,6 @@ if (!ruangAktif) {
             }
         }
 
-        // =============================================================
-        // 🔥 MESIN AUTO-RESOLVE BAGAN (PENERJEMAH PEMENANG) 🔥
-        // =============================================================
         window.getResolvedNames = function(row) {
             let nB = row['mapped_biru'] || "-"; let kB = row['mapped_kont_biru'] || "-";
             let nM = row['mapped_merah'] || "-"; let kM = row['mapped_kont_merah'] || "-";
@@ -560,26 +582,38 @@ if (!ruangAktif) {
 
             if (modeKategoriAktif !== 'tanding' || !riwayatPemenangGlobal) return { nB, kB, nM, kM };
 
-            let pemenangPerKelas = {};
-            Object.values(riwayatPemenangGlobal).forEach(r => {
-                if (!r) return;
-                let kelas = r['mapped_kelas'];
-                if (!pemenangPerKelas[kelas]) pemenangPerKelas[kelas] = [];
-                pemenangPerKelas[kelas].push({
-                    partai: parseInt(r['mapped_partai']) || 999,
-                    nama: r['NAMA ATLET'],
-                    kontingen: r['KONTINGEN']
-                });
-            });
-            
-            if (pemenangPerKelas[k]) {
-                pemenangPerKelas[k].sort((a, b) => a.partai - b.partai);
-                let list = pemenangPerKelas[k];
+            function cariPemenangPartai(teksSudut) {
+                let teksUpper = String(teksSudut).toUpperCase();
+                let match = teksUpper.match(/PEMENANG\s+PARTAI\s+(\d+)/);
+                if (match) {
+                    let nomorPartaiTarget = parseInt(match[1]); 
+                    let dataRiwayatSelesai = Object.values(riwayatPemenangGlobal);
+                    let partaiDitemukan = dataRiwayatSelesai.find(r => 
+                        r && 
+                        parseInt(r['mapped_partai']) === nomorPartaiTarget && 
+                        r['mapped_kelas'] === k 
+                    );
 
-                if (String(nB).toUpperCase().includes("PEMENANG ATAS") && list.length > 0) { nB = list[0].nama; kB = list[0].kontingen; }
-                if (String(nM).toUpperCase().includes("PEMENANG ATAS") && list.length > 0) { nM = list[0].nama; kM = list[0].kontingen; }
-                if (String(nB).toUpperCase().includes("PEMENANG BAWAH") && list.length > 1) { nB = list[1].nama; kB = list[1].kontingen; }
-                if (String(nM).toUpperCase().includes("PEMENANG BAWAH") && list.length > 1) { nM = list[1].nama; kM = list[1].kontingen; }
+                    if (partaiDitemukan) {
+                        return {
+                            nama: partaiDitemukan['NAMA ATLET'],
+                            kontingen: partaiDitemukan['KONTINGEN']
+                        };
+                    }
+                }
+                return null; 
+            }
+
+            let hasilBiru = cariPemenangPartai(nB);
+            if (hasilBiru) {
+                nB = hasilBiru.nama;
+                kB = hasilBiru.kontingen;
+            }
+
+            let hasilMerah = cariPemenangPartai(nM);
+            if (hasilMerah) {
+                nM = hasilMerah.nama;
+                kM = hasilMerah.kontingen;
             }
 
             return { nB, kB, nM, kM };
@@ -646,15 +680,24 @@ if (!ruangAktif) {
             }
 
             let gel = elPilihGelanggang.value;
+            let dropdownBabak = document.getElementById('lBabakOnAir').value;
+
             let dataObj = {
                 kategori: modeKategoriAktif,
+                // Kita kembalikan ke data asli dari Formulir/Excel
                 partai: elIPartai.value || "-", tingkat: elITingkat.value || "-", babak: elIBabak.value || "-", kelas: elIKelas.value || "-",
                 nama_biru: elINamaBiru.value || "BIRU", kontingen_biru: elIKontingenBiru.value || "-",
                 nama_merah: elINamaMerah.value || "MERAH", kontingen_merah: elIKontingenMerah.value || "-"
             };
 
             if (modeKategoriAktif === 'tanding') {
-                dataObj.wasit = elTWasit.value || "Wasit"; dataObj.juri1 = elTJ1.value || "J1"; dataObj.juri2 = elTJ2.value || "J2"; dataObj.juri3 = elTJ3.value || "J3";
+                let wasitDropdown = document.getElementById('pilihWasitHeader') ? document.getElementById('pilihWasitHeader').value : "-";
+                
+                // Mencegah nama terhapus. Urutan prioritas: Form Manual -> Dropdown Header -> Data di Server -> Default
+                dataObj.wasit = elTWasit.value || (wasitDropdown !== "-" ? wasitDropdown : (dataSetupSnapshot.wasit || "Wasit"));
+                dataObj.juri1 = elTJ1.value || dataSetupSnapshot.juri1 || "J1";
+                dataObj.juri2 = elTJ2.value || dataSetupSnapshot.juri2 || "J2";
+                dataObj.juri3 = elTJ3.value || dataSetupSnapshot.juri3 || "J3";
             } else {
                 dataObj.wasit = elSKp.value || "KP"; dataObj.dewan = elSDewan.value || "Dewan"; dataObj.juri1 = elSJ1.value || "J1"; dataObj.juri2 = elSJ2.value || "J2"; dataObj.juri3 = elSJ3.value || "J3"; dataObj.juri4 = elSJ4.value || "J4"; dataObj.juri5 = elSJ5.value || "J5"; dataObj.juri6 = elSJ6.value || "J6";
             }
@@ -671,7 +714,7 @@ if (!ruangAktif) {
         function resetFormAtas() {
             [elIPartai, elITingkat, elIBabak, elIKelas, elINamaBiru, elIKontingenBiru, elINamaMerah, elIKontingenMerah].forEach(el => el.value = "");
             elBtnKirimData.disabled = true; elBtnKirimData.className = "btn btn-secondary fw-bold px-3 py-2 shadow text-nowrap";
-           
+            
             if (indexMerah !== null && (state === "PERSIAPAN" || state === "SIAP_RONDE" || state === "PAUSE")) {
                 elBtnPlay.disabled = false;
             }
@@ -679,15 +722,71 @@ if (!ruangAktif) {
 
         let jadwalTandingGlobal = []; let jadwalJurusGlobal = []; let googleSheetUrlGlobal = "";
 
+        // Tambahkan variabel global di luar fungsi
+        window.statusDamiGlobal = 'tampil'; 
+
         function aktifkanSinkronisasiGlobal() {
-            onValue(ref(database, 'pengaturan'), (snap) => {
-                let d = snap.val() || {};
-                if(d.silat_sheet_url) googleSheetUrlGlobal = d.silat_sheet_url;
-                jadwalTandingGlobal = d.jadwal_tanding || []; jadwalJurusGlobal = d.jadwal_jurus || []; renderTabelJadwal();
-            });
+
+    // =====================================================
+    // SINKRONISASI PENGATURAN
+    // =====================================================
+
+    onValue(ref(database, `${ruangAktif}/pengaturan`), (snap) => {
+
+        let d = snap.val() || {};
+
+        // Status DAMI tetap dari pengaturan
+        window.statusDamiGlobal = d.status_dami || "tampil";
+
+        // Link Google Sheets tetap dari pengaturan
+        if (d.silat_sheet_url) {
+            googleSheetUrlGlobal = d.silat_sheet_url;
         }
 
-        function renderTabelJadwal() {
+    });
+
+    // SINKRONISASI DAFTAR NAMA WASIT & JURI DARI PENGATURAN
+            onValue(ref(database, `${ruangAktif}/pengaturan/daftar_wasit_juri`), (snap) => {
+                let daftar = snap.val() || [];
+                let options = `<option value="-">-- Pilih Wasit --</option>`;
+                daftar.forEach(nama => {
+                    options += `<option value="${nama}">${nama}</option>`;
+                });
+                
+                let elWasit = document.getElementById('pilihWasitHeader');
+                if (elWasit) {
+                    let prevVal = elWasit.value; // Ingat pilihan panitia saat ini
+                    elWasit.innerHTML = options;
+                    // Jaga agar pilihan panitia tidak ter-reset jika dropdown diperbarui
+                    let opsiAda = Array.from(elWasit.options).some(opt => opt.value === prevVal);
+                    if(opsiAda && prevVal !== "-") elWasit.value = prevVal;
+                }
+            });
+
+
+    // =====================================================
+    // SINKRONISASI JADWAL
+    // =====================================================
+
+    onValue(ref(database, `${ruangAktif}/jadwal`), (snap) => {
+
+        const data = snap.val() || {};
+
+        const gel = (elPilihGelanggang.value || "g1").replace("g", "");
+
+        jadwalTandingGlobal =
+            data?.gelanggang?.[gel]?.tanding || [];
+
+        jadwalJurusGlobal =
+            data?.gelanggang?.[gel]?.jurus || [];
+
+        renderTabelJadwal();
+
+    });
+
+}
+
+        window.renderTabelJadwal = function renderTabelJadwal() {
             let tbody = elTabelJadwal; let thead = elHeadTabelJadwal;
             let tbodyRiwayat = elTabelRiwayatLokal; 
             
@@ -697,7 +796,7 @@ if (!ruangAktif) {
             if(isTanding) {
                 thead.innerHTML = `<tr><th style="width: 8%;">Partai</th><th style="width: 15%;">Tingkat</th><th style="width: 15%;">Kelas/Babak</th><th style="width: 23%;" class="text-primary fw-bold">SUDUT BIRU</th><th style="width: 23%;" class="text-danger fw-bold">SUDUT MERAH</th><th style="width: 16%;">KONTROL</th></tr>`;
             } else {
-                thead.innerHTML = `<tr><th style="width: 8%;">Urutan</th><th style="width: 20%;">Kategori Seni</th><th style="width: 15%;">Tingkat</th><th style="width: 41%;" class="text-warning fw-bold">NAMA PESILAT / REGU</th><th style="width: 16%;">KONTROL</th></tr>`;
+                thead.innerHTML = `<tr><th style="width: 8%;">Urutan</th><th style="width: 20%;">Kategori Jurus</th><th style="width: 15%;">Tingkat</th><th style="width: 41%;" class="text-warning fw-bold">NAMA PESILAT / REGU</th><th style="width: 16%;">KONTROL</th></tr>`;
             }
 
             if(jadwalAktif.length === 0) { 
@@ -711,92 +810,125 @@ if (!ruangAktif) {
             let nomorGel = (elPilihGelanggang.value || "g1").replace('g', ''); 
             let mapHuruf = { "1":"a", "2":"b", "3":"c", "4":"d", "5":"e", "6":"f", "7":"g" }; let hurufGel = mapHuruf[nomorGel];
 
+           
+            // --- TAMBAHAN FILTER DROPDOWN ---
+            let filterDipilih = document.getElementById('lBabakOnAir') ? document.getElementById('lBabakOnAir').value : "SEMUA";
+
             jadwalAktif.forEach((row, index) => {
-                let gelRow = row['mapped_gelanggang']; 
-                if (!gelRow) {
-                    for (let key in row) {
-                        let kLower = key.toLowerCase().trim();
-                        if (kLower === 'gelanggang' || kLower === 'gel' || kLower === 'arena') {
-                            gelRow = row[key]; break;
+                
+                // 1. Ambil nama babak dari data
+                let babakRow = String(row['mapped_babak'] || "").toUpperCase();
+                let filterUpper = filterDipilih.toUpperCase();
+
+                // 2. Tentukan apakah baris ini boleh tampil
+                let bolehTampil = true;
+                // Ganti dari .includes menjadi wajib SAMA PERSIS
+                if (filterDipilih !== "SEMUA" && babakRow.trim() !== filterUpper.trim()) {
+                    bolehTampil = false;
+                }
+
+                // 3. JIKA BOLEH TAMPIL, BARU KITA PROSES HTML-NYA
+                if (bolehTampil) {
+                    
+                    let gelRow = row['mapped_gelanggang']; 
+                    if (!gelRow) {
+                        for (let key in row) {
+                            let kLower = key.toLowerCase().trim();
+                            if (kLower === 'gelanggang' || kLower === 'gel' || kLower === 'arena') {
+                                gelRow = row[key]; break;
+                            }
                         }
                     }
-                }
 
-                if (gelRow !== undefined && gelRow !== null && String(gelRow).trim() !== "") {
-                    let gStr = String(gelRow).toLowerCase().trim(); 
-                    let matchA = gStr.match(/\d+/); 
-                    let cocok = (matchA && matchA[0] === nomorGel) || gStr === hurufGel || gStr === nomorGel || gStr.endsWith(" " + hurufGel) || gStr.endsWith(hurufGel);
-                    if (!cocok) return; 
-                }
+                    if (gelRow !== undefined && gelRow !== null && String(gelRow).trim() !== "") {
+                        let gStr = String(gelRow).toLowerCase().trim(); 
+                        let matchA = gStr.match(/\d+/); 
+                        let cocok = (matchA && matchA[0] === nomorGel) || gStr === hurufGel || gStr === nomorGel || gStr.endsWith(" " + hurufGel) || gStr.endsWith(hurufGel);
+                        if (!cocok) return; 
+                    }
 
-                let p = row['mapped_partai'] !== "-" ? row['mapped_partai'] : (index + 1); 
-                let b = row['mapped_babak']; let k = row['mapped_kelas']; let t = row['mapped_tingkat'] || "-";
-                let kSeni = row['mapped_kategori'];
-                
-                let resolved = window.getResolvedNames(row);
-                let nB = resolved.nB; let kB = resolved.kB;
-                let nM = resolved.nM; let kM = resolved.kM;
-                
-                let namaBiruAsli = String(row['mapped_biru']).toUpperCase();
-                let namaMerahAsli = String(row['mapped_merah']).toUpperCase();
-                let isGaib = namaBiruAsli.includes("DAMI") || namaMerahAsli.includes("DAMI") || 
-                             namaBiruAsli.includes("BYE") || namaMerahAsli.includes("BYE") ||
-                             namaBiruAsli.includes("PEMENANG") || namaMerahAsli.includes("PEMENANG");
+                    let angkaPartaiDariExcel = parseInt(row['mapped_partai']);
+                    let p = !isNaN(angkaPartaiDariExcel) ? angkaPartaiDariExcel : (counterUtama + 1);
+                    let b = row['mapped_babak']; let k = row['mapped_kelas']; let t = row['mapped_tingkat'] || "-";
+                    let kJurus = row['mapped_kategori'];
+                    
+                    let resolved = window.getResolvedNames(row);
+                    let nB = resolved.nB; let kB = resolved.kB;
+                    let nM = resolved.nM; let kM = resolved.kM;
+                    
+                    let namaBiruAsli = String(row['mapped_biru']).toUpperCase();
+                    let namaMerahAsli = String(row['mapped_merah']).toUpperCase();
+                    // Kita tambahkan deteksi akhiran titik (.) sesuai kesepakatan
+                    let isGaib = namaBiruAsli.includes("DAMI") || namaMerahAsli.includes("DAMI") || 
+                                 namaBiruAsli.includes("BYE") || namaMerahAsli.includes("BYE") ||
+                                 namaBiruAsli.endsWith(".") || namaMerahAsli.endsWith(".");
 
-                if (isGaib) return;
+                    // FITUR RESPONSIF: Lenyapkan dari layar JIKA tombol sembunyikan diklik
+                    if (isGaib && window.statusDamiGlobal === 'sembunyi') return;
 
-                let isSelesai = himpunanSelesai.has(index); 
-                let isMerah = (indexMerah === index); 
-                let isKuning = (indexKuning === index);
-                
-                if (isSelesai) {
-                    counterRiwayat++;
-                    let pemenangColor = "";
-                    let arrRiwayat = Object.values(riwayatPemenangGlobal);
-                    let matchedRiwayat = arrRiwayat.find(r => r && r['mapped_biru'] === nB && r['mapped_merah'] === nM);
-                    if (matchedRiwayat) pemenangColor = matchedRiwayat['SUDUT_MENANG'] || "";
-
-                    if(isTanding) {
-                        let bgBiru = pemenangColor === 'biru' ? 'background: rgba(13, 110, 253, 0.25); border: 1px solid #0d6efd;' : 'border: 1px solid transparent; opacity: 0.5;';
-                        let bgMerah = pemenangColor === 'merah' ? 'background: rgba(220, 53, 69, 0.25); border: 1px solid #dc3545;' : 'border: 1px solid transparent; opacity: 0.5;';
+                    let isSelesai = himpunanSelesai.has(index); 
+                    let isMerah = (indexMerah === index); 
+                    let isKuning = (indexKuning === index);
+                    
+                    if (isSelesai) {
                         
-                        let textBiru = pemenangColor === 'biru' ? 'text-primary fw-bold' : 'text-light';
-                        let textMerah = pemenangColor === 'merah' ? 'text-danger fw-bold' : 'text-light';
-                        let trofiBiru = pemenangColor === 'biru' ? '🏆 ' : '';
-                        let trofiMerah = pemenangColor === 'merah' ? ' 🏆' : '';
+                        counterRiwayat++;
+                        let pemenangColor = "";
+                        let arrRiwayat = Object.values(riwayatPemenangGlobal);
+                        let matchedRiwayat = arrRiwayat.find(r => r && parseInt(r['mapped_partai']) === parseInt(p));
+                        if (matchedRiwayat) pemenangColor = matchedRiwayat['SUDUT_MENANG'] || "";
 
-                        htmlRiwayat += `<tr>
-                            <td class="fw-bold text-light align-middle">${p}</td>
-                            <td class="text-warning fw-bold align-middle" style="font-size: 10px; line-height: 1.1;">${k}<br><span class="text-secondary fw-normal">${b}</span></td>
-                            <td style="${bgBiru} border-radius: 4px;" class="align-middle px-1">
-                                <span class="${textBiru}">${trofiBiru}${nB}</span><br>
-                                <small class="text-secondary" style="font-size: 9px; letter-spacing: 0.5px;">${kB}</small>
-                            </td>
-                            <td style="${bgMerah} border-radius: 4px;" class="align-middle px-1">
-                                <span class="${textMerah}">${nM}${trofiMerah}</span><br>
-                                <small class="text-secondary" style="font-size: 9px; letter-spacing: 0.5px;">${kM}</small>
-                            </td>
-                        </tr>`;
-                    } else {
-                        htmlRiwayat += `<tr>
-                            <td class="fw-bold text-light align-middle">${p}</td>
-                            <td class="text-warning fw-bold align-middle" style="font-size: 10px;">${kSeni}</td>
-                            <td colspan="2" class="text-success fw-bold align-middle">✅ ${nB}<br><small class="text-secondary" style="font-size: 9px;">${kB}</small></td>
-                        </tr>`;
-                    }
-                } else {
-                    counterUtama++;
-                    let rowClass = isMerah ? 'row-merah' : (isKuning ? 'row-kuning' : '');
-                    let btnClass = isMerah ? 'btn-dark text-warning fw-black border-light' : (isKuning ? 'btn-light border-dark text-dark fw-bold' : 'btn-outline-info fw-bold');
-                    let btnTeks = isMerah ? '🛑 BATAL LIVE' : (isKuning ? '↩️ BATAL' : '⬆️ NAIKKAN');
-                    let btnAksi = (isMerah || isKuning) ? `onclick="batalkanPartai(${index})"` : `onclick="siapkanPartai(${index}, '${p}')"`;
+                        if(isTanding) {
+                            let bgBiru = pemenangColor === 'biru' ? 'background: rgba(13, 110, 253, 0.25); border: 1px solid #0d6efd;' : 'border: 1px solid transparent; opacity: 0.5;';
+                            let bgMerah = pemenangColor === 'merah' ? 'background: rgba(220, 53, 69, 0.25); border: 1px solid #dc3545;' : 'border: 1px solid transparent; opacity: 0.5;';
+                            
+                            let textBiru = pemenangColor === 'biru' ? 'text-primary fw-bold' : 'text-light';
+                            let textMerah = pemenangColor === 'merah' ? 'text-danger fw-bold' : 'text-light';
+                            let trofiBiru = pemenangColor === 'biru' ? '🏆 ' : '';
+                            let trofiMerah = pemenangColor === 'merah' ? ' 🏆' : '';
 
-                    if (isTanding) {
-                        htmlUtama += `<tr id="row_${index}" class="${rowClass}"><td class="fw-bold fs-5">${p}</td><td class="text-warning fw-bold">${t}</td><td><b>${k}</b><br><span style="font-size:11px;">${b}</span></td><td><strong class="fs-6">${nB}</strong><br><small>${kB}</small></td><td><strong class="fs-6">${nM}</strong><br><small>${kM}</small></td><td><button class="btn btn-sm ${btnClass} py-1 px-3 shadow-sm text-nowrap" ${btnAksi}>${btnTeks}</button></td></tr>`;
+                            htmlRiwayat += `<tr>
+                                <td class="fw-bold text-light align-middle">${p}</td>
+                                <td class="text-warning fw-bold align-middle" style="font-size: 10px; line-height: 1.1;">${k}<br><span class="text-secondary fw-normal">${b}</span></td>
+                                <td style="${bgBiru} border-radius: 4px;" class="align-middle px-1">
+                                    <span class="${textBiru}">${trofiBiru}${nB}</span><br>
+                                    <small class="text-secondary" style="font-size: 9px; letter-spacing: 0.5px;">${kB}</small>
+                                </td>
+                                <td style="${bgMerah} border-radius: 4px;" class="align-middle px-1">
+                                    <span class="${textMerah}">${nM}${trofiMerah}</span><br>
+                                    <small class="text-secondary" style="font-size: 9px; letter-spacing: 0.5px;">${kM}</small>
+                                </td>
+                            </tr>`;
+                        } else {
+                            htmlRiwayat += `<tr>
+                                <td class="fw-bold text-light align-middle">${p}</td>
+                                <td class="text-warning fw-bold align-middle" style="font-size: 10px;">${kJurus}</td>
+                                <td colspan="2" class="text-success fw-bold align-middle">✅ ${nB}<br><small class="text-secondary" style="font-size: 9px;">${kB}</small></td>
+                            </tr>`;
+                        }
                     } else {
-                        htmlUtama += `<tr id="row_${index}" class="${rowClass}"><td class="fw-bold fs-5">${p}</td><td class="text-warning fw-bold fs-6">${kSeni}</td><td><b>${t}</b></td><td><strong class="fs-5">${nB}</strong><br><small>${kB}</small></td><td><button class="btn btn-sm ${btnClass} py-1 px-3 shadow-sm text-nowrap" ${btnAksi}>${btnTeks}</button></td></tr>`;
+                        counterUtama++;
+                        let rowClass = isMerah ? 'row-merah' : (isKuning ? 'row-kuning' : '');
+                        let btnClass = isMerah ? 'btn-dark text-warning fw-black border-light' : (isKuning ? 'btn-light border-dark text-dark fw-bold' : 'btn-outline-info fw-bold');
+                        let btnTeks = isMerah ? '🛑 BATAL LIVE' : (isKuning ? '↩️ BATAL' : '⬆️ NAIKKAN');
+                        let btnAksi = (isMerah || isKuning) ? `onclick="batalkanPartai(${index})"` : `onclick="siapkanPartai(${index}, '${p}')"`;
+
+                        // 🌟 INJEKSI VISUAL UNTUK DAMI/BYE 🌟
+                        let styleBaris = "";
+                        if (isGaib) {
+                            styleBaris = "background-color: #333333; color: #a0a0a0;"; // Warna baris jadi Abu-abu
+                            btnClass = "btn-secondary text-light fw-bold border-dark"; // Tombol jadi abu-abu
+                            btnTeks = "BYE / UNDUR DIRI"; // Teks tombol berubah
+                            btnAksi = `onclick="bukaKonfirmasiBye(${index})"`; // Fungsi klik berubah
+                        }
+
+                        if (isTanding) {
+                            htmlUtama += `<tr id="row_${index}" class="${rowClass}" style="${styleBaris}"><td class="fw-bold fs-5">${p}</td><td class="text-warning fw-bold" style="${isGaib ? 'color:#888!important;' : ''}">${t}</td><td><b>${k}</b><br><span style="font-size:11px;">${b}</span></td><td><strong class="fs-6">${nB}</strong><br><small>${kB}</small></td><td><strong class="fs-6">${nM}</strong><br><small>${kM}</small></td><td><button class="btn btn-sm ${btnClass} py-1 px-3 shadow-sm text-nowrap" ${btnAksi}>${btnTeks}</button></td></tr>`;
+                        } else {
+                            htmlUtama += `<tr id="row_${index}" class="${rowClass}" style="${styleBaris}"><td class="fw-bold fs-5">${p}</td><td class="text-warning fw-bold fs-6" style="${isGaib ? 'color:#888!important;' : ''}">${kJurus}</td><td><b>${t}</b></td><td><strong class="fs-5">${nB}</strong><br><small>${kB}</small></td><td><button class="btn btn-sm ${btnClass} py-1 px-3 shadow-sm text-nowrap" ${btnAksi}>${btnTeks}</button></td></tr>`;
+                        }
                     }
-                }
+                } // Penutup blok IF (bolehTampil)
             });
 
             if(counterUtama === 0) tbody.innerHTML = `<tr><td colspan="${isTanding?6:5}" class="text-light py-5">Tabel Antrean Bersih. Menunggu pertandingan riil / bagan siap.</td></tr>`; 
@@ -810,17 +942,97 @@ if (!ruangAktif) {
             }
         }
 
+        window.eksekusiByeManual = function(idx) {
+            let jadwalAktif = (modeKategoriAktif === 'tanding') ? jadwalTandingGlobal : jadwalJurusGlobal;
+            let row = jadwalAktif[idx];
+            if(!row) return;
+
+            // Deteksi siapa yang atlet asli dan siapa yang Dami
+            let biru = String(row.mapped_biru).toUpperCase();
+            let isDamiBiru = biru.includes("DAMI") || biru.includes("BYE") || biru.endsWith(".");
+            let pemenangAsli = isDamiBiru ? 'merah' : 'biru';
+
+            // Bungkus data pemenangnya
+            let dataPemenang = JSON.parse(JSON.stringify(row));
+            dataPemenang['SUDUT_MENANG'] = pemenangAsli;
+            dataPemenang['NAMA ATLET'] = isDamiBiru ? row.mapped_merah : row.mapped_biru;
+            dataPemenang['KONTINGEN'] = isDamiBiru ? row.mapped_kont_merah : row.mapped_kont_biru;
+
+            let gel = (elPilihGelanggang.value || "g1").replace('g', '');
+            let ts = Date.now();
+
+            // 1. Simpan ke riwayat_pemenang (Tabel Kecil)
+            set(ref(database, `${ruangAktif}/pertandingan/g${gel}/riwayat_pemenang/${ts}`), dataPemenang);
+
+            // 2. Tandai partai ini sebagai "selesai" agar tercoret dari Tabel Besar
+            himpunanSelesai.add(idx);
+            set(ref(database, `${ruangAktif}/pertandingan/g${gel}/partai_selesai_${modeKategoriAktif}`), Array.from(himpunanSelesai));
+
+            // 3. Tembak data kemenangan instan ke Google Sheets!
+            if (typeof window.kirimKeSheetPanitia === "function") {
+                let payloadData = {
+                    googleSheetUrl: googleSheetUrlGlobal || localStorage.getItem('silat_sheet_url'),
+                    kategoriAktif: modeKategoriAktif,
+                    gelText: "Gelanggang " + gel,
+                    pemenangArah: pemenangAsli,
+                    partai: row.mapped_partai || "-",
+                    babak: row.mapped_babak || "-",
+                    kelasLengkap: (row.mapped_tingkat||"-")+" "+(row.mapped_kelas||row.mapped_kategori||"-"),
+                    nB: row.mapped_biru || "BIRU", kB: row.mapped_kont_biru || "-", skorBiruTotal: 0,
+                    nM: row.mapped_merah || "MERAH", kM: row.mapped_kont_merah || "-", skorMerahTotal: 0,
+                    alasan: "Menang BYE / Undur Diri",
+                    wasit: "-", j1: "-", j2: "-", j3: "-", dewan: "-",
+                    namaPemenang: dataPemenang['NAMA ATLET'],
+                    kontPemenang: dataPemenang['KONTINGEN'],
+                    kategoriJuara: "1",
+                    namaKalah: isDamiBiru ? row.mapped_biru : row.mapped_merah,
+                    kontKalah: isDamiBiru ? row.mapped_kont_biru : row.mapped_kont_merah,
+                    kelasSertifikat: row.mapped_kelas || "-",
+                    tingkatSertifikat: row.mapped_tingkat || "-",
+                    gender: String(row.mapped_kelas).toUpperCase().includes("PUTRI") ? "Putri" : "Putra"
+                };
+                window.kirimKeSheetPanitia(payloadData);
+            }
+            
+            showToast(`✅ Partai dieksekusi! Atlet otomatis naik ke babak selanjutnya dan data masuk ke Sheets.`);
+        };
+        
+
         let skorBiruTotal = 0; let skorMerahTotal = 0; let pemenangSementara = ""; let pemenangMutlak = null; 
         let state = "PERSIAPAN"; let izinSimpanDewan = false; let alasanMenangGlobal = "";
         let dataSetupSnapshot = {}; let isAutoSaving = false;
 
-        // =============================================================
-        // 🔥 UPDATE 2: PEMANTAUAN SKOR DIPECAH (TIDAK ADA RENDER BERAT) 🔥
-        // =============================================================
         function pantauSkorDanStatus() {
             let gel = elPilihGelanggang.value;
+
+            // 🔥 PEMULIHAN TIMER SAAT PANITIA REFRESH (TIMESTAMP)
+            onValue(ref(database, `${ruangAktif}/pertandingan/${gel}/timer_sync`), (snap) => {
+                let d = snap.val();
+                if(!d) return;
+
+                // Memulihkan data hanya jika layar panitia baru login (masih PERSIAPAN)
+                if (state === "PERSIAPAN" && d.status !== "reset") {
+                    rondeSaatIni = d.ronde || 1;
+                    durasiPertandingan = d.durasiAwal || 0; // Kembalikan ingatan durasi statis
+                    
+                    if (d.status === "running") {
+                        let elapsed = Math.floor((Date.now() - d.startTimestamp) / 1000);
+                        sisaDetik = (d.mode === 'tanding') ? Math.max(0, d.durasiAwal - elapsed) : (d.durasiAwal + elapsed);
+                        
+                        state = "RONDE";
+                        elBtnPlay.disabled = true; elBtnPause.disabled = false;
+                        setStatusTampilan(`RONDE ${rondeSaatIni}`, "bg-primary");
+                        jalankanHitungMundur();
+                    } else if (d.status === "pause") {
+                        sisaDetik = d.remaining;
+                        state = "PAUSE";
+                        elBtnPlay.disabled = false; elBtnPause.disabled = true;
+                        elLayarTimerLokal.innerText = konversiDetikKeMenit(sisaDetik);
+                        setStatusTampilan("JEDA KOTOR", "bg-warning text-dark");
+                    }
+                }
+            });
             
-            // 1. Screensaver
             onValue(ref(database, `${ruangAktif}/pertandingan/${gel}/status_screensaver`), (snap) => {
                 isScreensaverNyala = snap.val() || false; 
                 if(elBtnToggleSS) {
@@ -829,46 +1041,48 @@ if (!ruangAktif) {
                 }
             });
 
-            // 2. Auto Save Trigger
             onValue(ref(database, `${ruangAktif}/pertandingan/${gel}/trigger_auto_save`), (snap) => {
                 let token = snap.val();
                 if (token && !isAutoSaving) { jalankanAutoSave(gel); }
             });
 
-            // 3. Setup (Hanya untuk mengunci/membuka tombol Play)
             onValue(ref(database, `${ruangAktif}/pertandingan/${gel}/setup`), (snap) => {
                 dataSetupSnapshot = snap.val() || {};
                 let belumAdaPeserta = (!dataSetupSnapshot.nama_biru || dataSetupSnapshot.nama_biru === "SUDUT BIRU");
                 if (state === "PERSIAPAN") { elBtnPlay.disabled = belumAdaPeserta; }
+                
+                // Tambahan: Sesuaikan dropdown Wasit di atas dengan data Wasit dari Server
+                let elWasit = document.getElementById('pilihWasitHeader');
+                if(elWasit && dataSetupSnapshot.wasit) {
+                    if(elWasit.value !== dataSetupSnapshot.wasit) {
+                        let opsiAda = Array.from(elWasit.options).some(opt => opt.value === dataSetupSnapshot.wasit);
+                        if(opsiAda) elWasit.value = dataSetupSnapshot.wasit;
+                    }
+                }
             });
 
-            // 4. Kalkulator Total Biru (Tidak menyentuh DOM)
             onValue(ref(database, `${ruangAktif}/pertandingan/${gel}/biru`), (snap) => {
                 if (modeKategoriAktif === 'tanding') {
                     let b = snap.val() || {}; skorBiruTotal = (b.r1||0) + (b.r2||0) + (b.r3||0);
                 }
             });
 
-            // 5. Kalkulator Total Merah (Tidak menyentuh DOM)
             onValue(ref(database, `${ruangAktif}/pertandingan/${gel}/merah`), (snap) => {
                 if (modeKategoriAktif === 'tanding') {
                     let m = snap.val() || {}; skorMerahTotal = (m.r1||0) + (m.r2||0) + (m.r3||0);
                 }
             });
 
-            // 6. Kalkulator Seni
-            onValue(ref(database, `${ruangAktif}/pertandingan/${gel}/seni/hasil_akhir`), (snap) => {
+            onValue(ref(database, `${ruangAktif}/pertandingan/${gel}/Jurus/hasil_akhir`), (snap) => {
                 if (modeKategoriAktif !== 'tanding') { skorBiruTotal = snap.val() || 0; skorMerahTotal = 0; }
             });
 
-            // 7. Pengesahan Dewan
             onValue(ref(database, `${ruangAktif}/pertandingan/${gel}/izin_simpan`), (snap) => {
                 izinSimpanDewan = snap.val() || false; updateTombolHasil();
             });
             onValue(ref(database, `${ruangAktif}/pertandingan/${gel}/pemenang_keputusan`), (snap) => { pemenangMutlak = snap.val() || null; });
             onValue(ref(database, `${ruangAktif}/pertandingan/${gel}/alasan_menang`), (snap) => { alasanMenangGlobal = snap.val() || ""; });
 
-            // 8. Ronde Aktif
             onValue(ref(database, `${ruangAktif}/pertandingan/${gel}/ronde_aktif`), (snap) => {
                 let r = snap.val();
                 if (r && r !== rondeSaatIni && state !== "PERSIAPAN") {
@@ -876,7 +1090,6 @@ if (!ruangAktif) {
                 }
             });
 
-            // 9. Status Master & Logic Timer
             onValue(ref(database, `${ruangAktif}/pertandingan/${gel}/status`), (snap) => {
                 let s = snap.val(); if (!s) return;
                 
@@ -884,23 +1097,28 @@ if (!ruangAktif) {
                     clearInterval(intervalUtama); clearInterval(intervalPause); state = "SELESAI"; 
                     setStatusTampilan("PERTANDINGAN SELESAI", "bg-danger"); setTemaTimer(false); 
                     elBtnPlay.disabled = true; elBtnPause.disabled = true; 
-                    if(elBtnSelesaiSeniManual) elBtnSelesaiSeniManual.disabled = true; 
+                    if(elBtnSelesaiJurusManual) elBtnSelesaiJurusManual.disabled = true; 
                     updateTombolHasil(); 
                 }
                 
                 if (s === "PERSIAPAN" && state !== "PERSIAPAN") {
                     clearInterval(intervalUtama); clearInterval(intervalPause); 
-                    state = "PERSIAPAN"; rondeSaatIni = 1; sisaDetik = 0; idPauseAktif = 0;
+                    state = "PERSIAPAN"; rondeSaatIni = 1; idPauseAktif = 0;
+                    
+                    // 🔥 HAPUS sisaDetik = 0; GANTI JADI INI:
+                    if (durasiPertandingan === 0) durasiPertandingan = hitungTotalDetikTanding(elCfgWaktu.value);
+                    sisaDetik = (modeKategoriAktif === 'tanding') ? durasiPertandingan : 0;
+
                     setStatusTampilan("PERSIAPAN", "bg-secondary"); setTemaTimer(false); alasanMenangGlobal = "";
                     
-                    let waktuReset = modeKategoriAktif === 'tanding' ? konversiDetikKeMenit(hitungTotalDetikTanding(elCfgWaktu.value)) : "00:00";
+                    let waktuReset = konversiDetikKeMenit(sisaDetik);
                     elLayarTimerLokal.innerText = waktuReset;
                     
                     let belumAdaPeserta = (!dataSetupSnapshot.nama_biru || dataSetupSnapshot.nama_biru === "SUDUT BIRU");
                     elBtnPlay.disabled = belumAdaPeserta; 
                     
                     elBtnPause.disabled = true; elDaftarPause.innerHTML = ""; 
-                    if(elBtnSelesaiSeniManual) elBtnSelesaiSeniManual.disabled = false;
+                    if(elBtnSelesaiJurusManual) elBtnSelesaiJurusManual.disabled = false;
                 }
 
                 if (s === "PAUSE" && state === "RONDE") window.pauseTimer();
@@ -935,7 +1153,7 @@ if (!ruangAktif) {
                 else if (pemenangMutlak === "merah") pKirim = "merah";
                 else { pKirim = (skorBiruTotal > skorMerahTotal) ? "biru" : ((skorMerahTotal > skorBiruTotal) ? "merah" : "seri"); }
             } else {
-                pKirim = "seni";
+                pKirim = "Jurus";
             }
 
             let jadwalAktif = (modeKategoriAktif === 'tanding') ? jadwalTandingGlobal : jadwalJurusGlobal;
@@ -944,7 +1162,7 @@ if (!ruangAktif) {
             
             dataPemenang['SUDUT_MENANG'] = pKirim; 
             
-            if (pKirim === 'biru' || pKirim === 'seni') {
+            if (pKirim === 'biru' || pKirim === 'Jurus') {
                 dataPemenang['NAMA ATLET'] = dataSetupSnapshot.nama_biru || "SUDUT BIRU";
                 dataPemenang['KONTINGEN'] = dataSetupSnapshot.kontingen_biru || "-";
             } else if (pKirim === 'merah') {
@@ -966,8 +1184,51 @@ if (!ruangAktif) {
                 btn.innerHTML = "✅ DATA TERSIMPAN"; 
             }
             
-            eksekusiKirimHasil(pKirim); 
-            
+            // =========================================================================
+            // 🔥 UPDATE BARU: MENGGIRIM PAYLOAD KE mesin_sheet.js 🔥
+            // =========================================================================
+            if (typeof window.kirimKeSheetPanitia === "function") {
+                let payloadData = {
+                    googleSheetUrl: googleSheetUrlGlobal || localStorage.getItem('silat_sheet_url'),
+                    kategoriAktif: modeKategoriAktif,
+                    gelText: "Gelanggang " + gel.replace('g', ''),
+                    pemenangArah: pKirim,
+                    
+                    partai: dataSetupSnapshot.partai || "-",
+                    babak: dataSetupSnapshot.babak || "-",
+                    kelasLengkap: (dataSetupSnapshot.tingkat||"-")+" "+(dataSetupSnapshot.kelas||"-"),
+                    
+                    nB: dataSetupSnapshot.nama_biru || "BIRU",
+                    kB: dataSetupSnapshot.kontingen_biru || "-",
+                    skorBiruTotal: skorBiruTotal,
+                    
+                    nM: dataSetupSnapshot.nama_merah || "MERAH",
+                    kM: dataSetupSnapshot.kontingen_merah || "-",
+                    skorMerahTotal: skorMerahTotal,
+                    
+                    alasan: alasanMenangGlobal || "Selesai",
+                    
+                    wasit: dataSetupSnapshot.wasit || "-",
+                    j1: dataSetupSnapshot.juri1 || "-",
+                    j2: dataSetupSnapshot.juri2 || "-",
+                    j3: dataSetupSnapshot.juri3 || "-",
+                    dewan: dataSetupSnapshot.dewan || "-",
+                    
+                    // DATA EKSTRA UNTUK CETAK SERTIFIKAT
+                    namaPemenang: dataPemenang['NAMA ATLET'],
+                    kontPemenang: dataPemenang['KONTINGEN'],
+                    kategoriJuara: pKirim === "biru" ? "1" : (pKirim === "merah" ? "1" : ""),
+                    namaKalah: (pKirim === "biru") ? (dataSetupSnapshot.nama_merah || "") : (dataSetupSnapshot.nama_biru || ""),
+                    kontKalah: (pKirim === "biru") ? (dataSetupSnapshot.kontingen_merah || "") : (dataSetupSnapshot.kontingen_biru || ""),
+                    
+                    kelasSertifikat: dataSetupSnapshot.kelas || "-",
+                    tingkatSertifikat: dataSetupSnapshot.tingkat || "-",
+                    gender: String(dataSetupSnapshot.kelas).toUpperCase().includes("PUTRI") ? "Putri" : "Putra"
+                };
+                window.kirimKeSheetPanitia(payloadData);
+            }
+            // =========================================================================
+
             let modalLanjut = new bootstrap.Modal(elModalLanjutkanPertandingan);
             modalLanjut.show();
         }
@@ -984,11 +1245,14 @@ if (!ruangAktif) {
             indexMerah = null; 
             if(indexKuning === indexMerah) indexKuning = null;
             
-            set(ref(database, `${base}/status`), "PERSIAPAN");
-            
             set(ref(database, `${base}/setup`), { kategori: modeKategoriAktif, partai: "-", tingkat: "-", babak: "-", kelas: "-", wasit: "-", dewan: "-", juri1: "-", juri2: "-", juri3: "-", nama_biru: "SUDUT BIRU", kontingen_biru: "-", nama_merah: "SUDUT MERAH", kontingen_merah: "-" });
             
+            // 🔥 JALANKAN RESET LOKAL TERLEBIH DAHULU
             eksekusiReset(); 
+            
+            // Baru lempar status persiapan ke Firebase
+            set(ref(database, `${base}/status`), "PERSIAPAN");
+            
             renderTabelJadwal();
             isAutoSaving = false;
         }
@@ -1021,8 +1285,7 @@ if (!ruangAktif) {
                     let namaMerahCek = String(nM).toUpperCase();
                     
                     let isGaib = namaBiruCek.includes("DAMI") || namaMerahCek.includes("DAMI") || 
-                                 namaBiruCek.includes("BYE") || namaMerahCek.includes("BYE") ||
-                                 namaBiruCek.includes("PEMENANG") || namaMerahCek.includes("PEMENANG");
+             namaBiruCek.includes("BYE") || namaMerahCek.includes("BYE");
 
                     if (!isGaib) {
                         exportJadwal.push({
@@ -1047,7 +1310,7 @@ if (!ruangAktif) {
                         exportJadwal.push({
                             "PARTAI": urutanPartaiBaru++, 
                             "GELANGGANG": row['mapped_gelanggang'] || gel.toUpperCase(),
-                            "KATEGORI": "Seni / TGR",
+                            "KATEGORI": "Jurus / TGR",
                             "TINGKAT": row['mapped_tingkat'] || "-",
                             "KELAS": row['mapped_kategori'] || "-",
                             "SUDUT BIRU": nB,
@@ -1070,59 +1333,7 @@ if (!ruangAktif) {
             }).catch(e => { alert("Error: " + e.message); });
         }
 
-        function eksekusiKirimHasil(pemenang) {
-            try {
-                let link = googleSheetUrlGlobal || localStorage.getItem('silat_sheet_url'); 
-                if(!link || link.trim() === "") return; 
-                
-                let sheetMatch = link.match(/\/d\/([a-zA-Z0-9-_]+)/);
-                if(!sheetMatch) { console.warn("URL Sheet tidak valid, abaikan."); return; }
-                let sheetId = sheetMatch[1]; 
-
-                let gidMatch = link.match(/[#&]gid=([0-9]+)/); 
-                let tabId = gidMatch ? parseInt(gidMatch[1]) : 0; 
-                
-                let wkt = new Date().toLocaleString("id-ID"); let gelText = "Gelanggang " + elPilihGelanggang.value.replace('g', '');
-                let p = dataSetupSnapshot.partai || "-"; let b = dataSetupSnapshot.babak || "-"; let k = (dataSetupSnapshot.tingkat||"-")+" "+(dataSetupSnapshot.kelas||"-");
-                let nB = dataSetupSnapshot.nama_biru || "BIRU"; let kB = dataSetupSnapshot.kontingen_biru || "-"; let nM = dataSetupSnapshot.nama_merah || "MERAH"; let kM = dataSetupSnapshot.kontingen_merah || "-";
-
-                let namaPemenang = ""; let kontPemenang = "";
-                let namaKalah = ""; let kontKalah = "";
-                
-                if (pemenang === 'biru') {
-                    namaPemenang = nB; kontPemenang = kB;
-                    namaKalah = nM; kontKalah = kM;
-                } else if (pemenang === 'merah') {
-                    namaPemenang = nM; kontPemenang = kM;
-                    namaKalah = nB; kontKalah = kB;
-                }
-
-                let juara1 = ""; let juara2 = ""; let juara3_1 = ""; let juara3_2 = "";
-                let babakStr = String(b).toUpperCase();
-
-                if (babakStr.includes("SEMI")) {
-                    juara3_1 = namaKalah + " (" + kontKalah + ")";
-                } 
-                else if (babakStr.includes("FINAL")) {
-                    juara1 = namaPemenang + " (" + kontPemenang + ")";
-                    juara2 = namaKalah + " (" + kontKalah + ")";
-                }
-
-                let dataSheet = (modeKategoriAktif === 'tanding') 
-                    ? [wkt, gelText, p, b, k, nB, kB, skorBiruTotal, nM, kM, skorMerahTotal, alasanMenangGlobal||"Menang Poin", dataSetupSnapshot.wasit||"-", dataSetupSnapshot.juri1||"-", dataSetupSnapshot.juri2||"-", dataSetupSnapshot.juri3||"-", juara1, juara2, juara3_1, juara3_2]
-                    : [wkt, gelText, p, b, k, nB, kB, skorBiruTotal, nM, kM, skorMerahTotal, alasanMenangGlobal||"Selesai Penampilan", "-", "-", dataSetupSnapshot.wasit||"-", dataSetupSnapshot.dewan||"-", dataSetupSnapshot.juri1||"-", dataSetupSnapshot.juri2||"-", dataSetupSnapshot.juri3||"-", dataSetupSnapshot.juri4||"-", dataSetupSnapshot.juri5||"-", dataSetupSnapshot.juri6||"-", juara1, juara2, juara3_1, juara3_2];
-
-                fetch("https://script.google.com/macros/s/AKfycbxPahwtXYz_ITepb8D_3HLmZGQq978yLz-GXE5_0j12mOlGr1152wxd74xnHmWVOrHeHw/exec", { method: 'POST', body: JSON.stringify({ sheetId: sheetId, tabId: tabId, kategori: modeKategoriAktif, sheetTab: (modeKategoriAktif === 'tanding' ? 'REKAP_TANDING' : 'REKAP_JURUS'), data: dataSheet, pemenang: pemenang }), headers: { 'Content-Type': 'text/plain;charset=utf-8' } })
-                .catch(e => console.warn("Gagal sync ke Sheet, namun aman di Firebase: " + e));
-            } catch (error) {
-                console.warn("Ada yang salah saat mengolah link Sheet, penyimpanan lanjut ke lokal.", error);
-            }
-        }
-
-        // =========================================================================
-        // KONTROL TIMER & FUNGSI EDIT MANUAL (MODAL EKSKLUSIF)
-        // =========================================================================
-        let rondeSaatIni = 1; let sisaDetik = 0; let targetWaktuSekarang = 0;
+        let rondeSaatIni = 1; let durasiPertandingan = 0; let sisaDetik = 0; let targetWaktuSekarang = 0;
         let intervalUtama = null; let intervalPause = null; let waktuMulaiPause = 0; let idPauseAktif = 0;
 
         function mainkanGong() { elAudioGong.currentTime = 0; elAudioGong.play().catch(e => console.log("Audio diblokir")); }
@@ -1149,29 +1360,83 @@ if (!ruangAktif) {
             if(formatEdit.startsWith('0')) formatEdit = formatEdit.substring(1); 
             
             elInputEditTimer.value = formatEdit;
+
+            // 🌟 TRIK BARU: Kita cegat menggunakan sistem event bawaan Bootstrap 🌟
+            // Event ini memastikan kursor ditarik HANYA SETELAH animasi popup selesai 100%
+            elModalEditTimer.addEventListener('shown.bs.modal', function () {
+                setTimeout(() => {
+                    elInputEditTimer.focus();
+                    elInputEditTimer.select();
+                    
+                }, 10); // Jeda super singkat 10ms hanya untuk memastikan browser tidak lag
+            }, { once: true }); // { once: true } sangat penting agar perintah ini tidak menumpuk berkali-kali
+
             modalEditTimerInst.show();
-            setTimeout(() => { elInputEditTimer.focus(); }, 400);
         }
 
         window.simpanEditTimer = function() {
             let inputStr = elInputEditTimer.value;
-            
             if (inputStr !== null && inputStr.trim() !== "") {
                 let dtk = hitungTotalDetikTanding(inputStr);
-                let displayBaru = konversiDetikKeMenit(dtk);
                 
-                updateLayarDanFirebase(displayBaru);
-                sisaDetik = dtk;
+                // 🔥 LOGIKA BARU: Pisahkan durasi tetap dan dinamis
+                durasiPertandingan = dtk;
+                sisaDetik = durasiPertandingan;
+                let displayBaru = konversiDetikKeMenit(durasiPertandingan);
+                
+                elLayarTimerLokal.innerText = displayBaru;
 
                 if (state === "PERSIAPAN" || state === "SIAP_RONDE") {
                     let m = Math.floor(dtk / 60);
                     let s = (dtk % 60).toString().padStart(2, '0');
                     elCfgWaktu.value = `${m}.${s}`;
                     targetWaktuSekarang = dtk;
+                    
+                    let gel = elPilihGelanggang.value;
+                    
+                    // Update legacy timer (buat jaga-jaga)
+                    set(ref(database, `${ruangAktif}/pertandingan/${gel}/timer`), displayBaru);
+                    
+                    // 🔥 TAMBAHAN BARU: Tembak ke timer_sync agar TV & Juri langsung berubah detik itu juga!
+                    set(ref(database, `${ruangAktif}/pertandingan/${gel}/timer_sync`), {
+                        status: "reset", 
+                        remaining: sisaDetik, 
+                        durasiAwal: durasiPertandingan, 
+                        startTimestamp: 0, 
+                        ronde: rondeSaatIni, 
+                        mode: modeKategoriAktif
+                    });
                 }
             }
             modalEditTimerInst.hide();
         }
+
+    
+
+      
+        // Variabel penampung
+        let indexByeTerpilih = null;
+        let modalConfirmByeInst = null;
+
+        // Fungsi elegan untuk membuka popup
+        window.bukaKonfirmasiBye = function(index) {
+            indexByeTerpilih = index; // Simpan nomor baris yang mau di-BYE
+            let elModal = document.getElementById('modalConfirmBye');
+            
+            if(!modalConfirmByeInst) { 
+                modalConfirmByeInst = new bootstrap.Modal(elModal); 
+            }
+            modalConfirmByeInst.show();
+        };
+
+        // Fungsi saat tombol "YA, UNDUR DIRI" di dalam popup diklik
+        document.getElementById('btnKonfirmasiByeLanjut').addEventListener('click', function() {
+            if(indexByeTerpilih !== null) {
+                modalConfirmByeInst.hide(); // Tutup popup dengan mulus
+                eksekusiByeManual(indexByeTerpilih); // Eksekusi fungsi BYE aslimu
+                indexByeTerpilih = null; // Kosongkan kembali memorinya
+            }
+        });
 
         function jalankanHitungMundur() {
             clearInterval(intervalUtama);
@@ -1189,39 +1454,71 @@ if (!ruangAktif) {
                     }
                 }
 
-                let selesai = (state === "RONDE" && ((modeKategoriAktif === 'tanding' && sisaDetik <= 0) || (modeKategoriAktif === 'jurus' && sisaDetik >= targetWaktuSekarang))) || (state === "ISTIRAHAT" && sisaDetik <= 0);
+                // Cek selesai pake durasiPertandingan
+                let batasJurus = (durasiPertandingan > 0) ? durasiPertandingan : targetWaktuSekarang;
+                let selesai = (state === "RONDE" && ((modeKategoriAktif === 'tanding' && sisaDetik <= 0) || (modeKategoriAktif === 'jurus' && sisaDetik >= batasJurus))) || (state === "ISTIRAHAT" && sisaDetik <= 0);
 
                 if (selesai) {
                     clearInterval(intervalUtama);
                     let totRonde = parseInt(elCfgRonde.value);
+                    let gel = elPilihGelanggang.value; // Deklarasikan di sini agar bisa dipakai ke semua blok
+
                     if (state === "RONDE") {
                         mainkanGong(); 
                         if (rondeSaatIni < totRonde) { 
+                            // 1. PINDAH KE MODE ISTIRAHAT
                             state = "ISTIRAHAT"; sisaDetik = parseInt(elCfgIstirahat.value); 
                             setStatusTampilan("ISTIRAHAT", "bg-success"); setTemaTimer(true); 
                             
                             elLayarTimerLokal.innerText = konversiDetikKeMenit(sisaDetik);
-                            let gel = elPilihGelanggang.value;
                             set(ref(database, `${ruangAktif}/pertandingan/${gel}/timer`), "00:00");
                             set(ref(database, `${ruangAktif}/pertandingan/${gel}/status`), elStatusTanding.innerText);
                             
+                            // 🔥 TEMBAK TV & JURI: Paksa tampil 00:00 selama istirahat
+                            set(ref(database, `${ruangAktif}/pertandingan/${gel}/timer_sync`), {
+                                status: "reset", remaining: 0, durasiAwal: durasiPertandingan, startTimestamp: 0, ronde: rondeSaatIni, mode: modeKategoriAktif
+                            });
+
                             jalankanHitungMundur(); 
                         } else { 
+                            // 2. PERTANDINGAN SELESAI TOTAL
                             state = "SELESAI"; setStatusTampilan("PERTANDINGAN SELESAI", "bg-danger"); setTemaTimer(false); 
                             elBtnPlay.disabled = true; elBtnPause.disabled = true; 
-                            if(elBtnSelesaiSeniManual) elBtnSelesaiSeniManual.disabled = true;
-                            updateTombolHasil(); updateLayarDanFirebase("00:00"); 
+                            if(elBtnSelesaiJurusManual) elBtnSelesaiJurusManual.disabled = true;
+                            updateTombolHasil(); 
+                            
+                            // 🔥 PERBAIKAN: Kembalikan Layar Panitia ke Settingan, tapi TV & Firebase tetap 00:00
+                            elLayarTimerLokal.innerText = konversiDetikKeMenit(durasiPertandingan);
+                            set(ref(database, `${ruangAktif}/pertandingan/${gel}/timer`), "00:00");
+                            set(ref(database, `${ruangAktif}/pertandingan/${gel}/status`), elStatusTanding.innerText);
+                            
+                            // 🔥 TEMBAK TV & JURI: Kunci di 00:00 saat Pertandingan selesai
+                            set(ref(database, `${ruangAktif}/pertandingan/${gel}/timer_sync`), {
+                                status: "reset", remaining: 0, durasiAwal: durasiPertandingan, startTimestamp: 0, ronde: rondeSaatIni, mode: modeKategoriAktif
+                            });
                         }
                     } else if (state === "ISTIRAHAT") {
-                        state = "SIAP_RONDE"; rondeSaatIni++; targetWaktuSekarang = hitungTotalDetikTanding(elCfgWaktu.value); 
-                        sisaDetik = (modeKategoriAktif === 'tanding') ? targetWaktuSekarang : 0;
+                        // 3. ISTIRAHAT SELESAI -> MASUK RONDE BARU
+                        state = "SIAP_RONDE"; rondeSaatIni++; 
+                        
+                        // Kembalikan ke durasi tetap 
+                        sisaDetik = (modeKategoriAktif === 'tanding') ? durasiPertandingan : 0;
+                        
                         setStatusTampilan(`SIAP RONDE ${rondeSaatIni}`, "bg-info text-dark"); setTemaTimer(false); 
                         
-                        updateLayarDanFirebase(konversiDetikKeMenit(sisaDetik));
-                        let gel = elPilihGelanggang.value;
+                        // Kembalikan Layar Panitia ke Settingan & Sync Legacy Firebase
+                        elLayarTimerLokal.innerText = konversiDetikKeMenit(sisaDetik);
+                        set(ref(database, `${ruangAktif}/pertandingan/${gel}/timer`), konversiDetikKeMenit(sisaDetik));
+                        set(ref(database, `${ruangAktif}/pertandingan/${gel}/status`), elStatusTanding.innerText);
+                        
                         set(ref(database, `${ruangAktif}/pertandingan/${gel}/izin_play`), true); 
                         set(ref(database, `${ruangAktif}/pertandingan/${gel}/ronde_aktif`), rondeSaatIni);
                         elBtnPlay.disabled = false; elBtnPause.disabled = true;
+
+                        // 🔥 INI KUNCINYA: Tembak angka sisa waktu untuk ronde baru ke TV & Juri!
+                        set(ref(database, `${ruangAktif}/pertandingan/${gel}/timer_sync`), {
+                            status: "pause", remaining: sisaDetik, durasiAwal: durasiPertandingan, startTimestamp: 0, ronde: rondeSaatIni, mode: modeKategoriAktif
+                        });
                     }
                 }
             }, 1000);
@@ -1229,69 +1526,77 @@ if (!ruangAktif) {
 
         window.mulaiTimer = function() {
             elBtnPlay.disabled = true; elBtnPause.disabled = false;
-            let gel = elPilihGelanggang.value; setTemaTimer(false); set(ref(database, `${ruangAktif}/pertandingan/${gel}/timer_run`), true);
-            
+            let gel = elPilihGelanggang.value; 
+            setTemaTimer(false); 
+            let timeNow = Date.now();
+
             if (state === "PERSIAPAN") { 
-                rondeSaatIni = 1; targetWaktuSekarang = hitungTotalDetikTanding(elCfgWaktu.value); sisaDetik = (modeKategoriAktif === 'tanding') ? targetWaktuSekarang : 0; state = "RONDE"; setStatusTampilan(`RONDE 1`, "bg-primary"); updateLayarDanFirebase(konversiDetikKeMenit(sisaDetik)); mainkanGong(); jalankanHitungMundur(); 
+                rondeSaatIni = 1; 
+                // 🔥 Pastikan nilai durasi statis terisi
+                if (durasiPertandingan === 0) durasiPertandingan = hitungTotalDetikTanding(elCfgWaktu.value); 
+                sisaDetik = (modeKategoriAktif === 'tanding') ? durasiPertandingan : 0; 
+                
+                state = "RONDE"; setStatusTampilan(`RONDE 1`, "bg-primary"); 
+                mainkanGong(); 
+                
+                // 🔥 TIMESTAMP KE FIREBASE
+                set(ref(database, `${ruangAktif}/pertandingan/${gel}/timer_sync`), {
+                    status: "running", startTimestamp: timeNow, durasiAwal: sisaDetik, ronde: rondeSaatIni, mode: modeKategoriAktif
+                });
                 
                 set(ref(database, `${ruangAktif}/pertandingan/${gel}/ronde_aktif`), rondeSaatIni);
                 set(ref(database, `${ruangAktif}/pertandingan/${gel}/trigger_animasi`), { ronde: 1, token: Math.random() });
             } 
-
-        else if (state === "PAUSE") { 
-            state = "RONDE"; setStatusTampilan(`RONDE ${rondeSaatIni}`, "bg-primary"); clearInterval(intervalPause); let el = document.getElementById(`pause_${idPauseAktif}`); if(el) el.classList.remove('active'); 
-            
-            updateLayarDanFirebase(konversiDetikKeMenit(sisaDetik));
-            
+            else if (state === "PAUSE" || state === "SIAP_RONDE") { 
+                state = "RONDE"; setStatusTampilan(`RONDE ${rondeSaatIni}`, "bg-primary"); 
+                if (state === "PAUSE") { clearInterval(intervalPause); let el = document.getElementById(`pause_${idPauseAktif}`); if(el) el.classList.remove('active'); } 
+                else { mainkanGong(); }
+                
+                // 🔥 TIMESTAMP KE FIREBASE (RESUME)
+                set(ref(database, `${ruangAktif}/pertandingan/${gel}/timer_sync`), {
+                    status: "running", startTimestamp: timeNow, durasiAwal: sisaDetik, ronde: rondeSaatIni, mode: modeKategoriAktif
+                });
+                set(ref(database, `${ruangAktif}/pertandingan/${gel}/trigger_animasi`), { ronde: rondeSaatIni, token: Math.random() });
+            }
+            set(ref(database, `${ruangAktif}/pertandingan/${gel}/status`), elStatusTanding.innerText);
             jalankanHitungMundur(); 
-        } 
-        else if (state === "SIAP_RONDE") { 
-            state = "RONDE"; setStatusTampilan(`RONDE ${rondeSaatIni}`, "bg-primary"); mainkanGong(); 
-            
-            updateLayarDanFirebase(konversiDetikKeMenit(sisaDetik));
-            
-            jalankanHitungMundur(); 
-            
-            set(ref(database, `${ruangAktif}/pertandingan/${gel}/ronde_aktif`), rondeSaatIni);
-            set(ref(database, `${ruangAktif}/pertandingan/${gel}/trigger_animasi`), { ronde: rondeSaatIni, token: Math.random() });
-        }
         }
 
         window.pauseTimer = function() {
             if (state !== "RONDE" && state !== "ISTIRAHAT") return; 
             clearInterval(intervalUtama); clearInterval(intervalPause); 
             elBtnPlay.disabled = false; elBtnPause.disabled = true; state = "PAUSE"; setStatusTampilan("JEDA KOTOR", "bg-warning text-dark"); 
-            set(ref(database, `${ruangAktif}/pertandingan/${elPilihGelanggang.value}/timer_run`), false); 
-           
-            updateLayarDanFirebase(elLayarTimerLokal.innerText);
             
+            let gel = elPilihGelanggang.value;
+            set(ref(database, `${ruangAktif}/pertandingan/${gel}/timer_run`), false); 
+            set(ref(database, `${ruangAktif}/pertandingan/${gel}/status`), elStatusTanding.innerText);
+            
+            // 🔥 TIMESTAMP PAUSE
+            set(ref(database, `${ruangAktif}/pertandingan/${gel}/timer_sync`), {
+                status: "pause", remaining: sisaDetik, ronde: rondeSaatIni, mode: modeKategoriAktif
+            });
+
             idPauseAktif++; waktuMulaiPause = Date.now(); let d = elDaftarPause;
             let ib = document.createElement('div'); ib.className = "pause-item active"; ib.id = `pause_${idPauseAktif}`; 
             ib.innerHTML = `<span>Jeda ke-${idPauseAktif}:</span> <span id="waktu_${idPauseAktif}" style="float:right;">00:00.00</span>`;
             d.appendChild(ib); d.parentElement.scrollTop = d.parentElement.scrollHeight;
 
-            // 🔥 TAHAP OPTIMASI (DOM CACHING): 
-            // Kita simpan elemen yang baru saja dibuat ke dalam variabel tEl SEBELUM setInterval dimulai!
             const tEl = document.getElementById(`waktu_${idPauseAktif}`);
-            
-            // Interval berjalan sangat cepat (10 milidetik = 100x sedetik)
             intervalPause = setInterval(() => { 
                 let dur = Date.now() - waktuMulaiPause; 
                 let m = Math.floor(dur/60000).toString().padStart(2,'0'); 
                 let s = Math.floor((dur%60000)/1000).toString().padStart(2,'0'); 
                 let ms = Math.floor((dur%1000)/10).toString().padStart(2,'0'); 
-                
-                // 🔥 SANGAT RINGAN: Browser tidak mencari elemen lagi, langsung tembak teks ke RAM!
                 if(tEl) tEl.innerText = `${m}:${s}.${ms}`; 
             }, 10); 
         }
 
-        window.selesaiSeniManual = function() {
+        window.selesaiJurusManual = function() {
             if (state !== "RONDE") { showCustomAlert("⚠️ Perhatian", "Timer harus berjalan terlebih dahulu!", "text-warning"); return; }
             clearInterval(intervalUtama); clearInterval(intervalPause); state = "SELESAI"; mainkanGong();
             setStatusTampilan("PERTANDINGAN SELESAI", "bg-danger"); setTemaTimer(false); 
             elBtnPlay.disabled = true; elBtnPause.disabled = true; 
-            elBtnSelesaiSeniManual.disabled = true;
+            elBtnSelesaiJurusManual.disabled = true;
             updateLayarDanFirebase(elLayarTimerLokal.innerText); 
             updateTombolHasil();
         }
@@ -1300,27 +1605,62 @@ if (!ruangAktif) {
         window.tampilkanModalReset = function() { if(!modalResetInst) modalResetInst = new bootstrap.Modal(elModalConfirmReset); modalResetInst.show(); }
 
         window.eksekusiReset = function() {
-            clearInterval(intervalUtama); clearInterval(intervalPause); state = "PERSIAPAN"; rondeSaatIni = 1; sisaDetik = 0; idPauseAktif = 0;
+            clearInterval(intervalUtama); clearInterval(intervalPause); state = "PERSIAPAN"; rondeSaatIni = 1; idPauseAktif = 0;
             setStatusTampilan("PERSIAPAN", "bg-secondary"); setTemaTimer(false); alasanMenangGlobal = ""; 
             let gel = elPilihGelanggang.value; let base = `${ruangAktif}/pertandingan/${gel}`;
             
-            let waktuReset = modeKategoriAktif === 'tanding' ? konversiDetikKeMenit(hitungTotalDetikTanding(elCfgWaktu.value)) : "00:00";
-            updateLayarDanFirebase(waktuReset);
+            // 🔥 KEMBALIKAN KE SETINGAN DURASI AWAL (Bukan 0) 🔥
+            if (durasiPertandingan === 0) durasiPertandingan = hitungTotalDetikTanding(elCfgWaktu.value);
+            sisaDetik = (modeKategoriAktif === 'tanding') ? durasiPertandingan : 0;
             
+            let waktuReset = konversiDetikKeMenit(sisaDetik); 
+            elLayarTimerLokal.innerText = waktuReset;
+            set(ref(database, `${ruangAktif}/pertandingan/${gel}/timer`), waktuReset);
+            
+            // Tembak sinkronisasi ke TV dan Juri agar kembali ke setingan (Misal 00:10 atau 02:00)
+            set(ref(database, `${base}/timer_sync`), {
+                status: "reset", remaining: sisaDetik, durasiAwal: durasiPertandingan, startTimestamp: 0, ronde: 1, mode: modeKategoriAktif
+            });
+            
+            // Bersihkan data skor
             set(ref(database, `${base}/biru`), { r1:0, r2:0, r3:0, r1_log:[], r2_log:[], r3_log:[] }); 
             set(ref(database, `${base}/merah`), { r1:0, r2:0, r3:0, r1_log:[], r2_log:[], r3_log:[] }); 
             set(ref(database, `${base}/pemenang_keputusan`), null); set(ref(database, `${base}/pemenang_mutlak`), null); set(ref(database, `${base}/alasan_menang`), null);
             set(ref(database, `${base}/logs`), null); set(ref(database, `${base}/sinyal_dewan`), null); set(ref(database, `${base}/verifikasi`), null); set(ref(database, `${base}/izin_play`), null);
             set(ref(database, `${base}/ronde_aktif`), 1);
-            set(ref(database, `${base}/seni`), { skor: { j1: 10, j2: 10, j3: 10, j4: 10, j5: 10, j6: 10 }, hukuman: 0, hasil_akhir: 0 });
+            set(ref(database, `${base}/Jurus`), { skor: { j1: 10, j2: 10, j3: 10, j4: 10, j5: 10, j6: 10 }, hukuman: 0, hasil_akhir: 0 });
             set(ref(database, `${base}/sinyal`), null); set(ref(database, `${base}/izin_simpan`), null);
             
             elBtnPlay.disabled = false; 
             elBtnPause.disabled = true; 
-            if(elBtnSelesaiSeniManual) elBtnSelesaiSeniManual.disabled = false;
+            if(elBtnSelesaiJurusManual) elBtnSelesaiJurusManual.disabled = false;
             elDaftarPause.innerHTML = ""; 
             updateTombolHasil();
         }
     </script>
+
+    <!-- 🌟 MODAL KONFIRMASI BYE / UNDUR DIRI 🌟 -->
+    <div class="modal fade" id="modalConfirmBye" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="background-color: #222; border: 1px solid #444; border-radius: 8px;">
+          <div class="modal-header border-bottom-0 pb-0">
+            <h5 class="modal-title text-warning fw-bold"><i class="bi bi-exclamation-triangle"></i> Konfirmasi Tindakan</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body text-center py-4">
+            <h4 class="text-light mb-3">Apakah Anda yakin?</h4>
+            <p class="text-secondary mb-0" style="font-size: 0.95rem;">
+              Partai ini akan diakhiri dan dicatat dengan status <br><strong class="text-danger">BYE / UNDUR DIRI</strong>.
+            </p>
+          </div>
+          <div class="modal-footer border-top-0 justify-content-center pt-0 pb-4">
+            <button type="button" class="btn btn-secondary px-4 fw-bold" data-bs-dismiss="modal">BATAL</button>
+            <button type="button" class="btn btn-danger px-4 fw-bold" id="btnKonfirmasiByeLanjut">YA, UNDUR DIRI</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
 </body>
 </html>
