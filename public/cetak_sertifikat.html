@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <title>Studio Cetak Sertifikat Pro</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --nama-size: 18px;       --nama-top: 325px;       --nama-left: -60px;
+      --kontingen-size: 18px;  --kontingen-top: 30px;   --kontingen-left: -60px;
+      --keterangan-size: 18px; --keterangan-top: 30px;  --keterangan-left: -60px;
+      --blangko-brightness: 100%;
+      --blangko-contrast: 100%;
+      --blangko-opacity: 70%;
+    }
+
+    /* 🔥 PAKSA 0 MARGIN AGAR TIDAK ADA BORDER PUTIH DARI PRINTER 🔥 */
+    @page { 
+      size: A4 landscape; 
+      margin: 0 !important; 
+    }
+
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      text-transform: uppercase;
+      display: flex;
+      flex-direction: row;
+      height: 100vh;
+      overflow: hidden;
+      background: #080808;
+      color: #fff;
+    }
+
+    /* SIDEBAR KIRI (DARK & GOLD) */
+    .sidebar-left {
+      width: 330px;
+      background: #121212;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid #2a2a2a;
+      z-index: 10;
+      box-shadow: 4px 0 20px rgba(0,0,0,0.8);
+    }
+
+    .table-container {
+      flex: 1;
+      overflow-y: auto;
+      background: #121212;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .table-container h3 {
+      text-align: center;
+      font-size: 12px;
+      background: linear-gradient(90deg, #2a2a2a 0%, #1a1a1a 100%);
+      color: #bf953f;
+      margin: 0;
+      padding: 10px;
+      position: sticky;
+      top: 0;
+      z-index: 3;
+      letter-spacing: 2px;
+      border-bottom: 1px solid #333;
+      font-weight: 900;
+    }
+
+    .filter-kategori {
+      padding: 8px;
+      background: #1a1a1a;
+      border-bottom: 1px solid #333;
+      position: sticky;
+      top: 37px;
+      z-index: 3;
+    }
+
+    .filter-kategori select {
+      width: 100%;
+      background-color: #050505;
+      border: 1px solid #444;
+      color: #fff;
+      padding: 6px;
+      font-size: 11px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      outline: none;
+      transition: 0.3s;
+    }
+
+    .filter-kategori select:focus {
+      border-color: #bf953f;
+      box-shadow: 0 0 8px rgba(191, 149, 63, 0.3);
+    }
+
+    table { width: 100%; border-collapse: collapse; font-size: 11px; }
+    th, td {
+      padding: 8px;
+      text-align: left;
+      border-bottom: 1px solid #222;
+      cursor: pointer;
+      color: #ccc;
+    }
+
+    th {
+      background: #151515;
+      position: sticky;
+      top: 80px;
+      font-size: 10px;
+      color: #bf953f;
+      z-index: 1;
+      border-bottom: 2px solid #333;
+      letter-spacing: 1px;
+    }
+
+    tr:hover { background: #1f1f1f; color: #fff; }
+
+    /* HIGHLIGHT DATA TERPILIH */
+    .row-active {
+      background: rgba(191, 149, 63, 0.15) !important;
+      color: #bf953f !important;
+      font-weight: bold;
+      border-left: 5px solid #bf953f;
+      border-bottom: 1px solid rgba(191, 149, 63, 0.3);
+    }
+
+    .row-active td { color: #bf953f !important; }
+
+    /* AREA TENGAH (STUDIO WORKSPACE) */
+    .main-area {
+      flex: 1;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      background: #0e0e0e;
+    }
+
+    .preview-wrapper {
+      transition: transform 0.2s ease;
+      transform-origin: center center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .kertas-preview {
+      position: relative;
+      width: 297mm;
+      height: 210mm;
+      background: white;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.9);
+      overflow: hidden;
+      border: none;
+    }
+
+    /* FILTER GAMBAR BLANGKO */
+    .bg-sertif {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      object-fit: cover;
+      filter: brightness(var(--blangko-brightness)) contrast(var(--blangko-contrast));
+      opacity: var(--blangko-opacity);
+    }
+
+    .print-text {
+      position: absolute;
+      width: 100%;
+      text-align: center;
+      font-weight: 700;
+      z-index: 2;
+      color: #000000;
+      font-family: 'Montserrat', 'Poppins', Arial, sans-serif;
+    }
+
+    /* Kordinat aman dengan margin-top seperti aslimu */
+    #txt-nama {
+      font-size: var(--nama-size);
+      margin-top: var(--nama-top);
+      transform: translateX(var(--nama-left));
+    }
+
+    #txt-kontingen {
+      font-size: var(--kontingen-size);
+      margin-top: var(--kontingen-top);
+      transform: translateX(var(--kontingen-left));
+    }
+
+    #txt-keterangan {
+      font-size: var(--keterangan-size);
+      margin-top: var(--keterangan-top);
+      transform: translateX(var(--keterangan-left));
+    }
+
+    /* SIDEBAR KANAN */
+    .sidebar-right {
+      width: 270px;
+      background: #121212;
+      display: flex;
+      flex-direction: column;
+      border-left: 1px solid #2a2a2a;
+      z-index: 10;
+      box-shadow: -4px 0 20px rgba(0,0,0,0.8);
+    }
+
+    .sidebar-header {
+      padding: 8px 10px;
+      background: #181818;
+      border-bottom: 1px solid #2a2a2a;
+      text-align: center;
+    }
+
+    .btn-emas {
+      background: linear-gradient(to right, #bf953f, #b38728);
+      color: #000;
+      font-weight: 900;
+      border: none;
+      letter-spacing: 1px;
+      transition: 0.2s;
+      border-radius: 6px;
+      width: 100%;
+      padding: 8px;
+      font-size: 12px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(191,149,63,0.3);
+      display: block;
+      box-sizing: border-box;
+    }
+
+    .btn-emas:hover {
+      background: linear-gradient(to right, #d4af37, #c5a017);
+      transform: translateY(-2px);
+    }
+
+    .settings-container {
+      flex: 1;
+      padding: 6px 10px;
+      overflow-y: auto;
+    }
+
+    .setting-group {
+      margin-bottom: 6px;
+      background: #1a1a1a;
+      padding: 6px 8px;
+      border-radius: 6px;
+      border: 1px solid #333;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    }
+
+    .setting-group h3 {
+      margin: 0 0 4px 0;
+      font-size: 10px;
+      color: #bf953f;
+      text-align: center;
+      border-bottom: 1px solid #2c2c2c;
+      padding-bottom: 3px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+
+    .input-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      font-weight: bold;
+      margin-bottom: 3px;
+      align-items: center;
+      color: #aaa;
+    }
+
+    .input-row input {
+      width: 45px;
+      background-color: #050505;
+      border: 1px solid #444;
+      color: #fff;
+      padding: 3px;
+      text-align: center;
+      border-radius: 4px;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+
+    .input-row input:focus {
+      outline: none;
+      border-color: #bf953f;
+      box-shadow: 0 0 5px rgba(191,149,63,0.3);
+    }
+
+    .form-check-input {
+      background-color: #050505;
+      border-color: #444;
+      cursor: pointer;
+    }
+
+    .form-check-input:checked {
+      background-color: #bf953f !important;
+      border-color: #bf953f !important;
+    }
+
+    .form-check-input:focus {
+      border-color: #bf953f !important;
+      box-shadow: 0 0 0 0.25rem rgba(191, 149, 63, 0.25) !important;
+    }
+
+    #loading {
+      position: fixed; top:0; left:0; width: 100%; height: 100%;
+      background: rgba(5,5,5,0.95); color: #bf953f;
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      font-size: 18px; z-index: 9999; font-weight: bold; letter-spacing: 2px;
+    }
+
+    /* ERROR BADGE ELEGAN */
+    .error-badge {
+      display: inline-block; padding: 15px 25px; border-radius: 8px;
+      background: rgba(220, 53, 69, 0.15); border: 1px solid #dc3545;
+      color: #ff6b81; font-weight: bold; text-align: center; font-size: 12px;
+    }
+
+    /* PROTEKSI CETAK MUTLAK */
+    @media print {
+      @page { margin: 0 !important; }
+      body { display: block; background: none; color: #000; margin: 0 !important; }
+      .sidebar-left, .sidebar-right { display: none !important; }
+      .main-area { display: block; overflow: visible; background: none; }
+      .preview-wrapper { transform: scale(1) !important; margin: 0 !important; padding: 0 !important; }
+      .kertas-preview {
+        box-shadow: none !important; border: none !important; outline: none !important;
+        width: 100vw !important; height: 100vh !important;
+        margin: 0 !important; padding: 0 !important;
+        page-break-after: auto; break-after: auto;
+      }
+      body.sembunyikan-blangko-print .bg-sertif { display: none !important; }
+      body:not(.sembunyikan-blangko-print) .bg-sertif { 
+        display: block !important; opacity: var(--blangko-opacity) !important; 
+        filter: brightness(var(--blangko-brightness)) contrast(var(--blangko-contrast)) !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="loading">
+    <div>⏳ MEMBANGUN KONEKSI DATABASE...</div>
+    <div style="font-size: 12px; margin-top: 10px; color: #666; font-weight: normal; letter-spacing: 1px;" id="loading-sub">Mohon tunggu sebentar</div>
+  </div>
+
+  <div class="sidebar-left no-print">
+    <div class="table-container">
+      <h3>📋 DAFTAR CETAK SERTIFIKAT</h3>
+      <div class="filter-kategori">
+        <select id="kategori-sheet">
+          <option value="Sertifikat Tanding Prestasi">🏆 TANDING PRESTASI</option>
+          <option value="Sertifikat Tanding Pemasalan">🏅 TANDING PEMASALAN</option>
+          <option value="Sertifikat Jurus">🎭 SENI / JURUS</option>
+        </select>
+      </div>
+      <table>
+        <thead><tr><th width="15%" style="text-align: center;">PARTAI</th><th width="35%">KELAS</th><th>NAMA PESERTA</th></tr></thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="main-area">
+    <div class="preview-wrapper" id="preview-wrapper">
+      <div class="kertas-preview">
+        <img src="./assets/blangko_sertifikat.png" class="bg-sertif" id="img-blangko" alt="Background Sertifikat">
+        <div id="txt-nama" class="print-text">-</div>
+        <div id="txt-kontingen" class="print-text">-</div>
+        <div id="txt-keterangan" class="print-text">-</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sidebar-right no-print">
+    <div class="sidebar-header">
+      <button class="btn-emas" onclick="window.print()">🖨️ CETAK SEKARANG</button>
+    </div>
+
+    <div class="settings-container">
+      
+      <!-- PENGATURAN BLANGKO -->
+      <div class="setting-group" style="background: #161616; border-color: #333;">
+        <label style="display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; font-size: 10px; font-weight: bold; color: #bbb; margin-bottom: 6px;">
+          <input type="checkbox" id="cb-blangko" checked class="form-check-input" style="width: 14px; height: 14px;">
+          Cetak Sekaligus Blangkonya
+        </label>
+        
+        <div style="border-top: 1px solid #2c2c2c; padding-top: 5px; margin-bottom: 4px; display: flex; align-items: center; justify-content: space-between;">
+          <label style="font-size: 10px; font-weight: bold; color: #bf953f; letter-spacing: 1px;">KECERAHAN:</label>
+          <div style="display: flex; align-items: center; gap: 5px;">
+            <input type="range" min="50" max="150" step="5" value="100" id="blangko-brightness" style="width: 75px; accent-color: #bf953f; cursor: pointer;">
+            <span id="val-brightness" style="font-size: 10px; font-weight: bold; color: #bf953f; width: 30px; text-align:right;">100%</span>
+          </div>
+        </div>
+
+        <div class="input-row" style="margin-bottom: 4px;">
+          <label style="font-size: 10px; font-weight: bold; color: #bf953f; letter-spacing: 1px;">OPASITAS:</label>
+          <div style="display: flex; align-items: center; gap: 5px;">
+            <input type="range" min="20" max="100" step="5" value="70" id="blangko-opacity" style="width: 75px; accent-color: #bf953f; cursor: pointer;">
+            <span id="val-opacity" style="font-size: 10px; font-weight: bold; color: #bf953f; width: 30px; text-align:right;">70%</span>
+          </div>
+        </div>
+
+        <div style="border-top: 1px solid #2c2c2c; padding-top: 5px; display: flex; align-items: center; justify-content: space-between;">
+          <label style="font-size: 10px; font-weight: bold; color: #bf953f; letter-spacing: 1px;">ZOOM:</label>
+          <div style="display: flex; align-items: center; gap: 5px;">
+            <input type="range" min="0.3" max="1.1" step="0.05" value="0.55" id="zoom-slider" style="width: 75px; accent-color: #bf953f; cursor: pointer;">
+            <span id="zoom-val" style="font-size: 10px; font-weight: bold; color: #bf953f; width: 30px; text-align:right;">55%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="setting-group">
+        <h3>⚙️ SETTING NAMA</h3>
+        <div class="input-row">Y (Atas) <input type="number" min="-500" max="1500" id="nama-top" data-key="nama-top"></div>
+        <div class="input-row">X (Kiri/Kanan) <input type="number" min="-500" max="1500" id="nama-left" data-key="nama-left"></div>
+        <div class="input-row">Ukuran Font <input type="number" min="8" max="120" id="nama-size" data-key="nama-size"></div>
+      </div>
+      <div class="setting-group">
+        <h3>⚙️ SETTING KONTINGEN</h3>
+        <div class="input-row">Y (Spasi) <input type="number" min="-500" max="1500" id="kontingen-top" data-key="kontingen-top"></div>
+        <div class="input-row">X (Kiri/Kanan) <input type="number" min="-500" max="1500" id="kontingen-left" data-key="kontingen-left"></div>
+        <div class="input-row">Ukuran Font <input type="number" min="8" max="120" id="kontingen-size" data-key="kontingen-size"></div>
+      </div>
+      <div class="setting-group">
+        <h3>⚙️ SETTING KETERANGAN</h3>
+        <div class="input-row">Y (Spasi) <input type="number" min="-500" max="1500" id="keterangan-top" data-key="keterangan-top"></div>
+        <div class="input-row">X (Kiri/Kanan) <input type="number" min="-500" max="1500" id="keterangan-left" data-key="keterangan-left"></div>
+        <div class="input-row">Ukuran Font <input type="number" min="8" max="120" id="keterangan-size" data-key="keterangan-size"></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
+    import { getDatabase, ref, onValue, get } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js";
+
+    // KUNCI KONTAK YANG KEMARIN KETINGGALAN! 🔥
+    const firebaseConfig = {
+      apiKey: "AIzaSyCNsOk8MsIhBoZ44Nd9WGGl6eBJOEKu3nI",
+      authDomain: "tesapksilat99.firebaseapp.com",
+      databaseURL: "https://tesapksilat99-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "tesapksilat99",
+      storageBucket: "tesapksilat99.firebasestorage.app",
+      messagingSenderId: "747533449255",
+      appId: "1:747533449255:web:358edf3c6032c22cdbb602"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+    window.globalSheetId = null;
+    const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxPahwtXYz_ITepb8D_3HLmZGQq978yLz-GXE5_0j12mOlGr1152wxd74xnHmWVOrHeHw/exec";
+
+    // ==========================================
+    // ARSITEKTUR ENTERPRISE (MODULAR)
+    // ==========================================
+
+    const Utils = {
+      debounce(func, wait) {
+        let timeout;
+        return function(...args) {
+          clearTimeout(timeout);
+          timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+      },
+      sanitizeFilename(name) {
+        return String(name).replace(/[\\/:*?"<>|]/g, '');
+      }
+    };
+
+    const StorageManager = {
+      APP_VERSION: "4.1",
+      defaults: {
+        'nama-size': 18, 'nama-top': 325, 'nama-left': -60,
+        'kontingen-size': 18, 'kontingen-top': 30, 'kontingen-left': -60,
+        'keterangan-size': 18, 'keterangan-top': 30, 'keterangan-left': -60,
+        'brightness': '100', 'opacity': '70', 'zoom': '0.55', 'blangko': 'true'
+      },
+      init() {
+        if (localStorage.getItem('cetak_app_version') !== this.APP_VERSION) {
+          Object.keys(localStorage).forEach(key => { if (key.startsWith('cetak_')) localStorage.removeItem(key); });
+          localStorage.setItem('cetak_app_version', this.APP_VERSION);
+        }
+      },
+      get(key, isNumber = false) {
+        let val = localStorage.getItem(`cetak_${key}`);
+        if (val === null) val = this.defaults[key];
+        return isNumber ? Number(val) : val;
+      },
+      set(key, value) { localStorage.setItem(`cetak_${key}`, value); }
+    };
+
+    const UIManager = {
+      els: {
+        loading: document.getElementById('loading'),
+        loadingSub: document.getElementById('loading-sub'),
+        kategoriSelect: document.getElementById('kategori-sheet'),
+        tbody: document.getElementById('table-body'),
+        txtNama: document.getElementById('txt-nama'),
+        txtKontingen: document.getElementById('txt-kontingen'),
+        txtKeterangan: document.getElementById('txt-keterangan'),
+        previewWrapper: document.getElementById('preview-wrapper')
+      },
+      init() {
+        ['nama-top', 'nama-left', 'nama-size', 'kontingen-top', 'kontingen-left', 'kontingen-size', 'keterangan-top', 'keterangan-left', 'keterangan-size'].forEach(key => {
+          let val = StorageManager.get(key, true);
+          document.documentElement.style.setProperty(`--${key}`, `${val}px`);
+          document.getElementById(key).value = val;
+        });
+
+        let bVal = StorageManager.get('brightness');
+        let oVal = StorageManager.get('opacity');
+        document.getElementById('blangko-brightness').value = bVal;
+        document.getElementById('val-brightness').innerText = `${bVal}%`;
+        document.getElementById('blangko-opacity').value = oVal;
+        document.getElementById('val-opacity').innerText = `${oVal}%`;
+        document.documentElement.style.setProperty('--blangko-brightness', `${bVal}%`);
+        document.documentElement.style.setProperty('--blangko-opacity', (oVal / 100));
+
+        let zoomVal = StorageManager.get('zoom');
+        document.getElementById('zoom-slider').value = zoomVal;
+        this.updateZoom(zoomVal);
+
+        let showBlangko = StorageManager.get('blangko') === 'true';
+        document.getElementById('cb-blangko').checked = showBlangko;
+        this.toggleBlangko(showBlangko);
+
+        this.bindEvents();
+      },
+      bindEvents() {
+        this.els.kategoriSelect.addEventListener('change', () => {
+          this.els.txtNama.innerText = "-"; this.els.txtKontingen.innerText = "-"; this.els.txtKeterangan.innerText = "MENARIK DATA...";
+          DataManager.activeRowId = 2;
+          DataManager.fetchData(true);
+          let url = new URL(window.location.href);
+          url.searchParams.set('sheet', this.els.kategoriSelect.value);
+          url.searchParams.set('row', 2);
+          window.history.pushState({}, '', url);
+        });
+
+        document.querySelectorAll('input[type="number"]').forEach(input => {
+          input.addEventListener('change', (e) => {
+            let key = e.target.getAttribute('data-key');
+            let val = Number(e.target.value);
+            val = key.includes('size') ? Math.min(Math.max(val, 8), 120) : Math.min(Math.max(val, -1000), 2000);
+            e.target.value = val;
+            document.documentElement.style.setProperty(`--${key}`, `${val}px`);
+            StorageManager.set(key, val);
+          });
+        });
+
+        document.getElementById('blangko-brightness').addEventListener('input', Utils.debounce((e) => {
+          let bVal = e.target.value;
+          document.getElementById('val-brightness').innerText = `${bVal}%`;
+          document.documentElement.style.setProperty('--blangko-brightness', `${bVal}%`);
+          StorageManager.set('brightness', bVal);
+        }, 20));
+
+        document.getElementById('blangko-opacity').addEventListener('input', Utils.debounce((e) => {
+          let oVal = e.target.value;
+          document.getElementById('val-opacity').innerText = `${oVal}%`;
+          document.documentElement.style.setProperty('--blangko-opacity', (oVal / 100));
+          StorageManager.set('opacity', oVal);
+        }, 20));
+
+        document.getElementById('zoom-slider').addEventListener('input', Utils.debounce((e) => {
+          this.updateZoom(e.target.value);
+        }, 20));
+
+        document.getElementById('cb-blangko').addEventListener('change', (e) => {
+          this.toggleBlangko(e.target.checked);
+        });
+      },
+      updateZoom(val) {
+        this.els.previewWrapper.style.transform = `scale(${val})`;
+        document.getElementById('zoom-val').innerText = Math.round(val * 100) + '%';
+        StorageManager.set('zoom', val);
+      },
+      toggleBlangko(show) {
+        if (show) document.body.classList.remove('sembunyikan-blangko-print');
+        else document.body.classList.add('sembunyikan-blangko-print');
+        StorageManager.set('blangko', show);
+      },
+      showLoading(isShow, message = "Memuat data...") {
+        this.els.loading.style.display = isShow ? 'flex' : 'none';
+        this.els.loadingSub.innerText = message;
+      },
+      renderTable(dataArray) {
+        this.els.tbody.innerHTML = '';
+        if (dataArray.length === 0) {
+          this.els.tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 35px 10px; color: #bf953f; font-weight: bold; font-size: 11px;">⚠️ BELUM ADA PESERTA YANG TANDING DI KATEGORI INI</td></tr>`;
+          return;
+        }
+
+        const fragment = document.createDocumentFragment();
+
+        dataArray.forEach(item => {
+          let tr = document.createElement('tr');
+          tr.id = `row-${item.rowAktif}`;
+          tr.onclick = () => UIManager.selectParticipant(item.rowAktif, true);
+          
+          if (Number(item.rowAktif) === Number(DataManager.activeRowId)) {
+            tr.classList.add('row-active');
+          }
+
+          tr.innerHTML = `
+            <td width="15%" style="text-align: center; font-size: 12px; font-weight: bold;">${item.partai || "-"}</td>
+            <td width="35%"><strong>${item.kelas || "-"}</strong></td>
+            <td>${item.nama || "-"}</td>
+          `;
+          fragment.appendChild(tr);
+        });
+
+        this.els.tbody.appendChild(fragment);
+      },
+      selectParticipant(rowId, isManualClick = false) {
+        DataManager.activeRowId = rowId;
+        document.querySelectorAll('#table-body tr').forEach(tr => tr.classList.remove('row-active'));
+        
+        let activeRow = document.getElementById(`row-${rowId}`);
+        if (activeRow) {
+          activeRow.classList.add('row-active');
+          if (isManualClick) activeRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // PERBAIKAN TYPO: Menghapus d.rowAktas
+        const data = DataManager.peserta.find(d => Number(d.rowAktif) === Number(rowId));
+        if (!data) return;
+
+        // 🔥 LOGIKA CERDAS: Jika peringkat "-", jadikan "PESERTA", jika ada angka jadikan "JUARA"
+        let teksPeringkat = (data.peringkat === "-") ? "PESERTA" : `JUARA ${data.peringkat}`;
+        
+        const ketLengkap = `${teksPeringkat} ${data.jenisLomba || ""} ${data.kelas || ""} ${data.gender || ""} ${data.tingkat || ""} ${data.statusLevel || ""}`;
+        
+        this.els.txtNama.innerText = data.nama || "-";
+        this.els.txtKontingen.innerText = data.kontingen || "-";
+        this.els.txtKeterangan.innerText = ketLengkap;
+
+        let url = new URL(window.location.href);
+        url.searchParams.set('row', rowId);
+        window.history.pushState({}, '', url);
+
+        let namaBersih = Utils.sanitizeFilename(data.nama || "PESERTA").replace(/ /g, "-");
+        document.title = `${data.partai || "0"}_${namaBersih}_${data.statusLevel || "SERTIFIKAT"}`;
+      },
+      showErrorHtml(title, message) {
+        this.els.tbody.innerHTML = `<tr><td colspan="3" class="error-badge"><br><span style="font-size: 14px;">❌ ${title}</span><br><br><span style="color:#aaa; font-weight:normal;">${message}</span><br><br></td></tr>`;
+        this.els.txtNama.innerText = "-"; this.els.txtKontingen.innerText = "-"; this.els.txtKeterangan.innerText = "GAGAL MENGAMBIL DATA";
+        document.title = "Sistem Error";
+      }
+    };
+
+    const DataManager = {
+      peserta: [],
+      activeRowId: 2,
+      isLoading: false,
+      fetchController: null,
+
+      async fetchData(showLoadingUI = false) {
+        if (this.isLoading) return; 
+        this.isLoading = true;
+        
+        const sheetName = UIManager.els.kategoriSelect.value;
+        if (showLoadingUI) UIManager.showLoading(true, "Menarik data dari Google Sheets...");
+
+        if (this.fetchController) this.fetchController.abort();
+        this.fetchController = new AbortController();
+
+        const targetAPI = `${APP_SCRIPT_URL}?sheetId=${window.globalSheetId}&sheet=${encodeURIComponent(sheetName)}&mode=json_all`;
+
+        try {
+          if (!navigator.onLine) throw new Error("OFFLINE"); 
+
+          const res = await fetch(targetAPI, { signal: this.fetchController.signal });
+          
+          if (!res.ok) {
+            if (res.status === 404) throw new Error("404");
+            if (res.status >= 500) throw new Error("500");
+            throw new Error(`HTTP ${res.status}`);
+          }
+
+          const data = await res.json();
+          if (!Array.isArray(data) || (data.length > 0 && (data[0].error || data[0].pesan))) throw new Error("JSON_ERROR");
+
+          let dataTerbaru = [];
+          
+          for (let i = 0; i < data.length; i++) {
+              let item = data[i];
+              let jenis = String(item.jenisLomba || "").toUpperCase();
+              let level = String(item.statusLevel || "").toUpperCase();
+              let isSesuai = false;
+
+              if (sheetName === "Sertifikat Jurus") {
+                  isSesuai = jenis.includes("JURUS") || jenis.includes("SENI") || jenis.includes("TGR") || level.includes("JURUS") || level.includes("SENI");
+              } else if (sheetName === "Sertifikat Tanding Prestasi") {
+                  isSesuai = (jenis.includes("TANDING") || jenis.includes("LAGA")) && (level.includes("PRESTASI") || (!level.includes("PEMASALAN") && !level.includes("PEMULA")));
+              } else if (sheetName === "Sertifikat Tanding Pemasalan") {
+                  isSesuai = (jenis.includes("TANDING") || jenis.includes("LAGA")) && level.includes("PEMASALAN");
+              }
+
+              if (isSesuai) {
+                  item.kelas = String(item.kelas || "").replace(/\sPUTRA/gi, '').replace(/\sPUTRI/gi, '');
+                  item.jenisLomba = String(item.jenisLomba || "").replace(/LAGA\s*\(TANDING\)/gi, 'TANDING');
+                  dataTerbaru.push(item);
+              }
+          }
+
+          this.peserta = dataTerbaru;
+          UIManager.renderTable(this.peserta);
+
+          if (this.peserta.length > 0) {
+            let targetAda = this.peserta.find(d => Number(d.rowAktif) === Number(this.activeRowId));
+            let pilihBaris = targetAda ? this.activeRowId : this.peserta[0].rowAktif;
+            UIManager.selectParticipant(pilihBaris, false); 
+          } else {
+            UIManager.els.txtNama.innerText = "-"; UIManager.els.txtKontingen.innerText = "-"; UIManager.els.txtKeterangan.innerText = "BELUM ADA PESERTA YANG TANDING";
+            document.title = "Sertifikat Kosong";
+          }
+
+        } catch (err) {
+          if (err.name === 'AbortError') return; 
+          
+          this.peserta = [];
+          
+          if (err.message === "OFFLINE") UIManager.showErrorHtml("INTERNET TERPUTUS", "Periksa koneksi Wi-Fi atau LAN komputer Anda.");
+          else if (err.message === "404") UIManager.showErrorHtml("DATA TIDAK DITEMUKAN", "Link Spreadsheet mungkin salah atau tab telah dihapus.");
+          else if (err.message === "500") UIManager.showErrorHtml("SERVER SIBUK", "Google Apps Script sedang kelebihan beban. Tunggu sesaat.");
+          else if (err.message === "JSON_ERROR") UIManager.showErrorHtml("FORMAT DATA RUSAK", "Kolom di dalam Excel tidak sesuai format standar sistem.");
+          else UIManager.showErrorHtml("GAGAL MENGAMBIL DATA", "Terjadi kesalahan sistem: " + err.message);
+
+        } finally {
+          this.isLoading = false;
+          if (showLoadingUI) UIManager.showLoading(false);
+        }
+      }
+    };
+
+    const FirebaseManager = {
+      ruangAktif: localStorage.getItem('kode_voucer_aktif'),
+      init() {
+        const urlParams = new URLSearchParams(window.location.search);
+        let sheetIdDariURL = urlParams.get('sheetId');
+        let paramSheet = urlParams.get('sheet') || "Sertifikat Tanding Prestasi";
+        DataManager.activeRowId = parseInt(urlParams.get('row')) || 2;
+
+        let adaOpsi = Array.from(UIManager.els.kategoriSelect.options).some(opt => opt.value === paramSheet);
+        if (!adaOpsi) UIManager.els.kategoriSelect.add(new Option(paramSheet, paramSheet));
+        UIManager.els.kategoriSelect.value = paramSheet;
+
+        if (sheetIdDariURL) {
+          window.globalSheetId = sheetIdDariURL;
+          this.startSystem();
+        } else {
+          if (!this.ruangAktif) {
+            UIManager.els.txtKeterangan.innerText = "AKSES DITOLAK: VOUCER TIDAK DITEMUKAN";
+            UIManager.showLoading(false); return;
+          }
+
+          get(ref(database, `${this.ruangAktif}/pengaturan/silat_sheet_url`)).then((snap) => {
+            let urlSpreadsheet = snap.val();
+            if (urlSpreadsheet) {
+              let match = urlSpreadsheet.match(/\/d\/([a-zA-Z0-9-_]+)/);
+              if (match && match[1]) {
+                window.globalSheetId = match[1];
+                this.startSystem();
+              } else {
+                UIManager.els.txtKeterangan.innerText = "LINK SPREADSHEET DI FIREBASE TIDAK VALID";
+                UIManager.showLoading(false);
+              }
+            } else {
+              UIManager.els.txtKeterangan.innerText = "SILAKAN ISI LINK SPREADSHEET DI PENGATURAN";
+              UIManager.showLoading(false);
+            }
+          }).catch(err => {
+            UIManager.els.txtKeterangan.innerText = "GAGAL TERHUBUNG KE FIREBASE";
+            UIManager.showLoading(false);
+          });
+        }
+      },
+
+      startSystem() {
+        DataManager.fetchData(true);
+
+        const pertandinganRef = ref(database, `${this.ruangAktif}/pertandingan`);
+        const onFirebaseDataChanged = Utils.debounce(() => {
+            DataManager.fetchData(false); 
+        }, 4000);
+
+        onValue(pertandinganRef, () => {
+            onFirebaseDataChanged();
+        });
+      }
+    };
+
+    window.addEventListener('load', () => {
+      StorageManager.init();
+      UIManager.init();
+      FirebaseManager.init();
+    });
+
+  </script>
+</body>
+</html>

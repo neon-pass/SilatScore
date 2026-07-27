@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Excel Admin & Explorer</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; padding: 20px; margin: 0; color: #333; }
+        .container { max-width: 98%; margin: auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        
+        /* Header & Input */
+        h2 { color: #107c41; margin-top: 0; display: flex; align-items: center; gap: 10px; }
+        .request-panel { display: flex; gap: 10px; margin-bottom: 20px; }
+        input[type="text"] { flex: 1; padding: 12px; border: 2px solid #e1dfdd; border-radius: 6px; font-size: 14px; outline: none; transition: 0.2s; }
+        input[type="text"]:focus { border-color: #107c41; }
+        button.send-btn { padding: 12px 25px; background-color: #107c41; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        button.send-btn:hover { background-color: #0c5e31; }
+
+        /* Tombol Tambah Data */
+        .action-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        button.add-btn { padding: 8px 16px; background-color: #0078d4; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; display: none; }
+        button.add-btn:hover { background-color: #106ebe; }
+
+        /* Breadcrumb (Jejak Explorer) */
+        .breadcrumb { background-color: #e8f4f8; padding: 12px 15px; border-radius: 6px; margin-bottom: 20px; font-size: 14px; font-weight: bold; color: #0078d4; display: flex; flex-wrap: wrap; gap: 5px; align-items: center;}
+        .breadcrumb span { cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: 0.2s; }
+        .breadcrumb span:hover { background-color: #c7e0f4; text-decoration: underline; }
+        .breadcrumb .separator { color: #888; cursor: default; }
+        .breadcrumb .separator:hover { background-color: transparent; text-decoration: none; }
+
+        /* Grid Folder */
+        .folder-container { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+        .folder-btn { background-color: #f3f2f1; border: 1px solid #d2d0ce; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; color: #333; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
+        .folder-btn:hover { background-color: #e1dfdd; border-color: #c8c6c4; transform: translateY(-1px); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+
+        /* Area Tabel Excel */
+        .table-container { overflow-x: auto; overflow-y: auto; max-height: 55vh; border: 1px solid #e1dfdd; border-radius: 6px; background: white; }
+        table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+        th, td { border: 1px solid #e1dfdd; padding: 10px 15px; text-align: left; font-size: 13px; }
+        th { background-color: #f3f2f1; color: #333; position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 2px -1px rgba(0,0,0,0.1); }
+        tr:nth-child(even) { background-color: #faf9f8; }
+        tr:hover { background-color: #e5f3ff; }
+
+        /* Tombol Aksi di Tabel */
+        .btn-aksi { padding: 4px 8px; font-size: 12px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; margin-right: 4px; }
+        .btn-edit { background-color: #ffaa44; color: white; }
+        .btn-edit:hover { background-color: #e09230; }
+        .btn-del { background-color: #d13438; color: white; }
+        .btn-del:hover { background-color: #a4262c; }
+
+        .status-text { margin-bottom: 15px; font-weight: bold; font-size: 14px; }
+        .empty-state { padding: 30px; text-align: center; color: #888; font-style: italic; }
+
+        /* Modal Sederhana untuk Input/Edit */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 100; justify-content: center; align-items: center; }
+        .modal-content { background: white; padding: 25px; border-radius: 8px; width: 400px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .modal-content h3 { margin-top: 0; color: #107c41; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #555; }
+        .form-group input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .modal-buttons { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>📊 Firebase Excel Admin & Explorer</h2>
+        
+        <!-- Input URL Murni dari Pengguna -->
+        <div class="request-panel">
+            <input type="text" id="baseUrl" placeholder="Tempel URL Firebase di sini (contoh: https://namadb-default-rtdb.firebaseio.com/)">
+            <button class="send-btn" onclick="mulaiEksplorasi()">Buka Database</button>
+        </div>
+        
+        <div id="statusTeks" class="status-text"></div>
+
+        <!-- Jejak Navigasi (Breadcrumbs) -->
+        <div class="breadcrumb" id="breadcrumbArea">
+            <span>Silakan masukkan URL database di atas...</span>
+        </div>
+
+        <div class="action-bar">
+            <!-- Area Tombol Folder -->
+            <div class="folder-container" id="folderArea" style="margin-bottom: 0;"></div>
+            <!-- Tombol Tambah Data di Tabel Aktif -->
+            <button class="add-btn" id="tambahDataBtn" onclick="bukaModalTambah()">+ Tambah Baris Data</button>
+        </div>
+
+        <!-- Area Tabel Excel -->
+        <div class="table-container" id="tabelArea">
+            <div class="empty-state">Tabel data akan muncul di sini setelah terhubung...</div>
+        </div>
+    </div>
+
+    <!-- Modal Form Tambah/Edit Data -->
+    <div class="modal" id="formModal">
+        <div class="modal-content">
+            <h3 id="modalTitle">Tambah Data Baru</h3>
+            <div id="modalInputs"></div>
+            <div class="modal-buttons">
+                <button onclick="tutupModal()" style="padding: 8px 15px; background: #ccc; border: none; border-radius: 4px; cursor: pointer;">Batal</button>
+                <button onclick="simpanDataFirebase()" style="padding: 8px 15px; background: #107c41; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let baseFirebaseUrl = "";
+        let pathSaatIni = []; 
+        let cacheDataAktif = null; // Menyimpan data baris tabel yang sedang dibuka untuk keperluan edit
+
+        function mulaiEksplorasi() {
+            let inputUrl = document.getElementById('baseUrl').value.trim();
+            inputUrl = inputUrl.replace(/\/$/, ""); 
+            inputUrl = inputUrl.replace(/\.json$/, "");
+            
+            if(!inputUrl) {
+                alert("Kotak URL tidak boleh kosong, kawan!");
+                return;
+            }
+
+            baseFirebaseUrl = inputUrl;
+            pathSaatIni = []; 
+            bukaFolderSekarang();
+        }
+
+        async function bukaFolderSekarang() {
+            const statusTeks = document.getElementById('statusTeks');
+            const folderArea = document.getElementById('folderArea');
+            const tabelArea = document.getElementById('tabelArea');
+            const tambahBtn = document.getElementById('tambahDataBtn');
+            
+            statusTeks.innerHTML = "⏳ Memuat data dari server...";
+            folderArea.innerHTML = "";
+            tabelArea.innerHTML = "";
+            tambahBtn.style.display = "none";
+            renderBreadcrumb();
+
+            let pathString = pathSaatIni.length > 0 ? "/" + pathSaatIni.join("/") : "/";
+            let fetchUrl = `${baseFirebaseUrl}${pathString}.json`;
+
+            try {
+                const respon = await fetch(fetchUrl);
+                if (!respon.ok) throw new Error(`Error ${respon.status}: ${respon.statusText}`);
+
+                const data = await respon.json();
+
+                if (data === null) {
+                    statusTeks.innerHTML = "<span style='color: #d13438;'>📁 Folder ini kosong (Null).</span>";
+                    return;
+                }
+
+                statusTeks.innerHTML = `<span style="color: #107c41;">✅ Terhubung dengan sukses!</span>`;
+                renderTampilan(data);
+
+            } catch (error) {
+                statusTeks.innerHTML = `<span style="color: #d13438;">❌ Gagal terhubung: ${error.message}. Pastikan URL benar atau cek Aturan (Rules) Firebase.</span>`;
+            }
+        }
+
+        function renderBreadcrumb() {
+            const area = document.getElementById('breadcrumbArea');
+            area.innerHTML = "";
+
+            let homeSpan = document.createElement('span');
+            homeSpan.textContent = "🏠 Root Database";
+            homeSpan.onclick = () => pindahKePath(-1);
+            area.appendChild(homeSpan);
+
+            pathSaatIni.forEach((folder, index) => {
+                let separator = document.createElement('span');
+                separator.className = 'separator';
+                separator.textContent = "/";
+                area.appendChild(separator);
+
+                let folderSpan = document.createElement('span');
+                folderSpan.textContent = folder;
+                folderSpan.onclick = () => pindahKePath(index);
+                area.appendChild(folderSpan);
+            });
+        }
+
+        function pindahKePath(index) {
+            if (index === -1) {
+                pathSaatIni = []; 
+            } else {
+                pathSaatIni = pathSaatIni.slice(0, index + 1); 
+            }
+            bukaFolderSekarang();
+        }
+
+        function masukKeSubFolder(namaFolder) {
+            pathSaatIni.push(namaFolder);
+            bukaFolderSekarang();
+        }
+
+        function renderTampilan(data) {
+            const folderArea = document.getElementById('folderArea');
+            const tabelArea = document.getElementById('tabelArea');
+            const tambahBtn = document.getElementById('tambahDataBtn');
+            
+            let apakahIniList = Array.isArray(data) || (typeof data === 'object' && data !== null && Object.keys(data).every(k => !isNaN(k)));
+
+            if (apakahIniList || (typeof data === 'object' && data !== null && Object.values(data).some(v => typeof v === 'object' && v !== null))) {
+                // Cek apakah level ini layak dibuatkan tabel
+                cacheDataAktif = data;
+                buatTabel(data, tabelArea);
+                
+                // Jika berada di dalam folder data, nyalakan tombol tambah data
+                if(pathSaatIni.length > 0) {
+                    tambahBtn.style.display = "block";
+                }
+            }
+
+            if (typeof data === 'object' && data !== null) {
+                let keys = Object.keys(data);
+                // Filter keys yang berupa objek/folder
+                keys.forEach(key => {
+                    if(typeof data[key] === 'object' && data[key] !== null) {
+                        let btn = document.createElement('button');
+                        btn.className = 'folder-btn';
+                        btn.innerHTML = `📁 ${key}`;
+                        btn.onclick = () => masukKeSubFolder(key);
+                        folderArea.appendChild(btn);
+                    }
+                });
+            }
+        }
+
+        function buatTabel(dataRaw, container) {
+            let entries = [];
+            if (Array.isArray(dataRaw)) {
+                dataRaw.forEach((item, idx) => {
+                    if(item !== null) entries.push({ _firebaseKey: idx, ...item });
+                });
+            } else if (typeof dataRaw === 'object' && dataRaw !== null) {
+                Object.keys(dataRaw).forEach(k => {
+                    let val = dataRaw[k];
+                    if (typeof val === 'object' && val !== null) {
+                        entries.push({ _firebaseKey: k, ...val });
+                    }
+                });
+            }
+
+            if (entries.length === 0) {
+                container.innerHTML = "<div class='empty-state'>Tidak ada baris data berbentuk objek di level ini.</div>";
+                return;
+            }
+
+            let allKeys = new Set();
+            entries.forEach(row => {
+                Object.keys(row).forEach(k => {
+                    if (k !== '_firebaseKey') allKeys.add(k);
+                });
+            });
+            const headers = Array.from(allKeys);
+            
+            let html = "<table><thead><tr>";
+            html += "<th>AKSI</th>";
+            headers.forEach(head => { html += `<th>${head.toUpperCase()}</th>`; });
+            html += "</tr></thead><tbody>";
+
+            entries.forEach(row => {
+                let rowKey = row._firebaseKey;
+                html += "<tr>";
+                // Kolom Tombol Aksi (Edit & Hapus)
+                html += `<td>
+                            <button class="btn-aksi btn-edit" onclick="bukaModalEdit('${rowKey}')">Edit</button>
+                            <button class="btn-aksi btn-del" onclick="hapusBaris('${rowKey}')">Hapus</button>
+                         </td>`;
+
+                headers.forEach(key => {
+                    let isiCell = row[key];
+                    if (isiCell === undefined || isiCell === null) {
+                        isiCell = '-';
+                    } else if (typeof isiCell === 'object') {
+                        isiCell = `<span style="color:#888; font-style:italic;">[Objek]</span>`;
+                    }
+                    html += `<td>${isiCell}</td>`;
+                });
+                html += "</tr>";
+            });
+            html += "</tbody></table>";
+
+            container.innerHTML = html;
+        }
+
+        // --- FITUR CRUD (TAMBAH, EDIT, HAPUS) ---
+        let modeForm = 'tambah';
+        let targetKeyEdit = '';
+
+        function bukaModalTambah() {
+            modeForm = 'tambah';
+            document.getElementById('modalTitle').textContent = "Tambah Baris Data Baru";
+            
+            // Ambil kolom dari baris pertama yang sudah ada sebagai templat input
+            let sampleObj = Array.isArray(cacheDataAktif) ? cacheDataAktif.find(x=>x!==null) : Object.values(cacheDataAktif).find(x=>typeof x==='object');
+            if(!sampleObj) {
+                alert("Buat minimal satu data di Firebase Console terlebih dahulu agar sistem tahu kolom apa yang harus diisi.");
+                return;
+            }
+
+            let htmlInputs = "";
+            Object.keys(sampleObj).forEach(k => {
+                htmlInputs += `<div class="form-group">
+                                <label>${k.toUpperCase()}</label>
+                                <input type="text" id="input_${k}" placeholder="Masukkan ${k}">
+                               </div>`;
+            });
+            document.getElementById('modalInputs').innerHTML = htmlInputs;
+            document.getElementById('formModal').style.display = "flex";
+        }
+
+        function bukaModalEdit(rowKey) {
+            modeForm = 'edit';
+            targetKeyEdit = rowKey;
+            document.getElementById('modalTitle').textContent = "Edit Data (Key: " + rowKey + ")";
+
+            let targetData = Array.isArray(cacheDataAktif) ? cacheDataAktif[rowKey] : cacheDataAktif[rowKey];
+
+            let htmlInputs = "";
+            Object.keys(targetData).forEach(k => {
+                let val = targetData[k] !== null ? targetData[k] : "";
+                htmlInputs += `<div class="form-group">
+                                <label>${k.toUpperCase()}</label>
+                                <input type="text" id="input_${k}" value="${val}">
+                               </div>`;
+            });
+            document.getElementById('modalInputs').innerHTML = htmlInputs;
+            document.getElementById('formModal').style.display = "flex";
+        }
+
+        function tutupModal() {
+            document.getElementById('formModal').style.display = "none";
+        }
+
+        async function simpanDataFirebase() {
+            let pathString = "/" + pathSaatIni.join("/");
+            let targetUrl = `${baseFirebaseUrl}${pathString}`;
+            
+            let sampleObj = Array.isArray(cacheDataAktif) ? cacheDataAktif.find(x=>x!==null) : Object.values(cacheDataAktif).find(x=>typeof x==='object');
+            let payload = {};
+            
+            Object.keys(sampleObj).forEach(k => {
+                let val = document.getElementById(`input_${k}`).value;
+                // Coba konversi angka jika isinya angka asli
+                payload[k] = !isNaN(val) && val.trim() !== "" ? Number(val) : val;
+            });
+
+            let method = "POST";
+            let finalUrl = targetUrl + ".json";
+
+            if (modeForm === 'edit') {
+                method = "PATCH"; // Mengubah sebagian data pada key spesifik
+                finalUrl = `${targetUrl}/${targetKeyEdit}.json`;
+            }
+
+            try {
+                let respon = await fetch(finalUrl, {
+                    method: method,
+                    body: JSON.stringify(payload)
+                });
+
+                if(!respon.ok) throw new Error("Gagal menyimpan ke server");
+
+                tutupModal();
+                bukaFolderSekarang(); // Segarkan tabel secara otomatis
+            } catch (err) {
+                alert("Terjadi kesalahan: " + err.message);
+            }
+        }
+
+        async function hapusBaris(rowKey) {
+            if(!confirm("Apakah kamu yakin ingin menghapus baris data ini, kawan?")) return;
+
+            let pathString = "/" + pathSaatIni.join("/");
+            let deleteUrl = `${baseFirebaseUrl}${pathString}/${rowKey}.json`;
+
+            try {
+                let respon = await fetch(deleteUrl, { method: "DELETE" });
+                if(!respon.ok) throw new Error("Gagal menghapus data");
+
+                bukaFolderSekarang(); // Segarkan tabel
+            } catch (err) {
+                alert("Terjadi kesalahan: " + err.message);
+            }
+        }
+    </script>
+</body>
+</html>

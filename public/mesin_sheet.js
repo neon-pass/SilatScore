@@ -1,6 +1,5 @@
 // ============================================================================
-// 🔥 MESIN PENGIRIMAN DATA (SHEET BUILDER) - DIGITAL PENCAK SILAT 🔥
-// Tugas: Merakit Payload lengkap (Termasuk data Sertifikat) & Mengirim ke Sheet
+// MESIN PENGIRIMAN DATA (SHEET BUILDER)
 // ============================================================================
 
 window.kirimKeSheetPanitia = function(dataPayload) {
@@ -21,41 +20,32 @@ window.kirimKeSheetPanitia = function(dataPayload) {
         let wkt = new Date().toLocaleString("id-ID"); 
         
         // ---------------------------------------------------------
-        // 🏗️ STRUKTUR LOGIKA BAGAN (SEKRETARIS CERDAS)
+        // STRUKTUR LOGIKA BAGAN
         // ---------------------------------------------------------
         let mPenyisihan = "-"; let mSemi = "-"; let mFinal = "-";
-        let jTiga2 = "-"; let jTiga1 = "-"; let jDua = "-"; let jSatu = "-";
+        let jTiga = "-"; let jDua = "-"; let jSatu = "-";
 
         if (dataPayload.kategoriAktif === 'tanding' && dataPayload.pemenangArah !== 'seri') {
             let babakStr = String(dataPayload.babak).toUpperCase();
             
             if (babakStr.includes("SEMI")) {
-                mSemi = `${dataPayload.namaPemenang} (${dataPayload.kontPemenang})`;
-                
-                if (!window.penghitungSemiFinalLokal) window.penghitungSemiFinalLokal = {};
-                if (!window.penghitungSemiFinalLokal[dataPayload.kelasLengkap]) window.penghitungSemiFinalLokal[dataPayload.kelasLengkap] = 0;
-                window.penghitungSemiFinalLokal[dataPayload.kelasLengkap]++; 
-                
-                let kalahFull = `${dataPayload.namaKalah} (${dataPayload.kontKalah})`;
-                
-                if (window.penghitungSemiFinalLokal[dataPayload.kelasLengkap] % 2 !== 0) {
-                    jTiga2 = kalahFull;
-                } else {
-                    jTiga1 = kalahFull;
-                }
+                mSemi = dataPayload.namaPemenang || "-"; 
+                jTiga = dataPayload.namaKalah || "-";    
             } 
-            else if (babakStr.includes("FINAL")) {
-                mFinal = `${dataPayload.namaPemenang} (${dataPayload.kontPemenang})`;
-                jSatu = `${dataPayload.namaPemenang} (${dataPayload.kontPemenang})`;
-                jDua = `${dataPayload.namaKalah} (${dataPayload.kontKalah})`;
+            // Anti-Jebakan: Pastikan ini murni FINAL, bukan PEREMPAT FINAL atau 1/4 FINAL
+            else if (babakStr.includes("FINAL") && !babakStr.includes("PEREMPAT") && !babakStr.includes("DELAPAN") && !babakStr.includes("1/")) {
+                mFinal = dataPayload.namaPemenang || "-";
+                jSatu = dataPayload.namaPemenang || "-"; 
+                jDua = dataPayload.namaKalah || "-";     
             } 
             else {
-                mPenyisihan = `${dataPayload.namaPemenang} (${dataPayload.kontPemenang})`;
+                // Semua babak sebelum semi (Penyisihan, Perempat Final, Perdelapan Final) masuk sini
+                mPenyisihan = dataPayload.namaPemenang || "-"; 
             }
         }
 
         // ---------------------------------------------------------
-        //  PAYLOAD KOLOM EXCEL (Diperbarui dengan Data Sertifikat Lengkap)
+        // PAYLOAD TAB UTAMA
         // ---------------------------------------------------------
         let dataSheet = (dataPayload.kategoriAktif === 'tanding') 
             ? [
@@ -64,48 +54,35 @@ window.kirimKeSheetPanitia = function(dataPayload) {
                 dataPayload.nM, dataPayload.kM, dataPayload.skorMerahTotal, 
                 dataPayload.alasan, 
                 mPenyisihan, mSemi, mFinal, 
-                jTiga2, jTiga1, jDua, jSatu, 
-                dataPayload.wasit, dataPayload.j1, dataPayload.j2, dataPayload.j3,
-                
-                // 🔥 EKSTRA DATA UNTUK SERTIFIKAT (Kolom Baru di Kanan)
-                dataPayload.namaPemenang, 
-                dataPayload.kontPemenang, 
-                dataPayload.kategoriJuara,   // 1, 2, atau 3
-                "Pertandingan (Tanding)",            // Jenis Lomba
-                dataPayload.kelasSertifikat, // Misal: "Kelas A"
-                dataPayload.gender,          // Putra/Putri
-                dataPayload.tingkatSertifikat// Misal: "[Pra Remaja]"
+                jTiga, jDua, jSatu, 
+                dataPayload.wasit, dataPayload.j1, dataPayload.j2, dataPayload.j3
               ]
             : [
                 wkt, dataPayload.gelText, dataPayload.partai, dataPayload.babak, dataPayload.kelasLengkap, 
                 dataPayload.nB, dataPayload.kB, dataPayload.skorBiruTotal, 
                 dataPayload.nM, dataPayload.kM, dataPayload.skorMerahTotal, 
                 dataPayload.alasan, 
-                "-", "-", "-", "-", "-", "-", "-", 
-                dataPayload.wasit, dataPayload.dewan, dataPayload.j1, dataPayload.j2,
-                
-                // 🔥 EKSTRA DATA UNTUK SERTIFIKAT (Jurus)
-                dataPayload.namaPemenang, 
-                dataPayload.kontPemenang, 
-                "1",                         // Asumsi Juara 1 untuk Jurus
-                "Jurus / TGR",                // Jenis Lomba
-                dataPayload.kelasSertifikat, // Misal: "Tunggal"
-                dataPayload.gender,          // Putra/Putri
-                dataPayload.tingkatSertifikat// Misal: "[Remaja]"
+                "-", "-", "-", "-", "-", "-", 
+                dataPayload.wasit, dataPayload.dewan, dataPayload.j1, dataPayload.j2
               ];
-              
 
-        // MENGIRIM PAYLOAD KE GOOGLE APPS SCRIPT
         fetch("https://script.google.com/macros/s/AKfycbxPahwtXYz_ITepb8D_3HLmZGQq978yLz-GXE5_0j12mOlGr1152wxd74xnHmWVOrHeHw/exec", { 
             method: 'POST', 
             body: JSON.stringify({ 
                 sheetId: sheetId, 
                 tabId: tabId, 
                 kategori: dataPayload.kategoriAktif, 
-                // 🔥 Ubah tulisan REKAP_TANDING menjadi nama tab asli Anda di sini 🔥
-                sheetTab: (dataPayload.kategoriAktif === 'tanding' ? 'Data Pertandingan' : 'Data Jurus'), 
+                sheetTab: dataPayload.sheetTab, 
                 data: dataSheet, 
-                pemenang: dataPayload.pemenangArah 
+                pemenang: dataPayload.pemenangArah,
+                namaPemenang: dataPayload.namaPemenang,
+                kontPemenang: dataPayload.kontPemenang,
+                namaKalah: dataPayload.namaKalah,
+                kontKalah: dataPayload.kontKalah,
+                babak: dataPayload.babak,
+                kelasSertifikat: dataPayload.kelasSertifikat,
+                gender: dataPayload.gender,
+                tingkatSertifikat: dataPayload.tingkatSertifikat
             }), 
             headers: { 'Content-Type': 'text/plain;charset=utf-8' } 
         })
