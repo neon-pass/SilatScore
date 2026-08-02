@@ -1,27 +1,34 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
   <meta charset="utf-8">
   <title>Studio Cetak Sertifikat Pro</title>
-  
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
-  
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Poppins:wght@600;700&display=swap"
+    rel="stylesheet">
+
   <style>
     :root {
-      --nama-size: 18px;       --nama-top: 325px;       --nama-left: -60px;
-      --kontingen-size: 18px;  --kontingen-top: 30px;   --kontingen-left: -60px;
-      --keterangan-size: 18px; --keterangan-top: 30px;  --keterangan-left: -60px;
+      --nama-size: 18px;
+      --nama-top: 325px;
+      --nama-left: -60px;
+      --kontingen-size: 18px;
+      --kontingen-top: 30px;
+      --kontingen-left: -60px;
+      --keterangan-size: 18px;
+      --keterangan-top: 30px;
+      --keterangan-left: -60px;
       --blangko-brightness: 100%;
       --blangko-contrast: 100%;
       --blangko-opacity: 70%;
     }
 
-    /* 🔥 PAKSA 0 MARGIN AGAR TIDAK ADA BORDER PUTIH DARI PRINTER 🔥 */
-    @page { 
-      size: A4 landscape; 
-      margin: 0 !important; 
+    @page {
+      size: A4 landscape;
+      margin: 0 !important;
     }
 
     body {
@@ -37,7 +44,6 @@
       color: #fff;
     }
 
-    /* SIDEBAR KIRI (DARK & GOLD) */
     .sidebar-left {
       width: 330px;
       background: #121212;
@@ -45,7 +51,7 @@
       flex-direction: column;
       border-right: 1px solid #2a2a2a;
       z-index: 10;
-      box-shadow: 4px 0 20px rgba(0,0,0,0.8);
+      box-shadow: 4px 0 20px rgba(0, 0, 0, 0.8);
     }
 
     .table-container {
@@ -99,8 +105,14 @@
       box-shadow: 0 0 8px rgba(191, 149, 63, 0.3);
     }
 
-    table { width: 100%; border-collapse: collapse; font-size: 11px; }
-    th, td {
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+    }
+
+    th,
+    td {
       padding: 8px;
       text-align: left;
       border-bottom: 1px solid #222;
@@ -119,9 +131,11 @@
       letter-spacing: 1px;
     }
 
-    tr:hover { background: #1f1f1f; color: #fff; }
+    tr:hover {
+      background: #1f1f1f;
+      color: #fff;
+    }
 
-    /* HIGHLIGHT DATA TERPILIH */
     .row-active {
       background: rgba(191, 149, 63, 0.15) !important;
       color: #bf953f !important;
@@ -130,9 +144,10 @@
       border-bottom: 1px solid rgba(191, 149, 63, 0.3);
     }
 
-    .row-active td { color: #bf953f !important; }
+    .row-active td {
+      color: #bf953f !important;
+    }
 
-    /* AREA TENGAH (STUDIO WORKSPACE) */
     .main-area {
       flex: 1;
       position: relative;
@@ -156,12 +171,11 @@
       width: 297mm;
       height: 210mm;
       background: white;
-      box-shadow: 0 15px 40px rgba(0,0,0,0.9);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.9);
       overflow: hidden;
       border: none;
     }
 
-    /* FILTER GAMBAR BLANGKO */
     .bg-sertif {
       position: absolute;
       top: 0;
@@ -184,7 +198,6 @@
       font-family: 'Montserrat', 'Poppins', Arial, sans-serif;
     }
 
-    /* Kordinat aman dengan margin-top seperti aslimu */
     #txt-nama {
       font-size: var(--nama-size);
       margin-top: var(--nama-top);
@@ -203,7 +216,6 @@
       transform: translateX(var(--keterangan-left));
     }
 
-    /* SIDEBAR KANAN */
     .sidebar-right {
       width: 270px;
       background: #121212;
@@ -211,7 +223,7 @@
       flex-direction: column;
       border-left: 1px solid #2a2a2a;
       z-index: 10;
-      box-shadow: -4px 0 20px rgba(0,0,0,0.8);
+      box-shadow: -4px 0 20px rgba(0, 0, 0, 0.8);
     }
 
     .sidebar-header {
@@ -233,7 +245,7 @@
       padding: 8px;
       font-size: 12px;
       cursor: pointer;
-      box-shadow: 0 4px 15px rgba(191,149,63,0.3);
+      box-shadow: 0 4px 15px rgba(191, 149, 63, 0.3);
       display: block;
       box-sizing: border-box;
     }
@@ -255,7 +267,7 @@
       padding: 6px 8px;
       border-radius: 6px;
       border: 1px solid #333;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
     }
 
     .setting-group h3 {
@@ -295,7 +307,7 @@
     .input-row input:focus {
       outline: none;
       border-color: #bf953f;
-      box-shadow: 0 0 5px rgba(191,149,63,0.3);
+      box-shadow: 0 0 5px rgba(191, 149, 63, 0.3);
     }
 
     .form-check-input {
@@ -315,45 +327,95 @@
     }
 
     #loading {
-      position: fixed; top:0; left:0; width: 100%; height: 100%;
-      background: rgba(5,5,5,0.95); color: #bf953f;
-      display: flex; flex-direction: column; justify-content: center; align-items: center;
-      font-size: 18px; z-index: 9999; font-weight: bold; letter-spacing: 2px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(5, 5, 5, 0.95);
+      color: #bf953f;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-size: 18px;
+      z-index: 9999;
+      font-weight: bold;
+      letter-spacing: 2px;
     }
 
-    /* ERROR BADGE ELEGAN */
     .error-badge {
-      display: inline-block; padding: 15px 25px; border-radius: 8px;
-      background: rgba(220, 53, 69, 0.15); border: 1px solid #dc3545;
-      color: #ff6b81; font-weight: bold; text-align: center; font-size: 12px;
+      display: inline-block;
+      padding: 15px 25px;
+      border-radius: 8px;
+      background: rgba(220, 53, 69, 0.15);
+      border: 1px solid #dc3545;
+      color: #ff6b81;
+      font-weight: bold;
+      text-align: center;
+      font-size: 12px;
     }
 
-    /* PROTEKSI CETAK MUTLAK */
     @media print {
-      @page { margin: 0 !important; }
-      body { display: block; background: none; color: #000; margin: 0 !important; }
-      .sidebar-left, .sidebar-right { display: none !important; }
-      .main-area { display: block; overflow: visible; background: none; }
-      .preview-wrapper { transform: scale(1) !important; margin: 0 !important; padding: 0 !important; }
-      .kertas-preview {
-        box-shadow: none !important; border: none !important; outline: none !important;
-        width: 100vw !important; height: 100vh !important;
-        margin: 0 !important; padding: 0 !important;
-        page-break-after: auto; break-after: auto;
+      @page {
+        margin: 0 !important;
       }
-      body.sembunyikan-blangko-print .bg-sertif { display: none !important; }
-      body:not(.sembunyikan-blangko-print) .bg-sertif { 
-        display: block !important; opacity: var(--blangko-opacity) !important; 
+
+      body {
+        display: block;
+        background: none;
+        color: #000;
+        margin: 0 !important;
+      }
+
+      .sidebar-left,
+      .sidebar-right {
+        display: none !important;
+      }
+
+      .main-area {
+        display: block;
+        overflow: visible;
+        background: none;
+      }
+
+      .preview-wrapper {
+        transform: scale(1) !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      .kertas-preview {
+        box-shadow: none !important;
+        border: none !important;
+        outline: none !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        page-break-after: auto;
+        break-after: auto;
+      }
+
+      body.sembunyikan-blangko-print .bg-sertif {
+        display: none !important;
+      }
+
+      body:not(.sembunyikan-blangko-print) .bg-sertif {
+        display: block !important;
+        opacity: var(--blangko-opacity) !important;
         filter: brightness(var(--blangko-brightness)) contrast(var(--blangko-contrast)) !important;
       }
     }
   </style>
 </head>
+
 <body>
 
   <div id="loading">
     <div>⏳ MEMBANGUN KONEKSI DATABASE...</div>
-    <div style="font-size: 12px; margin-top: 10px; color: #666; font-weight: normal; letter-spacing: 1px;" id="loading-sub">Mohon tunggu sebentar</div>
+    <div style="font-size: 12px; margin-top: 10px; color: #666; font-weight: normal; letter-spacing: 1px;"
+      id="loading-sub">Mohon tunggu sebentar</div>
   </div>
 
   <div class="sidebar-left no-print">
@@ -367,7 +429,13 @@
         </select>
       </div>
       <table>
-        <thead><tr><th width="15%" style="text-align: center;">PARTAI</th><th width="35%">KELAS</th><th>NAMA PESERTA</th></tr></thead>
+        <thead>
+          <tr>
+            <th width="15%" style="text-align: center;">PARTAI</th>
+            <th width="35%">KELAS</th>
+            <th>NAMA PESERTA</th>
+          </tr>
+        </thead>
         <tbody id="table-body"></tbody>
       </table>
     </div>
@@ -390,56 +458,74 @@
     </div>
 
     <div class="settings-container">
-      
+
       <!-- PENGATURAN BLANGKO -->
       <div class="setting-group" style="background: #161616; border-color: #333;">
-        <label style="display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; font-size: 10px; font-weight: bold; color: #bbb; margin-bottom: 6px;">
+        <label
+          style="display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; font-size: 10px; font-weight: bold; color: #bbb; margin-bottom: 6px;">
           <input type="checkbox" id="cb-blangko" checked class="form-check-input" style="width: 14px; height: 14px;">
           Cetak Sekaligus Blangkonya
         </label>
-        
-        <div style="border-top: 1px solid #2c2c2c; padding-top: 5px; margin-bottom: 4px; display: flex; align-items: center; justify-content: space-between;">
+
+        <div
+          style="border-top: 1px solid #2c2c2c; padding-top: 5px; margin-bottom: 4px; display: flex; align-items: center; justify-content: space-between;">
           <label style="font-size: 10px; font-weight: bold; color: #bf953f; letter-spacing: 1px;">KECERAHAN:</label>
           <div style="display: flex; align-items: center; gap: 5px;">
-            <input type="range" min="50" max="150" step="5" value="100" id="blangko-brightness" style="width: 75px; accent-color: #bf953f; cursor: pointer;">
-            <span id="val-brightness" style="font-size: 10px; font-weight: bold; color: #bf953f; width: 30px; text-align:right;">100%</span>
+            <input type="range" min="50" max="150" step="5" value="100" id="blangko-brightness"
+              style="width: 75px; accent-color: #bf953f; cursor: pointer;">
+            <span id="val-brightness"
+              style="font-size: 10px; font-weight: bold; color: #bf953f; width: 30px; text-align:right;">100%</span>
           </div>
         </div>
 
         <div class="input-row" style="margin-bottom: 4px;">
           <label style="font-size: 10px; font-weight: bold; color: #bf953f; letter-spacing: 1px;">OPASITAS:</label>
           <div style="display: flex; align-items: center; gap: 5px;">
-            <input type="range" min="20" max="100" step="5" value="70" id="blangko-opacity" style="width: 75px; accent-color: #bf953f; cursor: pointer;">
-            <span id="val-opacity" style="font-size: 10px; font-weight: bold; color: #bf953f; width: 30px; text-align:right;">70%</span>
+            <input type="range" min="20" max="100" step="5" value="70" id="blangko-opacity"
+              style="width: 75px; accent-color: #bf953f; cursor: pointer;">
+            <span id="val-opacity"
+              style="font-size: 10px; font-weight: bold; color: #bf953f; width: 30px; text-align:right;">70%</span>
           </div>
         </div>
 
-        <div style="border-top: 1px solid #2c2c2c; padding-top: 5px; display: flex; align-items: center; justify-content: space-between;">
+        <div
+          style="border-top: 1px solid #2c2c2c; padding-top: 5px; display: flex; align-items: center; justify-content: space-between;">
           <label style="font-size: 10px; font-weight: bold; color: #bf953f; letter-spacing: 1px;">ZOOM:</label>
           <div style="display: flex; align-items: center; gap: 5px;">
-            <input type="range" min="0.3" max="1.1" step="0.05" value="0.55" id="zoom-slider" style="width: 75px; accent-color: #bf953f; cursor: pointer;">
-            <span id="zoom-val" style="font-size: 10px; font-weight: bold; color: #bf953f; width: 30px; text-align:right;">55%</span>
+            <input type="range" min="0.3" max="1.1" step="0.05" value="0.55" id="zoom-slider"
+              style="width: 75px; accent-color: #bf953f; cursor: pointer;">
+            <span id="zoom-val"
+              style="font-size: 10px; font-weight: bold; color: #bf953f; width: 30px; text-align:right;">55%</span>
           </div>
         </div>
       </div>
 
       <div class="setting-group">
         <h3>⚙️ SETTING NAMA</h3>
-        <div class="input-row">Y (Atas) <input type="number" min="-500" max="1500" id="nama-top" data-key="nama-top"></div>
-        <div class="input-row">X (Kiri/Kanan) <input type="number" min="-500" max="1500" id="nama-left" data-key="nama-left"></div>
-        <div class="input-row">Ukuran Font <input type="number" min="8" max="120" id="nama-size" data-key="nama-size"></div>
+        <div class="input-row">Y (Atas) <input type="number" min="-500" max="1500" id="nama-top" data-key="nama-top">
+        </div>
+        <div class="input-row">X (Kiri/Kanan) <input type="number" min="-500" max="1500" id="nama-left"
+            data-key="nama-left"></div>
+        <div class="input-row">Ukuran Font <input type="number" min="8" max="120" id="nama-size" data-key="nama-size">
+        </div>
       </div>
       <div class="setting-group">
         <h3>⚙️ SETTING KONTINGEN</h3>
-        <div class="input-row">Y (Spasi) <input type="number" min="-500" max="1500" id="kontingen-top" data-key="kontingen-top"></div>
-        <div class="input-row">X (Kiri/Kanan) <input type="number" min="-500" max="1500" id="kontingen-left" data-key="kontingen-left"></div>
-        <div class="input-row">Ukuran Font <input type="number" min="8" max="120" id="kontingen-size" data-key="kontingen-size"></div>
+        <div class="input-row">Y (Spasi) <input type="number" min="-500" max="1500" id="kontingen-top"
+            data-key="kontingen-top"></div>
+        <div class="input-row">X (Kiri/Kanan) <input type="number" min="-500" max="1500" id="kontingen-left"
+            data-key="kontingen-left"></div>
+        <div class="input-row">Ukuran Font <input type="number" min="8" max="120" id="kontingen-size"
+            data-key="kontingen-size"></div>
       </div>
       <div class="setting-group">
         <h3>⚙️ SETTING KETERANGAN</h3>
-        <div class="input-row">Y (Spasi) <input type="number" min="-500" max="1500" id="keterangan-top" data-key="keterangan-top"></div>
-        <div class="input-row">X (Kiri/Kanan) <input type="number" min="-500" max="1500" id="keterangan-left" data-key="keterangan-left"></div>
-        <div class="input-row">Ukuran Font <input type="number" min="8" max="120" id="keterangan-size" data-key="keterangan-size"></div>
+        <div class="input-row">Y (Spasi) <input type="number" min="-500" max="1500" id="keterangan-top"
+            data-key="keterangan-top"></div>
+        <div class="input-row">X (Kiri/Kanan) <input type="number" min="-500" max="1500" id="keterangan-left"
+            data-key="keterangan-left"></div>
+        <div class="input-row">Ukuran Font <input type="number" min="8" max="120" id="keterangan-size"
+            data-key="keterangan-size"></div>
       </div>
     </div>
   </div>
@@ -448,7 +534,6 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
     import { getDatabase, ref, onValue, get } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js";
 
-    // KUNCI KONTAK YANG KEMARIN KETINGGALAN! 🔥
     const firebaseConfig = {
       apiKey: "AIzaSyCNsOk8MsIhBoZ44Nd9WGGl6eBJOEKu3nI",
       authDomain: "tesapksilat99.firebaseapp.com",
@@ -463,15 +548,10 @@
     const database = getDatabase(app);
     window.globalSheetId = null;
     const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxPahwtXYz_ITepb8D_3HLmZGQq978yLz-GXE5_0j12mOlGr1152wxd74xnHmWVOrHeHw/exec";
-
-    // ==========================================
-    // ARSITEKTUR ENTERPRISE (MODULAR)
-    // ==========================================
-
     const Utils = {
       debounce(func, wait) {
         let timeout;
-        return function(...args) {
+        return function (...args) {
           clearTimeout(timeout);
           timeout = setTimeout(() => func.apply(this, args), wait);
         };
@@ -611,7 +691,7 @@
           let tr = document.createElement('tr');
           tr.id = `row-${item.rowAktif}`;
           tr.onclick = () => UIManager.selectParticipant(item.rowAktif, true);
-          
+
           if (Number(item.rowAktif) === Number(DataManager.activeRowId)) {
             tr.classList.add('row-active');
           }
@@ -629,22 +709,18 @@
       selectParticipant(rowId, isManualClick = false) {
         DataManager.activeRowId = rowId;
         document.querySelectorAll('#table-body tr').forEach(tr => tr.classList.remove('row-active'));
-        
+
         let activeRow = document.getElementById(`row-${rowId}`);
         if (activeRow) {
           activeRow.classList.add('row-active');
           if (isManualClick) activeRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
-        // PERBAIKAN TYPO: Menghapus d.rowAktas
         const data = DataManager.peserta.find(d => Number(d.rowAktif) === Number(rowId));
         if (!data) return;
-
-        // 🔥 LOGIKA CERDAS: Jika peringkat "-", jadikan "PESERTA", jika ada angka jadikan "JUARA"
         let teksPeringkat = (data.peringkat === "-") ? "PESERTA" : `JUARA ${data.peringkat}`;
-        
         const ketLengkap = `${teksPeringkat} ${data.jenisLomba || ""} ${data.kelas || ""} ${data.gender || ""} ${data.tingkat || ""} ${data.statusLevel || ""}`;
-        
+
         this.els.txtNama.innerText = data.nama || "-";
         this.els.txtKontingen.innerText = data.kontingen || "-";
         this.els.txtKeterangan.innerText = ketLengkap;
@@ -670,9 +746,9 @@
       fetchController: null,
 
       async fetchData(showLoadingUI = false) {
-        if (this.isLoading) return; 
+        if (this.isLoading) return;
         this.isLoading = true;
-        
+
         const sheetName = UIManager.els.kategoriSelect.value;
         if (showLoadingUI) UIManager.showLoading(true, "Menarik data dari Google Sheets...");
 
@@ -682,10 +758,10 @@
         const targetAPI = `${APP_SCRIPT_URL}?sheetId=${window.globalSheetId}&sheet=${encodeURIComponent(sheetName)}&mode=json_all`;
 
         try {
-          if (!navigator.onLine) throw new Error("OFFLINE"); 
+          if (!navigator.onLine) throw new Error("OFFLINE");
 
           const res = await fetch(targetAPI, { signal: this.fetchController.signal });
-          
+
           if (!res.ok) {
             if (res.status === 404) throw new Error("404");
             if (res.status >= 500) throw new Error("500");
@@ -696,26 +772,26 @@
           if (!Array.isArray(data) || (data.length > 0 && (data[0].error || data[0].pesan))) throw new Error("JSON_ERROR");
 
           let dataTerbaru = [];
-          
+
           for (let i = 0; i < data.length; i++) {
-              let item = data[i];
-              let jenis = String(item.jenisLomba || "").toUpperCase();
-              let level = String(item.statusLevel || "").toUpperCase();
-              let isSesuai = false;
+            let item = data[i];
+            let jenis = String(item.jenisLomba || "").toUpperCase();
+            let level = String(item.statusLevel || "").toUpperCase();
+            let isSesuai = false;
 
-              if (sheetName === "Sertifikat Jurus") {
-                  isSesuai = jenis.includes("JURUS") || jenis.includes("SENI") || jenis.includes("TGR") || level.includes("JURUS") || level.includes("SENI");
-              } else if (sheetName === "Sertifikat Tanding Prestasi") {
-                  isSesuai = (jenis.includes("TANDING") || jenis.includes("LAGA")) && (level.includes("PRESTASI") || (!level.includes("PEMASALAN") && !level.includes("PEMULA")));
-              } else if (sheetName === "Sertifikat Tanding Pemasalan") {
-                  isSesuai = (jenis.includes("TANDING") || jenis.includes("LAGA")) && level.includes("PEMASALAN");
-              }
+            if (sheetName === "Sertifikat Jurus") {
+              isSesuai = jenis.includes("JURUS") || jenis.includes("SENI") || jenis.includes("TGR") || level.includes("JURUS") || level.includes("SENI");
+            } else if (sheetName === "Sertifikat Tanding Prestasi") {
+              isSesuai = (jenis.includes("TANDING") || jenis.includes("LAGA")) && (level.includes("PRESTASI") || (!level.includes("PEMASALAN") && !level.includes("PEMULA")));
+            } else if (sheetName === "Sertifikat Tanding Pemasalan") {
+              isSesuai = (jenis.includes("TANDING") || jenis.includes("LAGA")) && level.includes("PEMASALAN");
+            }
 
-              if (isSesuai) {
-                  item.kelas = String(item.kelas || "").replace(/\sPUTRA/gi, '').replace(/\sPUTRI/gi, '');
-                  item.jenisLomba = String(item.jenisLomba || "").replace(/LAGA\s*\(TANDING\)/gi, 'TANDING');
-                  dataTerbaru.push(item);
-              }
+            if (isSesuai) {
+              item.kelas = String(item.kelas || "").replace(/\sPUTRA/gi, '').replace(/\sPUTRI/gi, '');
+              item.jenisLomba = String(item.jenisLomba || "").replace(/LAGA\s*\(TANDING\)/gi, 'TANDING');
+              dataTerbaru.push(item);
+            }
           }
 
           this.peserta = dataTerbaru;
@@ -724,17 +800,17 @@
           if (this.peserta.length > 0) {
             let targetAda = this.peserta.find(d => Number(d.rowAktif) === Number(this.activeRowId));
             let pilihBaris = targetAda ? this.activeRowId : this.peserta[0].rowAktif;
-            UIManager.selectParticipant(pilihBaris, false); 
+            UIManager.selectParticipant(pilihBaris, false);
           } else {
             UIManager.els.txtNama.innerText = "-"; UIManager.els.txtKontingen.innerText = "-"; UIManager.els.txtKeterangan.innerText = "BELUM ADA PESERTA YANG TANDING";
             document.title = "Sertifikat Kosong";
           }
 
         } catch (err) {
-          if (err.name === 'AbortError') return; 
-          
+          if (err.name === 'AbortError') return;
+
           this.peserta = [];
-          
+
           if (err.message === "OFFLINE") UIManager.showErrorHtml("INTERNET TERPUTUS", "Periksa koneksi Wi-Fi atau LAN komputer Anda.");
           else if (err.message === "404") UIManager.showErrorHtml("DATA TIDAK DITEMUKAN", "Link Spreadsheet mungkin salah atau tab telah dihapus.");
           else if (err.message === "500") UIManager.showErrorHtml("SERVER SIBUK", "Google Apps Script sedang kelebihan beban. Tunggu sesaat.");
@@ -796,11 +872,11 @@
 
         const pertandinganRef = ref(database, `${this.ruangAktif}/pertandingan`);
         const onFirebaseDataChanged = Utils.debounce(() => {
-            DataManager.fetchData(false); 
+          DataManager.fetchData(false);
         }, 4000);
 
         onValue(pertandinganRef, () => {
-            onFirebaseDataChanged();
+          onFirebaseDataChanged();
         });
       }
     };
@@ -813,4 +889,5 @@
 
   </script>
 </body>
+
 </html>

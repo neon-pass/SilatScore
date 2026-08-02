@@ -1,4 +1,3 @@
-// 1. INJEKSI GAYA CSS (STYLE)
 const styleEfek = document.createElement('style');
 styleEfek.innerHTML = `
     #rondeTransitionOverlay {
@@ -39,7 +38,6 @@ styleEfek.innerHTML = `
 `;
 document.head.appendChild(styleEfek);
 
-// 2. INJEKSI ELEMEN HTML
 const overlayEfek = document.createElement('div');
 overlayEfek.id = 'rondeTransitionOverlay';
 overlayEfek.innerHTML = `
@@ -52,30 +50,28 @@ overlayEfek.innerHTML = `
     </div>
 `;
 
-// Pasang HTML siluman ini saat halaman siap
 document.addEventListener("DOMContentLoaded", () => {
     document.body.appendChild(overlayEfek);
 });
 
-// 3. FUNGSI PEMICU ANIMASI (Bisa Dipanggil dari File Lain)
-window.mainkanEfekTransisiRonde = function(rondeVal) {
+window.mainkanEfekTransisiRonde = function (rondeVal) {
     let overlay = document.getElementById('rondeTransitionOverlay');
     let textEl = document.getElementById('transitionRondeText');
-    
-    if(!overlay || !textEl) return; // Mencegah error jika belum ter-load
+
+    if (!overlay || !textEl) return;
 
     overlay.classList.remove('show', 'exit');
     textEl.innerText = "RONDE " + rondeVal;
-    
-    void overlay.offsetWidth; // Reset status animasi
-    
+
+    void overlay.offsetWidth;
+
     overlay.classList.add('show');
-    
+
     setTimeout(() => {
         overlay.classList.remove('show');
         overlay.classList.add('exit');
         setTimeout(() => {
             overlay.classList.remove('exit');
         }, 800);
-    }, 1500); // Tampil 2.5 Detik
+    }, 1500); // Tampil 1.5 Detik
 };

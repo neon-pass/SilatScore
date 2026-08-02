@@ -1,6 +1,3 @@
-// ====================================================================
-// 1. INJEKSI GAYA CSS (FULL RESPONSIVE VIEWPORT UNTUK TV / CASTING)
-// ====================================================================
 const stylePemenang = document.createElement('style');
 stylePemenang.innerHTML = `
     #winnerOverlay {
@@ -10,7 +7,7 @@ stylePemenang.innerHTML = `
         opacity: 0; pointer-events: none; transition: background 0.8s, opacity 0.8s ease-in-out;
         font-family: 'Arial', sans-serif;
         box-sizing: border-box;
-        overflow: hidden; /* 🔥 MENCEGAH SCROLL / OFFSIDE 🔥 */
+        overflow: hidden; 
     }
     #winnerOverlay.show { opacity: 1; pointer-events: all; }
 
@@ -32,13 +29,11 @@ stylePemenang.innerHTML = `
     .reveal-content { transform: translateY(100%); opacity: 0; }
     #winnerOverlay.show .reveal-content { animation: slideReveal 1s cubic-bezier(0.16, 1, 0.3, 1) forwards; animation-delay: 0.5s; }
     
-    /* 🔥 PENGUMUMAN AWAL MENGGUNAKAN VIEWPORT (VH/VW) 🔥 */
     .alasan-menang { color: #a8a8a8; font-size: 3vh; letter-spacing: 1vw; font-weight: 300; margin-bottom: 2vh; text-transform: uppercase; }
     .sudut-teks { font-family: 'FontGadugi', sans-serif; font-size: 18vh; text-transform: uppercase; font-weight: 900; letter-spacing: 0.5vw; display: block; line-height: 1; }
     .menang-teks { font-family: 'FontGadugi', sans-serif; font-size: 14vh; font-weight: 900; letter-spacing: 0.8vw; display: block; margin-top: -1vh; position: relative; background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c); -webkit-background-clip: text; color: transparent; }
     .nama-atlet { font-size: 8vh; color: #ffffff; font-weight: 400; letter-spacing: 0.5vw; margin-top: 3vh; text-transform: uppercase; text-shadow: 0 0.5vh 1.5vh rgba(0,0,0,0.5); }
 
-    /* 🔥 REKAPAN MENGGUNAKAN VIEWPORT (VH/VW) 🔥 */
     .rkp-header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5vh; position: relative; }
     .rkp-sponsor { display: flex; align-items: center; gap: 0.5vw; }
     .rkp-sponsor img { height: 6vh; max-width: 15vw; object-fit: contain; }
@@ -63,8 +58,6 @@ stylePemenang.innerHTML = `
     
     .rkp-pelanggaran-title { display: inline-block; font-size: 2vh; font-weight: 900; color: #ffc107; letter-spacing: 0.2vw; border-bottom: 0.2vh solid #ffc107; padding-bottom: 0.5vh; margin: 1.5vh 0 0.5vh 0; text-shadow: 0 0.2vh 0.5vh rgba(0,0,0,0.5); }
     .teks-warning { color: #ffc107 !important; }
-
-    /* 🔥 GAYA KHUSUS SKOR AKHIR & ANIMASI KEMENANGAN 🔥 */
     .rkp-skor-akhir { font-family: 'Roboto', 'Arial', sans-serif; font-size: 8vh; font-weight: 900; color: #ffffff; text-shadow: 0 0.4vh 1.5vh rgba(0,0,0,0.8); line-height: 1; display: inline-block; }
 
     .skor-menang { 
@@ -84,9 +77,6 @@ stylePemenang.innerHTML = `
 `;
 document.head.appendChild(stylePemenang);
 
-// ====================================================================
-// 2. INJEKSI ELEMEN HTML (PENGUMUMAN + REKAP ID NYATA)
-// ====================================================================
 const overlayPemenang = document.createElement('div');
 overlayPemenang.id = 'winnerOverlay';
 overlayPemenang.innerHTML = `
@@ -188,36 +178,33 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.appendChild(overlayPemenang);
 });
 
-// ====================================================================
-// 3. FUNGSI PEMICU ANIMASI GLOBAL & EKSTRAKSI DATA LOG
-// ====================================================================
 let bokehInterval;
 let rekapTimeout1;
 let rekapTimeout2;
 
 function hitungRekap(riwayat) {
-    let r = { pukulan:0, tendangan:0, jatuhan:0, binaan:0, teguran:0, per:0 };
-    if(!riwayat) return r;
-    
-    for(let i=1; i<=3; i++) {
-        if(riwayat[i]) {
+    let r = { pukulan: 0, tendangan: 0, jatuhan: 0, binaan: 0, teguran: 0, per: 0 };
+    if (!riwayat) return r;
+
+    for (let i = 1; i <= 3; i++) {
+        if (riwayat[i]) {
             riwayat[i].forEach(poin => {
-                if(poin === 1) r.pukulan++;
-                else if(poin === 2) r.tendangan++;
-                else if(poin === 3) r.jatuhan++;
-                else if(poin === 0) r.binaan++;
-                else if(poin === -1 || poin === -2) r.teguran++;
-                else if(poin === -5 || poin === -10) r.per++;
+                if (poin === 1) r.pukulan++;
+                else if (poin === 2) r.tendangan++;
+                else if (poin === 3) r.jatuhan++;
+                else if (poin === 0) r.binaan++;
+                else if (poin === -1 || poin === -2) r.teguran++;
+                else if (poin === -5 || poin === -10) r.per++;
             });
         }
     }
     return r;
 }
 
-window.mainkanEfekPemenang = function(sudut, namaAtlet, alasan) {
+window.mainkanEfekPemenang = function (sudut, namaAtlet, alasan) {
     let overlay = document.getElementById('winnerOverlay');
-    if(!overlay) return;
-    
+    if (!overlay) return;
+
     clearTimeout(rekapTimeout1);
     clearTimeout(rekapTimeout2);
     document.getElementById('winnerContentPanel').style.display = 'block';
@@ -228,18 +215,18 @@ window.mainkanEfekPemenang = function(sudut, namaAtlet, alasan) {
     document.getElementById('winReason').innerText = alasan;
     document.getElementById('winSudut').innerText = "SUDUT " + sudut;
     document.getElementById('winName').innerText = namaAtlet;
-    
-    overlay.className = ''; 
+
+    overlay.className = '';
     if (sudut.toLowerCase() === 'biru') overlay.classList.add('theme-biru');
     else overlay.classList.add('theme-merah');
 
     void overlay.offsetWidth;
     overlay.classList.add('show');
-    
+
     let container = document.getElementById('particleContainerPemenang');
-    container.innerHTML = ''; 
+    container.innerHTML = '';
     clearInterval(bokehInterval);
-    
+
     bokehInterval = setInterval(() => {
         let bokeh = document.createElement('div');
         bokeh.classList.add('bokeh');
@@ -259,7 +246,7 @@ window.mainkanEfekPemenang = function(sudut, namaAtlet, alasan) {
             document.getElementById('winnerContentPanel').style.display = 'none';
             let rekapView = document.getElementById('rekapViewPanel');
             rekapView.style.display = 'flex';
-            
+
             if (document.getElementById('wadahKiri')) document.getElementById('rkpSponsorKiri').innerHTML = document.getElementById('wadahKiri').innerHTML;
             if (document.getElementById('wadahKanan')) document.getElementById('rkpSponsorKanan').innerHTML = document.getElementById('wadahKanan').innerHTML;
             if (document.getElementById('judulKejuaraan')) document.getElementById('rkpKejuaraan').innerText = document.getElementById('judulKejuaraan').innerText;
@@ -283,7 +270,7 @@ window.mainkanEfekPemenang = function(sudut, namaAtlet, alasan) {
             document.getElementById('rkpTendanganMerah').innerText = dataMerah.tendangan;
             document.getElementById('rkpJatuhanBiru').innerText = dataBiru.jatuhan;
             document.getElementById('rkpJatuhanMerah').innerText = dataMerah.jatuhan;
-            
+
             document.getElementById('rkpBinaanBiru').innerText = dataBiru.binaan;
             document.getElementById('rkpBinaanMerah').innerText = dataMerah.binaan;
             document.getElementById('rkpTegBiru').innerText = dataBiru.teguran;
@@ -291,45 +278,40 @@ window.mainkanEfekPemenang = function(sudut, namaAtlet, alasan) {
             document.getElementById('rkpPerBiru').innerText = dataBiru.per;
             document.getElementById('rkpPerMerah').innerText = dataMerah.per;
 
-            // 🔥 HITUNG & SUNTIKKAN SKOR AKHIR BERSAMAAN DENGAN ALASAN 🔥
-            let logB = [ ...(window.riwayatBiru[1]||[]), ...(window.riwayatBiru[2]||[]), ...(window.riwayatBiru[3]||[]) ];
-            let logM = [ ...(window.riwayatMerah[1]||[]), ...(window.riwayatMerah[2]||[]), ...(window.riwayatMerah[3]||[]) ];
-            
-            let totalB = logB.reduce((a,b) => a+b, 0);
-            let totalM = logM.reduce((a,b) => a+b, 0);
-            
+            let logB = [...(window.riwayatBiru[1] || []), ...(window.riwayatBiru[2] || []), ...(window.riwayatBiru[3] || [])];
+            let logM = [...(window.riwayatMerah[1] || []), ...(window.riwayatMerah[2] || []), ...(window.riwayatMerah[3] || [])];
+
+            let totalB = logB.reduce((a, b) => a + b, 0);
+            let totalM = logM.reduce((a, b) => a + b, 0);
+
             let elTotalBiru = document.getElementById('rkpTotalBiru');
             let elTotalMerah = document.getElementById('rkpTotalMerah');
-            
+
             elTotalBiru.innerText = totalB;
             elTotalMerah.innerText = totalM;
-            
-            // Bersihkan efek skor akhir sebelumnya
             elTotalBiru.classList.remove('skor-menang');
             elTotalMerah.classList.remove('skor-menang');
-            
-            // Berikan Efek Menyala Khusus Untuk Skor Pemenang Saja
+
             if (sudut.toLowerCase() === 'biru') {
                 elTotalBiru.classList.add('skor-menang');
             } else if (sudut.toLowerCase() === 'merah') {
                 elTotalMerah.classList.add('skor-menang');
             }
 
-            // Tampilkan Alasan Menang di bawah Skor
             document.getElementById('rkpAlasanMenangBawah').innerText = alasan;
 
             void rekapView.offsetWidth;
             rekapView.style.opacity = '1';
-        }, 500); 
-    }, 2500); 
+        }, 500);
+    }, 2500);
 };
 
-window.tutupEfekPemenang = function() {
+window.tutupEfekPemenang = function () {
     let overlay = document.getElementById('winnerOverlay');
-    if(overlay) overlay.classList.remove('show');
-    clearInterval(bokehInterval); 
+    if (overlay) overlay.classList.remove('show');
+    clearInterval(bokehInterval);
     clearTimeout(rekapTimeout1);
     clearTimeout(rekapTimeout2);
     let container = document.getElementById('particleContainerPemenang');
-    if(container) container.innerHTML = ''; 
+    if (container) container.innerHTML = '';
 };
