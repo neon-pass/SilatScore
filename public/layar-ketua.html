@@ -76,9 +76,9 @@
         }
         .tx-putih { color: #ffffff; font-size: 14px; }
         .tx-abu { color: #555; font-weight: normal; font-size: 14px; }
-        .tx-kuning { color: #ffc107; font-size: 14px;}
-        .tx-biru { color: #00e1ff; font-size: 15px; text-shadow: 0 0 6px rgba(0,225,255,0.6); }
-        .tx-merah { color: #ff3c3c; font-size: 15px; text-shadow: 0 0 6px rgba(255,60,60,0.6); }
+        .tx-kuning { color: #ffffff; font-size: 14px; text-shadow: 0 0 6px rgb(255, 238, 0);}
+        .tx-biru { color: #ffffff; font-size: 15px; text-shadow: 0 0 6px rgb(0, 47, 255); }
+        .tx-merah { color: #ffffff; font-size: 15px; text-shadow: 0 0 6px rgb(255, 60, 60); }
 
         .babak-divider { background: #1a1a1a; border: 1px solid #333; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 310px; }
         .babak-number { font-size: 38px; font-weight: bold; color: #ffc107; font-family: monospace; line-height: 1; }
@@ -149,12 +149,12 @@
                             <td class="label-row">Jatuhan</td>
                         </tr>
                         <tr>
-                            <td class="total-col text-danger" id="totHukumanBiru">0</td>
+                            <td class="total-col text-light" id="totHukumanBiru">0</td>
                             <td><div class="points-timeline-container" id="timeline-hukuman-biru"></div></td>
                             <td class="label-row">Hukuman</td>
                         </tr>
                         <tr>
-                            <td class="total-col text-info" id="totBinaanBiru">0</td>
+                            <td class="total-col text-success" id="totBinaanBiru">0</td>
                             <td><div class="points-timeline-container" id="timeline-binaan-biru"></div></td>
                             <td class="label-row">Binaan</td>
                         </tr>
@@ -205,12 +205,12 @@
                         <tr>
                             <td class="label-row">Hukuman</td>
                             <td><div class="points-timeline-container" id="timeline-hukuman-merah"></div></td>
-                            <td class="total-col text-danger" id="totHukumanMerah">0</td>
+                            <td class="total-col text-light" id="totHukumanMerah">0</td>
                         </tr>
                         <tr>
                             <td class="label-row">Binaan</td>
                             <td><div class="points-timeline-container" id="timeline-binaan-merah"></div></td>
-                            <td class="total-col text-info" id="totBinaanMerah">0</td>
+                            <td class="total-col text-success" id="totBinaanMerah">0</td>
                         </tr>
                     </tbody>
                 </table>
@@ -390,11 +390,19 @@ if (!ruangAktif) {
     function pasangMasterMonitor() {
         let baseRef = `${ruangAktif}/pertandingan/${session.gel}`;
 
+        // 🔥 1. AMBIL NAMA KEJUARAAN LANGSUNG DARI PANEL PENGATURAN GLOBAL
+        onValue(ref(database, `${ruangAktif}/pengaturan`), (snap) => {
+            let pengaturan = snap.val();
+            if (pengaturan && pengaturan.nama_kejuaraan) {
+                document.getElementById('liveEventName').innerText = pengaturan.nama_kejuaraan;
+            }
+        });
+
+        // 2. AMBIL DETAIL PERTANDINGAN (Kelas, Partai, Nama Pesilat, Kontingen)
         onValue(ref(database, `${baseRef}/setup`), (snap) => {
             let data = snap.val();
             if(data) {
-                document.getElementById('liveEventName').innerText = data.event || "PORPROV SILAT DIGITAL";
-                document.getElementById('liveMatchInfo').innerText = `${data.kelas || "-"} - Match ${data.partai || "-"}`;
+                document.getElementById('liveMatchInfo').innerText = `${data.kelas || "-"} - Partai ${data.partai || "-"}`;
                 document.getElementById('liveNamaBiru').innerText = data.nama_biru || "-";
                 document.getElementById('liveKonBiru').innerText = data.kontingen_biru || "-";
                 document.getElementById('liveNamaMerah').innerText = data.nama_merah || "-";
@@ -430,25 +438,42 @@ if (!ruangAktif) {
     }
 
     function updateSkorLayarMata() {
-        let tb = skorBiru[1] + skorBiru[2] + skorBiru[3];
-        let tm = skorMerah[1] + skorMerah[2] + skorMerah[3];
-        
-        document.getElementById('liveSkorBiru').innerText = tb;
-        document.getElementById('liveSkorMerah').innerText = tm;
-        document.getElementById('mTotalBiru').innerText = tb;
-        document.getElementById('mTotalMerah').innerText = tm;
-
         let sP_B = riwayatBiru[1].concat(riwayatBiru[2], riwayatBiru[3]);
         let sP_M = riwayatMerah[1].concat(riwayatMerah[2], riwayatMerah[3]);
 
-        document.getElementById('totJatuhanBiru').innerText = sP_B.filter(v => v === 3).length * 3;
-        document.getElementById('totJatuhanMerah').innerText = sP_M.filter(v => v === 3).length * 3;
-        
-        document.getElementById('totHukumanBiru').innerText = sP_B.filter(v => v < 0 && v !== -99).reduce((a,b)=>a+b, 0);
-        document.getElementById('totHukumanMerah').innerText = sP_M.filter(v => v < 0 && v !== -99).reduce((a,b)=>a+b, 0);
+        // 1. KOTAK "TOT" DI SAMPING JURI (Murni hanya dari Baris Score / Pukulan positif)
+        let totalPukulanBiru = sP_B.filter(v => v > 0 && v !== 3).reduce((a,b) => a+b, 0);
+        let totalPukulanMerah = sP_M.filter(v => v > 0 && v !== 3).reduce((a,b) => a+b, 0);
 
-        document.getElementById('totBinaanBiru').innerText = sP_B.filter(v => v === 0).length;
-        document.getElementById('totBinaanMerah').innerText = sP_M.filter(v => v === 0).length;
+        document.getElementById('mTotalBiru').innerText = totalPukulanBiru;
+        document.getElementById('mTotalMerah').innerText = totalPukulanMerah;
+
+        // 2. KOMPONEN BAWAH (Jatuhan, Hukuman, Binaan)
+        let jatuhanBiruVal = sP_B.filter(v => v === 3).length * 3;
+        let jatuhanMerahVal = sP_M.filter(v => v === 3).length * 3;
+
+        let hukumanBiruVal = sP_B.filter(v => v < 0 && v !== -99).reduce((a,b)=>a+b, 0);
+        let hukumanMerahVal = sP_M.filter(v => v < 0 && v !== -99).reduce((a,b)=>a+b, 0);
+
+        let binaanBiruVal = sP_B.filter(v => v === 0).length;
+        let binaanMerahVal = sP_M.filter(v => v === 0).length;
+
+        document.getElementById('totJatuhanBiru').innerText = jatuhanBiruVal;
+        document.getElementById('totJatuhanMerah').innerText = jatuhanMerahVal;
+        
+        document.getElementById('totHukumanBiru').innerText = hukumanBiruVal;
+        document.getElementById('totHukumanMerah').innerText = hukumanMerahVal;
+
+        document.getElementById('totBinaanBiru').innerText = binaanBiruVal;
+        document.getElementById('totBinaanMerah').innerText = binaanMerahVal;
+
+        // 3. SKOR UTAMA DI ATAS (Grand Total: Pukulan + Jatuhan + Hukuman)
+        // Catatan: Hukuman bernilai negatif (misal -6), jadi jika dijumlahkan otomatis mengurangi total poin.
+        let grandTotalBiru = totalPukulanBiru + jatuhanBiruVal + hukumanBiruVal;
+        let grandTotalMerah = totalPukulanMerah + jatuhanMerahVal + hukumanMerahVal;
+
+        document.getElementById('liveSkorBiru').innerText = grandTotalBiru;
+        document.getElementById('liveSkorMerah').innerText = grandTotalMerah;
     }
 
     // 🔥 MESIN PENCETAK SINKRON BIRU-MERAH 🔥
