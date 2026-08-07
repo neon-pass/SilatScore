@@ -974,6 +974,10 @@
         let dataSetupGlobal = {};
         let unsubscribeLock = null;
         let timerAnimasiJuri = {};
+        
+        // 🔥 VARIABEL NAVIGASI FOLDER BARU 🔥
+        let baseRefGelanggang = "";
+        let baseRefKamar = "";
 
         let waktuBerjalanSekarang = "00:00";
         const BASE_SKOR_TUNGGAL = 9.90;
@@ -1018,7 +1022,7 @@
             let gel = document.getElementById('lGelanggang').value;
             if (!gel) return;
 
-            onValue(ref(database, `${ruangAktif}/pertandingan/${gel}/setup`), (snap) => {
+            onValue(ref(database, `${ruangAktif}/pertandingan/${gel}/kamar_jurus/info_laga`), (snap) => {
                 dataSetupGlobal = snap.val() || {};
                 let kategori = dataSetupGlobal.jenis_seni || "Tunggal";
                 let maxJuriServer = dataSetupGlobal.jumlah_juri ? parseInt(dataSetupGlobal.jumlah_juri) : 10;
@@ -1039,7 +1043,7 @@
                 if (prevVal) selectJuri.value = prevVal;
 
                 if (unsubscribeLock) unsubscribeLock();
-                unsubscribeLock = onValue(ref(database, `${ruangAktif}/pertandingan/${gel}/locks`), (lockSnap) => {
+                unsubscribeLock = onValue(ref(database, `${ruangAktif}/pertandingan/${gel}/kontrol_layar/locks`), (lockSnap) => {
                     let locks = lockSnap.val() || {};
                     let optDewan = document.getElementById('optDewan');
                     optDewan.disabled = locks['Jurus_dewan'] ? true : false;
@@ -1085,8 +1089,6 @@
             }
         }
 
-
-
         window.initAppJurus = async function () {
             const btnLogin = document.getElementById('btnLoginApp'), errorEl = document.getElementById('loginError');
             let gel = document.getElementById('lGelanggang').value, pos = document.getElementById('lPosisi').value;
@@ -1104,28 +1106,28 @@
             btnLogin.disabled = true; errorEl.style.display = "none"; btnLogin.innerText = "MEMVALIDASI...";
 
             let slotId = (pos === 'dewan') ? 'Jurus_dewan' : `Jurus_${juri}`;
-            let lockRef = ref(database, `${ruangAktif}/pertandingan/${gel}/locks/${slotId}`);
+            let lockRef = ref(database, `${ruangAktif}/pertandingan/${gel}/kontrol_layar/locks/${slotId}`);
             let snap = await get(lockRef);
 
             if (snap.exists() && snap.val() === true) { errorEl.innerHTML = `❌ Posisi terkunci!`; errorEl.style.display = "block"; btnLogin.disabled = false; btnLogin.innerText = "MASUK GELANGGANG"; return; }
 
             await set(lockRef, true); onDisconnect(lockRef).remove();
-            if (pos === 'dewan') { set(ref(database, `${ruangAktif}/pertandingan/${gel}/setup/jumlah_juri`), jumlahJuri); }
+            
+            baseRefGelanggang = `${ruangAktif}/pertandingan/${gel}`;
+            baseRefKamar = `${baseRefGelanggang}/kamar_jurus`;
+            
+            if (pos === 'dewan') { set(ref(database, `${baseRefKamar}/info_laga/jumlah_juri`), jumlahJuri); }
 
             sessionJurus = { gel, pos, juriId: juri, slotId, kategori, jumlahJuri, sudut: 'biru' };
 
-            onValue(ref(database, `${ruangAktif}/pertandingan/${gel}/setup`), (snap) => {
+            onValue(ref(database, `${baseRefKamar}/info_laga`), (snap) => {
                 dataSetupGlobal = snap.val() || {};
                 updateIdentitasUI();
 
                 let kategoriBaru = dataSetupGlobal.jenis_seni || "Tunggal";
                 if (sessionJurus.kategori !== kategoriBaru) {
                     sessionJurus.kategori = kategoriBaru;
-                    if (sessionJurus.pos === 'juri') {
-                        generateJuriUI();
-                    } else {
-                        generateDewanUI();
-                    }
+                    if (sessionJurus.pos === 'juri') { generateJuriUI(); } else { generateDewanUI(); }
                 }
 
                 if (sessionJurus.pos === 'juri') {
@@ -1141,30 +1143,25 @@
                 if (sessionJurus.pos === 'dewan') {
                     for (let i = 1; i <= sessionJurus.jumlahJuri; i++) {
                         let elNama = document.getElementById(`nama_j${i}`);
-                        if (elNama) {
-                            let n = dataSetupGlobal[`juri${i}`];
-                            elNama.innerText = (n && n !== "-") ? n : `JURI ${i}`;
-                        }
+                        if (elNama) { let n = dataSetupGlobal[`juri${i}`]; elNama.innerText = (n && n !== "-") ? n : `JURI ${i}`; }
                     }
                 }
             });
 
-            onValue(ref(database, `${ruangAktif}/pertandingan/${gel}/sudut_aktif`), (snap) => {
+            onValue(ref(database, `${baseRefKamar}/live_state/sudut_aktif`), (snap) => {
                 if (snap.exists()) { sessionJurus.sudut = snap.val(); updateIdentitasUI(); }
             });
 
-            onValue(ref(database, `${ruangAktif}/pertandingan/${gel}/timer`), (snap) => {
+            onValue(ref(database, `${baseRefKamar}/live_state/timer`), (snap) => {
                 waktuBerjalanSekarang = snap.val() || "00:00";
                 let elJuri = document.getElementById('displayTimerGelanggang'); if (elJuri) elJuri.innerText = waktuBerjalanSekarang;
                 let elDewan = document.getElementById('displayTimerDewan'); if (elDewan) elDewan.innerText = waktuBerjalanSekarang;
             });
 
             onValue(ref(database, `${ruangAktif}/pengaturan/daftar_wasit_juri`), (snap) => {
-                let daftar = snap.val() || [];
-                let select = document.getElementById('pilihNamaJuri');
+                let daftar = snap.val() || []; let select = document.getElementById('pilihNamaJuri');
                 if (select) {
-                    let prevVal = select.value;
-                    let options = `<option value="-">- PILIH NAMA JURI -</option>`;
+                    let prevVal = select.value; let options = `<option value="-">- PILIH NAMA JURI -</option>`;
                     daftar.forEach(nama => { options += `<option value="${nama}">${nama}</option>`; });
                     select.innerHTML = options;
                     if (Array.from(select.options).some(opt => opt.value === prevVal)) select.value = prevVal;
@@ -1172,51 +1169,32 @@
             });
 
             if (pos === 'juri') {
-                onValue(ref(database, `${ruangAktif}/pertandingan/${gel}/juri_siap/${juri}`), (snap) => {
-                    let isSiap = snap.val();
-                    statusJuriSiapLokal = isSiap;
+                onValue(ref(database, `${baseRefKamar}/live_state/juri_siap/${juri}`), (snap) => {
+                    let isSiap = snap.val(); statusJuriSiapLokal = isSiap;
                     let btn = document.getElementById('btnJuriSiap');
-                    if (btn) {
-                        if (isSiap) {
-                            btn.classList.add('siap-aktif');
-                            btn.innerText = "✓ SUDAH SIAP";
-                        } else {
-                            btn.classList.remove('siap-aktif');
-                            btn.innerText = "JURI SIAP";
-                        }
-                    }
+                    if (btn) { if (isSiap) { btn.classList.add('siap-aktif'); btn.innerText = "✓ SUDAH SIAP"; } else { btn.classList.remove('siap-aktif'); btn.innerText = "JURI SIAP"; } }
                 });
             }
 
             if (pos === 'dewan') {
-                onValue(ref(database, `${ruangAktif}/pertandingan/${gel}/juri_siap`), (snap) => {
+                onValue(ref(database, `${baseRefKamar}/live_state/juri_siap`), (snap) => {
                     let dataSiap = snap.val() || {};
                     for (let i = 1; i <= sessionJurus.jumlahJuri; i++) {
-                        let titleEl = document.getElementById(`title_j${i}`);
-                        let namaEl = document.getElementById(`nama_j${i}`);
+                        let titleEl = document.getElementById(`title_j${i}`); let namaEl = document.getElementById(`nama_j${i}`);
                         if (titleEl) {
-                            if (dataSiap[`j${i}`] === true) {
-                                titleEl.style.color = "var(--neon-green)";
-                                titleEl.innerText = `✓ JURI ${i}`;
-                                if (namaEl) namaEl.style.color = "var(--neon-green)";
-                            } else {
-                                titleEl.style.color = "#888";
-                                titleEl.innerText = `JURI ${i}`;
-                                if (namaEl) namaEl.style.color = "#888";
-                            }
+                            if (dataSiap[`j${i}`] === true) { titleEl.style.color = "var(--neon-green)"; titleEl.innerText = `✓ JURI ${i}`; if (namaEl) namaEl.style.color = "var(--neon-green)"; } 
+                            else { titleEl.style.color = "#888"; titleEl.innerText = `JURI ${i}`; if (namaEl) namaEl.style.color = "#888"; }
                         }
                     }
                 });
             }
 
             if (pos === 'dewan') {
-                document.getElementById('headerDewan').style.display = "grid";
-                document.getElementById('headerJuri').style.display = "none";
+                document.getElementById('headerDewan').style.display = "grid"; document.getElementById('headerJuri').style.display = "none";
                 document.getElementById('wadahFooterJuriKhusus').style.setProperty("display", "none", "important");
                 generateDewanUI(); document.getElementById('panelDewan').style.display = "block";
             } else {
-                document.getElementById('headerDewan').style.display = "none";
-                document.getElementById('headerJuri').style.display = "flex";
+                document.getElementById('headerDewan').style.display = "none"; document.getElementById('headerJuri').style.display = "flex";
                 document.getElementById('wadahFooterJuriKhusus').style.setProperty("display", "flex", "important");
                 generateJuriUI(); document.getElementById('panelJuri').style.display = "flex";
             }
@@ -1226,75 +1204,50 @@
             bootstrap.Modal.getInstance(document.getElementById('modalLogin')).hide();
         }
 
-        window.logoutJurus = function () {
-            let modalLogout = new bootstrap.Modal(document.getElementById('modalConfirmLogout'));
-            modalLogout.show();
-        }
+        window.logoutJurus = function () { let modalLogout = new bootstrap.Modal(document.getElementById('modalConfirmLogout')); modalLogout.show(); }
 
         window.eksekusiLogoutFinal = function () {
-            if (sessionJurus.slotId) {
-                set(ref(database, `${ruangAktif}/pertandingan/${sessionJurus.gel}/locks/${sessionJurus.slotId}`), null);
-            }
-
-            let modalEl = document.getElementById('modalConfirmLogout');
-            let modalInstance = bootstrap.Modal.getInstance(modalEl);
-            if (modalInstance) modalInstance.hide();
-
+            if (sessionJurus.slotId) { set(ref(database, `${baseRefGelanggang}/kontrol_layar/locks/${sessionJurus.slotId}`), null); }
+            let modalEl = document.getElementById('modalConfirmLogout'); let modalInstance = bootstrap.Modal.getInstance(modalEl); if (modalInstance) modalInstance.hide();
             setTimeout(() => window.location.reload(), 200);
         }
 
-        // FUNGSI JURI SIAP TOGGLE
         window.toggleJuriSiap = function () {
             if (sessionJurus.pos !== 'juri') return;
             let nilaiBaru = statusJuriSiapLokal ? null : true;
-            set(ref(database, `${ruangAktif}/pertandingan/${sessionJurus.gel}/juri_siap/${sessionJurus.juriId}`), nilaiBaru);
+            set(ref(database, `${baseRefKamar}/live_state/juri_siap/${sessionJurus.juriId}`), nilaiBaru);
         }
 
         window.updateNamaJuriKeDatabase = function (namaTerpilih) {
-            if (sessionJurus.pos !== 'juri') return;
-            let dbKey = sessionJurus.juriId.replace('j', 'juri');
-            update(ref(database, `${ruangAktif}/pertandingan/${sessionJurus.gel}/setup`), {
-                [dbKey]: namaTerpilih
-            });
+            if (sessionJurus.pos !== 'juri') return; let dbKey = sessionJurus.juriId.replace('j', 'juri');
+            update(ref(database, `${baseRefKamar}/info_laga`), { [dbKey]: namaTerpilih });
         }
 
-        // UI GENERATOR DEWAN
         function generateDewanUI() {
-            let gridJuri = document.getElementById('gridJuriDewan');
-            gridJuri.innerHTML = "";
+            let gridJuri = document.getElementById('gridJuriDewan'); gridJuri.innerHTML = "";
             let baseScoreTampil = (sessionJurus.kategori === 'Ganda' || sessionJurus.kategori === 'Solo Kreatif') ? "9.10" : "9.90";
 
-            let n = sessionJurus.jumlahJuri;
-            let flexLebar = "18%";
-            if (n === 8 || n === 7) flexLebar = "23%";
-            if (n <= 6) flexLebar = "31%";
+            let n = sessionJurus.jumlahJuri; let flexLebar = "18%";
+            if (n === 8 || n === 7) flexLebar = "23%"; if (n <= 6) flexLebar = "31%";
 
             for (let i = 1; i <= n; i++) {
                 let namaJuri = dataSetupGlobal[`juri${i}`] && dataSetupGlobal[`juri${i}`] !== "-" ? dataSetupGlobal[`juri${i}`] : `JURI ${i}`;
-
                 gridJuri.innerHTML += `
                 <div style="flex: 0 0 ${flexLebar}; min-width: 190px; margin-bottom: 2px;">
                     <div class="juri-box" id="boxJ${i}" style="width: 100%; padding: 6px 10px; background: rgba(10,10,10,0.8); border: 1px solid #333; border-radius: 8px;">
-                        
-                        <!-- Header Nama Juri -->
                         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #444; padding-bottom: 2px; margin-bottom: 4px;">
                             <span class="juri-title" id="title_j${i}" style="margin: 0; font-size: 11px; font-weight: 900;">JURI ${i}</span>
                             <span id="nama_j${i}" style="font-size: 10px; font-weight: bold; color: var(--gold); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 65%; text-transform: uppercase;">${namaJuri}</span>
                         </div>
-                        
-                        <!-- Rincian Nilai -->
                         <div style="display: flex; justify-content: space-between; font-size: 12px; color: #aaa; margin-bottom: 2px;">
                             <span>Kebenaran:</span> <span id="kebenaran_j${i}" class="text-white fw-bold">${baseScoreTampil}</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; font-size: 12px; color: #aaa; margin-bottom: 4px;">
                             <span>Stamina:</span> <span id="stamina_j${i}" class="text-white fw-bold">0.00</span>
                         </div>
-
-                        <!-- Total Skor -->
                         <div style="background: #000; border: 1px solid #444; border-radius: 4px; padding: 2px;">
                             <div id="skorJ${i}" class="display-skor-juri" style="font-size: 24px; height: 30px; line-height: 30px; border: none; background: transparent;">${baseScoreTampil}</div>
                         </div>
-
                     </div>
                 </div>`;
             }
@@ -1304,22 +1257,13 @@
                 <button class="btn btn-hukuman" onclick="tambahHukumanDewan('Keluar Gelanggang (10x10)')"><span>Keluar Gelanggang (10x10)</span> <span class="badge-hukuman">-0.50</span></button>
                 <button class="btn btn-hukuman warning-hukuman text-warning" onclick="tambahHukumanDewan('Menahan Gerak > 5 Detik')"><span>Menahan Gerak > 5 Detik</span> <span class="badge-hukuman text-warning">-0.50</span></button>
             `;
-            if (sessionJurus.kategori === 'Tunggal') {
-                hukumanHtml += `<button class="btn btn-hukuman" onclick="tambahHukumanDewan('Senjata Jatuh ke Lantai')"><span>Senjata Jatuh ke Lantai</span> <span class="badge-hukuman">-0.50</span></button>
-                                <button class="btn btn-hukuman" onclick="tambahHukumanDewan('Pakaian Tidak Sesuai Aturan')"><span>Pakaian Tidak Sesuai Aturan</span> <span class="badge-hukuman">-0.50</span></button>`;
-            } else if (sessionJurus.kategori === 'Regu') {
-                hukumanHtml += `<button class="btn btn-hukuman" onclick="tambahHukumanDewan('Pakaian Tidak Sesuai Aturan')"><span>Pakaian Tidak Sesuai Aturan</span> <span class="badge-hukuman">-0.50</span></button>`;
-            } else if (sessionJurus.kategori === 'Ganda') {
-                hukumanHtml += `<button class="btn btn-hukuman" onclick="tambahHukumanDewan('Senjata Jatuh Beda Sinopsis')"><span>Senjata Jatuh Beda Sinopsis</span> <span class="badge-hukuman">-0.50</span></button>
-                                <button class="btn btn-hukuman" onclick="tambahHukumanDewan('Senjata Jatuh Keluar Arena')"><span>Senjata Jatuh Keluar Arena</span> <span class="badge-hukuman">-0.50</span></button>
-                                <button class="btn btn-hukuman" onclick="tambahHukumanDewan('Pakaian Tidak Sesuai Aturan')"><span>Pakaian Tidak Sesuai Aturan</span> <span class="badge-hukuman">-0.50</span></button>`;
-            } else {
-                hukumanHtml += `<button class="btn btn-hukuman" onclick="tambahHukumanDewan('Senjata Jatuh Beda Sinopsis')"><span>Senjata Jatuh Beda Sinopsis</span> <span class="badge-hukuman">-0.50</span></button>
-                                <button class="btn btn-hukuman" onclick="tambahHukumanDewan('Senjata Jatuh Keluar Arena')"><span>Senjata Jatuh Keluar Arena</span> <span class="badge-hukuman">-0.50</span></button>`;
-            }
+            if (sessionJurus.kategori === 'Tunggal') { hukumanHtml += `<button class="btn btn-hukuman" onclick="tambahHukumanDewan('Senjata Jatuh ke Lantai')"><span>Senjata Jatuh ke Lantai</span> <span class="badge-hukuman">-0.50</span></button><button class="btn btn-hukuman" onclick="tambahHukumanDewan('Pakaian Tidak Sesuai Aturan')"><span>Pakaian Tidak Sesuai Aturan</span> <span class="badge-hukuman">-0.50</span></button>`; } 
+            else if (sessionJurus.kategori === 'Regu') { hukumanHtml += `<button class="btn btn-hukuman" onclick="tambahHukumanDewan('Pakaian Tidak Sesuai Aturan')"><span>Pakaian Tidak Sesuai Aturan</span> <span class="badge-hukuman">-0.50</span></button>`; } 
+            else if (sessionJurus.kategori === 'Ganda') { hukumanHtml += `<button class="btn btn-hukuman" onclick="tambahHukumanDewan('Senjata Jatuh Beda Sinopsis')"><span>Senjata Jatuh Beda Sinopsis</span> <span class="badge-hukuman">-0.50</span></button><button class="btn btn-hukuman" onclick="tambahHukumanDewan('Senjata Jatuh Keluar Arena')"><span>Senjata Jatuh Keluar Arena</span> <span class="badge-hukuman">-0.50</span></button><button class="btn btn-hukuman" onclick="tambahHukumanDewan('Pakaian Tidak Sesuai Aturan')"><span>Pakaian Tidak Sesuai Aturan</span> <span class="badge-hukuman">-0.50</span></button>`; } 
+            else { hukumanHtml += `<button class="btn btn-hukuman" onclick="tambahHukumanDewan('Senjata Jatuh Beda Sinopsis')"><span>Senjata Jatuh Beda Sinopsis</span> <span class="badge-hukuman">-0.50</span></button><button class="btn btn-hukuman" onclick="tambahHukumanDewan('Senjata Jatuh Keluar Arena')"><span>Senjata Jatuh Keluar Arena</span> <span class="badge-hukuman">-0.50</span></button>`; }
             document.getElementById('gridTombolHukumanDewan').innerHTML = hukumanHtml;
 
-            onValue(ref(database, `${ruangAktif}/pertandingan/${sessionJurus.gel}/Jurus/skor`), (snap) => {
+            onValue(ref(database, `${baseRefKamar}/skor_juri`), (snap) => {
                 let skorData = snap.val() || {};
                 for (let i = 1; i <= sessionJurus.jumlahJuri; i++) {
                     let e = document.getElementById(`skorJ${i}`), box = document.getElementById(`boxJ${i}`);
@@ -1335,11 +1279,10 @@
                 kalkulasiSkorDewan();
             });
 
-            onValue(ref(database, `${ruangAktif}/pertandingan/${sessionJurus.gel}/Jurus/rincian`), (snap) => {
+            onValue(ref(database, `${baseRefKamar}/rincian_juri`), (snap) => {
                 let rincianData = snap.val() || {};
                 for (let i = 1; i <= sessionJurus.jumlahJuri; i++) {
-                    let elKeb = document.getElementById(`kebenaran_j${i}`);
-                    let elStam = document.getElementById(`stamina_j${i}`);
+                    let elKeb = document.getElementById(`kebenaran_j${i}`); let elStam = document.getElementById(`stamina_j${i}`);
                     if (elKeb && elStam) {
                         let dataJuri = rincianData[`j${i}`];
                         elKeb.innerText = dataJuri ? dataJuri.kebenaran.toFixed(2) : baseScoreTampil;
@@ -1349,115 +1292,55 @@
             });
         }
 
-        // UI GENERATOR JURI
         function generateJuriUI() {
             let footerKhusus = document.getElementById('wadahFooterJuriKhusus');
-            let boxSiap = document.getElementById('boxBtnSiap');
-            let boxNama = document.getElementById('boxSelectJuri');
-            let timerGelanggang = document.getElementById('displayTimerGelanggang');
+            let boxSiap = document.getElementById('boxBtnSiap'); let boxNama = document.getElementById('boxSelectJuri'); let timerGelanggang = document.getElementById('displayTimerGelanggang');
             let topWrapper = document.getElementById('topWrapperJuri');
-            if (!topWrapper) {
-                topWrapper = document.createElement('div');
-                topWrapper.id = 'topWrapperJuri';
-                topWrapper.style.position = 'relative';
-                topWrapper.style.width = '100%';
-                topWrapper.style.marginBottom = '15px';
-
-                timerGelanggang.parentNode.insertBefore(topWrapper, timerGelanggang);
-                topWrapper.appendChild(timerGelanggang);
-            }
+            if (!topWrapper) { topWrapper = document.createElement('div'); topWrapper.id = 'topWrapperJuri'; topWrapper.style.position = 'relative'; topWrapper.style.width = '100%'; topWrapper.style.marginBottom = '15px'; timerGelanggang.parentNode.insertBefore(topWrapper, timerGelanggang); topWrapper.appendChild(timerGelanggang); }
 
             if (sessionJurus.kategori === 'Tunggal' || sessionJurus.kategori === 'Regu') {
                 document.getElementById('displaySkorJuri').innerText = BASE_SKOR_TUNGGAL.toFixed(2);
+                document.getElementById('wadahJuriPengurangan').style.display = "block"; document.getElementById('wadahJuriPenambahan').style.display = "none";
+                topWrapper.appendChild(boxNama); boxNama.style.position = "absolute"; boxNama.style.right = "0"; boxNama.style.top = "10px"; boxNama.style.width = "250px"; boxNama.style.margin = "0";
 
-                document.getElementById('wadahJuriPengurangan').style.display = "block";
-                document.getElementById('wadahJuriPenambahan').style.display = "none";
-
-                topWrapper.appendChild(boxNama);
-                boxNama.style.position = "absolute";
-                boxNama.style.right = "0";
-                boxNama.style.top = "10px";
-                boxNama.style.width = "250px";
-                boxNama.style.margin = "0";
-
-
-                let htmlKiri = `<button id="btnSalahGerakLokal" class="btn fw-bold btn-salah-gerak btn-kesalahan" style="width: 100%; height: 100%; min-height: 250px; font-size: 28px; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center;" onclick="potongNilaiJuri('Salah Gerakan')">
-                                    <span style="pointer-events: none;">SALAH GERAKAN</span>
-                                    <span class="badge-minus mt-3" style="pointer-events: none; font-size: 26px; padding: 8px 30px; color: #000; background: rgba(255,255,255,0.9);"> -0.01 </span>
-                                </button>`;
+                let htmlKiri = `<button id="btnSalahGerakLokal" class="btn fw-bold btn-salah-gerak btn-kesalahan" style="width: 100%; height: 100%; min-height: 250px; font-size: 28px; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center;" onclick="potongNilaiJuri('Salah Gerakan')"><span style="pointer-events: none;">SALAH GERAKAN</span><span class="badge-minus mt-3" style="pointer-events: none; font-size: 26px; padding: 8px 30px; color: #000; background: rgba(255,255,255,0.9);"> -0.01 </span></button>`;
                 document.getElementById('gridTombolKiri').innerHTML = htmlKiri;
 
-                let gridKanan = document.getElementById('gridTombolKanan');
-                gridKanan.innerHTML = "";
-                boxSiap.style.width = "100%";
-                boxSiap.style.height = "100%";
-
-                let btnSiapAsli = document.getElementById('btnJuriSiap');
-                btnSiapAsli.style.height = "100%";
-                btnSiapAsli.style.minHeight = "250px";
-                btnSiapAsli.style.fontSize = "28px";
-                btnSiapAsli.style.borderRadius = "12px";
-                btnSiapAsli.className = "btn fw-bold btn-juri-siap-raksasa";
-
+                let gridKanan = document.getElementById('gridTombolKanan'); gridKanan.innerHTML = "";
+                boxSiap.style.width = "100%"; boxSiap.style.height = "100%";
+                let btnSiapAsli = document.getElementById('btnJuriSiap'); btnSiapAsli.style.height = "100%"; btnSiapAsli.style.minHeight = "250px"; btnSiapAsli.style.fontSize = "28px"; btnSiapAsli.style.borderRadius = "12px"; btnSiapAsli.className = "btn fw-bold btn-juri-siap-raksasa";
                 gridKanan.appendChild(boxSiap);
 
                 footerKhusus.style.justifyContent = "center";
                 let htmlStamina = `<div class="pdf-section-title text-center mt-2">KEMANTAPAN GERAK / STAMINA (RENTANG NILAI: 0.01 - 0.10)</div><div class="grid-10-col" id="gridStaminaJuri">`;
-                for (let i = 1; i <= 10; i++) {
-                    let val = (i / 100).toFixed(2);
-                    htmlStamina += `<button class="btn-nilai-pdf btn-stamina" id="btnStam_${i}" onclick="setStaminaJuri(${val}, ${i})">${val}</button>`;
-                }
-                htmlStamina += `</div>`;
-                document.getElementById('wadahStaminaTengah').innerHTML = htmlStamina;
+                for (let i = 1; i <= 10; i++) { let val = (i / 100).toFixed(2); htmlStamina += `<button class="btn-nilai-pdf btn-stamina" id="btnStam_${i}" onclick="setStaminaJuri(${val}, ${i})">${val}</button>`; }
+                htmlStamina += `</div>`; document.getElementById('wadahStaminaTengah').innerHTML = htmlStamina;
 
                 updateLayarJuriTunggal();
-
             } else {
                 document.getElementById('displaySkorJuri').innerText = BASE_SKOR_GANDA.toFixed(2);
-                document.getElementById('wadahJuriPenambahan').style.display = "block";
-                document.getElementById('wadahJuriPengurangan').style.display = "none";
-                document.getElementById('wadahStaminaTengah').innerHTML = "";
-
-                boxNama.style.position = "static";
-                boxNama.style.width = "220px";
-                boxSiap.style.width = "220px";
-                let btnSiapAsli = document.getElementById('btnJuriSiap');
-                btnSiapAsli.style.height = "auto";
-                btnSiapAsli.style.minHeight = "0px";
-                btnSiapAsli.style.fontSize = "14px";
-                btnSiapAsli.className = "btn fw-bold text-dark btn-juri-siap-bottom btn-warning";
-                footerKhusus.insertBefore(boxSiap, document.getElementById('wadahStaminaTengah'));
-                footerKhusus.appendChild(boxNama);
-                footerKhusus.style.justifyContent = "space-between";
-
-                document.getElementById('gridGandaTeknik').innerHTML = generateGrid15x2('teknik');
-                document.getElementById('gridGandaSerasi').innerHTML = generateGrid15x2('serasi');
-                document.getElementById('gridGandaJiwa').innerHTML = generateGrid15x2('jiwa');
+                document.getElementById('wadahJuriPenambahan').style.display = "block"; document.getElementById('wadahJuriPengurangan').style.display = "none"; document.getElementById('wadahStaminaTengah').innerHTML = "";
+                boxNama.style.position = "static"; boxNama.style.width = "220px"; boxSiap.style.width = "220px";
+                let btnSiapAsli = document.getElementById('btnJuriSiap'); btnSiapAsli.style.height = "auto"; btnSiapAsli.style.minHeight = "0px"; btnSiapAsli.style.fontSize = "14px"; btnSiapAsli.className = "btn fw-bold text-dark btn-juri-siap-bottom btn-warning";
+                footerKhusus.insertBefore(boxSiap, document.getElementById('wadahStaminaTengah')); footerKhusus.appendChild(boxNama); footerKhusus.style.justifyContent = "space-between";
+                document.getElementById('gridGandaTeknik').innerHTML = generateGrid15x2('teknik'); document.getElementById('gridGandaSerasi').innerHTML = generateGrid15x2('serasi'); document.getElementById('gridGandaJiwa').innerHTML = generateGrid15x2('jiwa');
             }
         }
 
         function generateGrid15x2(kategoriId) {
             let html = `<div class="grid-15-col">`;
-            for (let i = 1; i <= 30; i++) {
-                let val = (i / 100).toFixed(2);
-                html += `<button class="btn-ganda btn-ganda-${kategoriId}" id="btnGanda_${kategoriId}_${i}" onclick="setNilaiGanda('${kategoriId}', ${val}, ${i})">${val}</button>`;
-            }
-            html += `</div>`;
-            return html;
+            for (let i = 1; i <= 30; i++) { let val = (i / 100).toFixed(2); html += `<button class="btn-ganda btn-ganda-${kategoriId}" id="btnGanda_${kategoriId}_${i}" onclick="setNilaiGanda('${kategoriId}', ${val}, ${i})">${val}</button>`; }
+            html += `</div>`; return html;
         }
 
         window.potongNilaiJuri = function (jenis) {
-            totalPotonganJuri++;
-            let objekLog = { teks: jenis, tipe: 'min', poin: '-0.01', waktu: waktuBerjalanSekarang };
-            riwayatPotonganJuri.push(objekLog);
-            logTampilanJuri.push(objekLog);
-            updateLayarJuriTunggal(); renderLogJuriTunggal();
+            totalPotonganJuri++; let objekLog = { teks: jenis, tipe: 'min', poin: '-0.01', waktu: waktuBerjalanSekarang };
+            riwayatPotonganJuri.push(objekLog); logTampilanJuri.push(objekLog); updateLayarJuriTunggal(); renderLogJuriTunggal();
         }
 
         window.undoNilaiJuri = function () {
             if (riwayatPotonganJuri.length > 0) {
-                totalPotonganJuri--;
-                let undoneItem = riwayatPotonganJuri.pop();
+                totalPotonganJuri--; let undoneItem = riwayatPotonganJuri.pop();
                 logTampilanJuri.push({ teks: `BATAL: ${undoneItem.teks.toUpperCase()}`, tipe: 'plus', poin: '+0.01', waktu: waktuBerjalanSekarang });
                 updateLayarJuriTunggal(); renderLogJuriTunggal();
             }
@@ -1465,66 +1348,40 @@
 
         window.setStaminaJuri = function (nilai, idTombol) {
             let tombolDiklik = document.getElementById(`btnStam_${idTombol}`);
-
-            if (tombolDiklik.classList.contains('active')) {
-                tombolDiklik.classList.remove('active');
-                nilaiStaminaAktif = 0.00;
-            } else {
-                document.querySelectorAll('.btn-stamina').forEach(b => b.classList.remove('active'));
-                tombolDiklik.classList.add('active');
-                nilaiStaminaAktif = nilai;
-            }
-
+            if (tombolDiklik.classList.contains('active')) { tombolDiklik.classList.remove('active'); nilaiStaminaAktif = 0.00; } 
+            else { document.querySelectorAll('.btn-stamina').forEach(b => b.classList.remove('active')); tombolDiklik.classList.add('active'); nilaiStaminaAktif = nilai; }
             updateLayarJuriTunggal();
         }
 
         function updateLayarJuriTunggal() {
             let skorKebenaran = Number((BASE_SKOR_TUNGGAL - (totalPotonganJuri * 0.01)).toFixed(2));
             let skorFinal = Number((skorKebenaran + nilaiStaminaAktif).toFixed(2));
-
             document.getElementById("displaySkorJuri").innerText = skorFinal.toFixed(2);
-
-            set(ref(database, `${ruangAktif}/pertandingan/${sessionJurus.gel}/Jurus/skor/${sessionJurus.juriId}`), skorFinal);
-            set(ref(database, `${ruangAktif}/pertandingan/${sessionJurus.gel}/Jurus/rincian/${sessionJurus.juriId}`), {
-                kebenaran: skorKebenaran,
-                stamina: nilaiStaminaAktif
-            });
+            set(ref(database, `${baseRefKamar}/skor_juri/${sessionJurus.juriId}`), skorFinal);
+            set(ref(database, `${baseRefKamar}/rincian_juri/${sessionJurus.juriId}`), { kebenaran: skorKebenaran, stamina: nilaiStaminaAktif });
         }
 
         function renderLogJuriTunggal() {
             let box = document.getElementById("logKesalahanJuri");
-            if (logTampilanJuri.length === 0) {
-                box.innerHTML = '<div class="text-center mt-5 text-secondary" style="font-size:14px; letter-spacing:1px;">Log Pemotongan Poin...</div>';
-            } else {
-                box.innerHTML = logTampilanJuri.map(x => {
-                    let stempelWaktu = `<span class="text-secondary fw-bold" style="font-size:11px; margin-right:8px;">[${x.waktu}]</span>`;
-                    if (x.tipe === 'min') {
-                        return `<div class="mb-2 text-danger border-bottom border-dark pb-1">${stempelWaktu} ⚠️ ${x.teks} <span class="float-end fw-bold">${x.poin}</span></div>`;
-                    } else {
-                        return `<div class="mb-2 text-success border-bottom border-dark pb-1">${stempelWaktu} ↩️ ${x.teks} <span class="float-end fw-bold">${x.poin}</span></div>`;
-                    }
-                }).reverse().join('');
-            }
+            if (logTampilanJuri.length === 0) { box.innerHTML = '<div class="text-center mt-5 text-secondary" style="font-size:14px; letter-spacing:1px;">Log Pemotongan Poin...</div>'; } 
+            else { box.innerHTML = logTampilanJuri.map(x => { let stempelWaktu = `<span class="text-secondary fw-bold" style="font-size:11px; margin-right:8px;">[${x.waktu}]</span>`; if (x.tipe === 'min') { return `<div class="mb-2 text-danger border-bottom border-dark pb-1">${stempelWaktu} ⚠️ ${x.teks} <span class="float-end fw-bold">${x.poin}</span></div>`; } else { return `<div class="mb-2 text-success border-bottom border-dark pb-1">${stempelWaktu} ↩️ ${x.teks} <span class="float-end fw-bold">${x.poin}</span></div>`; } }).reverse().join(''); }
         }
 
-        // LOGIKA PENILAIAN JURI GANDA / SOLO
         window.setNilaiGanda = function (kategoriId, nilai, idTombol) {
             skorGanda[kategoriId] = nilai;
             document.querySelectorAll(`.btn-ganda-${kategoriId}`).forEach(b => b.classList.remove('active'));
             document.getElementById(`btnGanda_${kategoriId}_${idTombol}`).classList.add('active');
-
             let idKotakSkor = kategoriId === 'teknik' ? 'skorKotakTeknik' : (kategoriId === 'serasi' ? 'skorKotakSerasi' : 'skorKotakJiwa');
             document.getElementById(idKotakSkor).innerText = nilai.toFixed(2);
-
             let totalPenambahan = skorGanda.teknik + skorGanda.serasi + skorGanda.jiwa;
             let skorSementara = Number((BASE_SKOR_GANDA + totalPenambahan).toFixed(2));
-
             document.getElementById('skorKotakTotal').innerText = skorSementara.toFixed(2);
             document.getElementById("displaySkorJuri").innerText = skorSementara.toFixed(2);
         }
+
         window.kirimNilaiGanda = function () {
             let finalSkor = parseFloat(document.getElementById("displaySkorJuri").innerText);
-            set(ref(database, `${ruangAktif}/pertandingan/${sessionJurus.gel}/Jurus/skor/${sessionJurus.juriId}`), finalSkor).then(() => {
+            set(ref(database, `${baseRefKamar}/skor_juri/${sessionJurus.juriId}`), finalSkor).then(() => {
                 showCustomAlert("BERHASIL", "Nilai berhasil terkirim ke Dewan!");
                 let el = document.getElementById("displaySkorJuri");
                 el.classList.remove("skor-update"); void el.offsetWidth; el.classList.add("skor-update");
@@ -1532,37 +1389,26 @@
             });
         }
 
-        // LOGIKA DEWAN JURI & KALKULASI IPSI
         window.tambahHukumanDewan = function (jenis) { totalHukumanDewan += 0.50; listHukumanDewan.push(jenis); updateLogHukumanDewan(); kalkulasiSkorDewan(); }
         window.resetHukumanDewan = function () { totalHukumanDewan = 0; listHukumanDewan = []; updateLogHukumanDewan(); kalkulasiSkorDewan(); }
-
 
         function updateLogHukumanDewan() {
             let box = document.getElementById('daftarHukumanDewan');
             box.innerHTML = listHukumanDewan.length === 0 ? "<div class='text-center mt-2'>Bersih</div>" : listHukumanDewan.map(h => `<div class="mb-1 pb-1 border-bottom border-danger">❌ ${h}</div>`).join('');
             document.getElementById('teksTotalHukuman').innerText = "-" + totalHukumanDewan.toFixed(2);
-            set(ref(database, `${ruangAktif}/pertandingan/${sessionJurus.gel}/Jurus/hukuman`), totalHukumanDewan);
+            set(ref(database, `${baseRefKamar}/hukuman`), totalHukumanDewan);
+            set(ref(database, `${baseRefKamar}/hukuman_list`), listHukumanDewan);
         }
 
         window.kalkulasiSkorDewan = function () {
-            let arraySkor = [];
-            let defaultBase = (sessionJurus.kategori === 'Ganda' || sessionJurus.kategori === 'Solo Kreatif') ? 9.10 : 9.90;
-
-            for (let i = 1; i <= sessionJurus.jumlahJuri; i++) {
-                let n = parseFloat(document.getElementById(`skorJ${i}`).innerText);
-                arraySkor.push(isNaN(n) ? defaultBase : n);
-            }
+            let arraySkor = []; let defaultBase = (sessionJurus.kategori === 'Ganda' || sessionJurus.kategori === 'Solo Kreatif') ? 9.10 : 9.90;
+            for (let i = 1; i <= sessionJurus.jumlahJuri; i++) { let n = parseFloat(document.getElementById(`skorJ${i}`).innerText); arraySkor.push(isNaN(n) ? defaultBase : n); }
             arraySkor.sort((a, b) => a - b);
             document.getElementById('arrayUrut').innerText = `[ ${arraySkor.map(s => s.toFixed(2)).join(', ')} ]`;
 
             let median = 0, mid = Math.floor(arraySkor.length / 2);
-            if (arraySkor.length % 2 === 0) {
-                median = (arraySkor[mid - 1] + arraySkor[mid]) / 2;
-                document.getElementById('dataTengah').innerText = `[ ${arraySkor[mid - 1].toFixed(2)} & ${arraySkor[mid].toFixed(2)} ]`;
-            } else {
-                median = arraySkor[mid];
-                document.getElementById('dataTengah').innerText = `[ ${arraySkor[mid].toFixed(2)} ]`;
-            }
+            if (arraySkor.length % 2 === 0) { median = (arraySkor[mid - 1] + arraySkor[mid]) / 2; document.getElementById('dataTengah').innerText = `[ ${arraySkor[mid - 1].toFixed(2)} & ${arraySkor[mid].toFixed(2)} ]`; } 
+            else { median = arraySkor[mid]; document.getElementById('dataTengah').innerText = `[ ${arraySkor[mid].toFixed(2)} ]`; }
             document.getElementById('hasilMedian').innerText = median.toFixed(3);
 
             let mean = arraySkor.reduce((a, b) => a + b, 0) / arraySkor.length;
@@ -1573,91 +1419,50 @@
             let skorAkhirFinal = Math.max(0, median - totalHukumanDewan);
             document.getElementById('skorAkhirFinal').innerText = skorAkhirFinal.toFixed(3);
 
-            set(ref(database, `${ruangAktif}/pertandingan/${sessionJurus.gel}/Jurus/hasil_akhir`), Number(skorAkhirFinal.toFixed(3)));
-            set(ref(database, `${ruangAktif}/pertandingan/${sessionJurus.gel}/Jurus/sd`), Number(sd.toFixed(5)));
+            set(ref(database, `${baseRefKamar}/hasil_akhir`), Number(skorAkhirFinal.toFixed(3)));
+            set(ref(database, `${baseRefKamar}/sd`), Number(sd.toFixed(5)));
         }
 
         window.sahkanNilaiJurus = function () {
-            set(ref(database, `${ruangAktif}/pertandingan/${sessionJurus.gel}/status`), "PERTANDINGAN SELESAI");
-            set(ref(database, `${ruangAktif}/pertandingan/${sessionJurus.gel}/timer`), "00:00");
-            set(ref(database, `${ruangAktif}/pertandingan/${sessionJurus.gel}/trigger_auto_save`), Date.now());
-            set(ref(database, `${ruangAktif}/pertandingan/${sessionJurus.gel}/izin_simpan`), true).then(() => {
-                showCustomAlert("✅ DISAHKAN", "Skor berhasil disahkan ke Meja Kontrol.");
-            });
+            set(ref(database, `${baseRefKamar}/live_state/status`), "PERTANDINGAN SELESAI");
+            set(ref(database, `${baseRefKamar}/live_state/timer`), "00:00");
+            set(ref(database, `${baseRefKamar}/live_state/trigger_auto_save`), Date.now());
+            set(ref(database, `${baseRefKamar}/live_state/izin_simpan`), true).then(() => { showCustomAlert("✅ DISAHKAN", "Skor berhasil disahkan ke Meja Kontrol."); });
         }
 
-        // PEMBERSIHAN DATA SAAT STATUS PERSIAPAN
         function pantauStatus() {
-            onValue(ref(database, `${ruangAktif}/pertandingan/${sessionJurus.gel}/status`), (snap) => {
+            onValue(ref(database, `${baseRefKamar}/live_state/status`), (snap) => {
                 let status = snap.val() || "PERSIAPAN";
-
                 let kunciNilai = (status === "PERSIAPAN" || status === "PERTANDINGAN SELESAI");
                 let kunciSiap = (status.startsWith("RONDE") || status === "SELESAI");
 
-                document.querySelectorAll('.btn-kesalahan, .btn-undo, .btn-hukuman, .btn-stamina, .btn-ganda, .tombol-tengah-absolute').forEach(el => {
-                    el.disabled = kunciNilai;
-                    el.style.opacity = kunciNilai ? "0.3" : "1";
-                    el.style.pointerEvents = kunciNilai ? "none" : "auto";
-                });
+                document.querySelectorAll('.btn-kesalahan, .btn-undo, .btn-hukuman, .btn-stamina, .btn-ganda, .tombol-tengah-absolute').forEach(el => { el.disabled = kunciNilai; el.style.opacity = kunciNilai ? "0.3" : "1"; el.style.pointerEvents = kunciNilai ? "none" : "auto"; });
 
                 let btnSalah = document.getElementById('btnSalahGerakLokal');
-                if (btnSalah) {
-                    if (status.startsWith("RONDE")) {
-                        btnSalah.classList.add('hijau-saat-play');
-                    } else {
-                        btnSalah.classList.remove('hijau-saat-play');
-                    }
-                }
+                if (btnSalah) { if (status.startsWith("RONDE")) { btnSalah.classList.add('hijau-saat-play'); } else { btnSalah.classList.remove('hijau-saat-play'); } }
 
                 let btnSiap = document.getElementById('btnJuriSiap');
-                if (btnSiap) {
-                    btnSiap.disabled = kunciSiap;
-                    btnSiap.style.cursor = kunciSiap ? "not-allowed" : "pointer";
-                    btnSiap.style.opacity = "1";
-                }
+                if (btnSiap) { btnSiap.disabled = kunciSiap; btnSiap.style.cursor = kunciSiap ? "not-allowed" : "pointer"; btnSiap.style.opacity = "1"; }
 
                 let dropdownNama = document.getElementById('pilihNamaJuri');
-                if (dropdownNama) {
-                    let kunciDropdown = (status !== "PERSIAPAN");
-                    dropdownNama.disabled = kunciDropdown;
-                    dropdownNama.style.opacity = kunciDropdown ? "0.5" : "1";
-                    dropdownNama.style.cursor = kunciDropdown ? "not-allowed" : "pointer";
-                }
+                if (dropdownNama) { let kunciDropdown = (status !== "PERSIAPAN"); dropdownNama.disabled = kunciDropdown; dropdownNama.style.opacity = kunciDropdown ? "0.5" : "1"; dropdownNama.style.cursor = kunciDropdown ? "not-allowed" : "pointer"; }
 
                 if (status === "PERSIAPAN") {
-
                     if (sessionJurus.pos === 'dewan') {
-                        set(ref(database, `${ruangAktif}/pertandingan/${sessionJurus.gel}/Jurus/skor`), null);
-                        set(ref(database, `${ruangAktif}/pertandingan/${sessionJurus.gel}/Jurus/rincian`), null);
-                        set(ref(database, `${ruangAktif}/pertandingan/${sessionJurus.gel}/Jurus/hukuman`), 0);
-                        set(ref(database, `${ruangAktif}/pertandingan/${sessionJurus.gel}/Jurus/hasil_akhir`), 0);
-                        set(ref(database, `${ruangAktif}/pertandingan/${sessionJurus.gel}/Jurus/sd`), 0);
-                        set(ref(database, `${ruangAktif}/pertandingan/${sessionJurus.gel}/juri_siap`), null);
-
-                        totalHukumanDewan = 0; listHukumanDewan = [];
-                        updateLogHukumanDewan(); kalkulasiSkorDewan();
+                        set(ref(database, `${baseRefKamar}/skor_juri`), null);
+                        set(ref(database, `${baseRefKamar}/rincian_juri`), null);
+                        set(ref(database, `${baseRefKamar}/hukuman`), 0);
+                        set(ref(database, `${baseRefKamar}/hasil_akhir`), 0);
+                        set(ref(database, `${baseRefKamar}/sd`), 0);
+                        set(ref(database, `${baseRefKamar}/live_state/juri_siap`), null);
+                        totalHukumanDewan = 0; listHukumanDewan = []; updateLogHukumanDewan(); kalkulasiSkorDewan();
                     }
 
-
                     if (sessionJurus.pos === 'juri') {
-                        totalPotonganJuri = 0;
-                        riwayatPotonganJuri = [];
-                        logTampilanJuri = [];
-                        nilaiStaminaAktif = 0.00;
-
-                        skorGanda = { teknik: 0.00, serasi: 0.00, jiwa: 0.00 };
-
+                        totalPotonganJuri = 0; riwayatPotonganJuri = []; logTampilanJuri = []; nilaiStaminaAktif = 0.00; skorGanda = { teknik: 0.00, serasi: 0.00, jiwa: 0.00 };
                         document.querySelectorAll('.btn-stamina, .btn-ganda').forEach(b => b.classList.remove('active'));
-
-                        if (sessionJurus.kategori === 'Tunggal' || sessionJurus.kategori === 'Regu') {
-                            updateLayarJuriTunggal(); renderLogJuriTunggal();
-                        } else {
-                            document.getElementById("displaySkorJuri").innerText = BASE_SKOR_GANDA.toFixed(2);
-                            document.getElementById('skorKotakTeknik').innerText = "0.00";
-                            document.getElementById('skorKotakSerasi').innerText = "0.00";
-                            document.getElementById('skorKotakJiwa').innerText = "0.00";
-                            document.getElementById('skorKotakTotal').innerText = "0.00";
-                        }
+                        if (sessionJurus.kategori === 'Tunggal' || sessionJurus.kategori === 'Regu') { updateLayarJuriTunggal(); renderLogJuriTunggal(); } 
+                        else { document.getElementById("displaySkorJuri").innerText = BASE_SKOR_GANDA.toFixed(2); document.getElementById('skorKotakTeknik').innerText = "0.00"; document.getElementById('skorKotakSerasi').innerText = "0.00"; document.getElementById('skorKotakJiwa').innerText = "0.00"; document.getElementById('skorKotakTotal').innerText = "0.00"; }
                     }
                 }
             });

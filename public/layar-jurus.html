@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Layar TV Jurus Digital Scoring</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            /* Nilai default, akan ditimpa oleh panel pengaturan secara live */
+            --skala-global: 13px;
+            --skala-skor-juri: 4.5rem;
+            --skala-skor-akhir: 9.5rem;
+
+            /* TEMA WARNA DINAMIS (BUNGLON SUDUT) */
+            --sudut-warna: #20c997; 
+            --sudut-bg: rgba(5, 27, 17, 0.6);
+            --sudut-border: #198754;
+            --sudut-glow: rgba(32, 201, 151, 0.4);
+            --juri-header-bg: linear-gradient(180deg, #2a2a2a 0%, #111 100%);
+            --juri-header-border: #555;
+        }
+
+        body {
+            background: #080808; 
+            color: #fff;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 1rem 1.5rem;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            user-select: none;
+            transition: background 0.8s ease; 
+        }
+
+        html { font-size: var(--skala-global); transition: font-size 0.2s ease-out; }
+
+        #mainAppUI { display: none; flex-direction: column; flex: 1; width: 100%; height: 100%; gap: 1rem; }
+
+        /* 🔥 HEADER KOP & SPONSOR BARU (BEBAS KOTAK) 🔥 */
+        .header-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            min-height: 6rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .sponsor-container { 
+            display: flex; 
+            align-items: center; 
+            gap: 1.5rem; 
+        }
+        
+        .sponsor-logo { 
+            height: 5.5rem; /* Logo sekarang jauh lebih besar */
+            max-width: 9rem; 
+            object-fit: contain; 
+            filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.5));
+        }
+        
+
+        .championship-title-box {
+            background: rgba(0, 0, 0, 0.6); 
+            backdrop-filter: blur(8px);
+            border: 3px solid var(--sudut-border); 
+            border-radius: 12px; 
+            padding: 0.8rem 3rem; /* Memeluk teks secara presisi */
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 5px 15px rgba(0, 0, 0, 0.5); 
+            transition: border-color 0.8s ease;
+            text-align: center;
+        }
+
+        .championship-title-text {
+            font-size: 2rem; 
+            font-weight: 900; 
+            letter-spacing: 4px; 
+            text-transform: uppercase;
+            color: white;
+            text-shadow: 0 0 15px var(--sudut-glow);
+            margin: 0;
+            transition: color 0.8s ease, text-shadow 0.8s ease;
+        }
+
+        /* BOX ATLET & WAKTU */
+        .box-atlet-Jurus {
+            background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px);
+            border: 3px solid var(--sudut-border); border-radius: 15px;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.8), 0 5px 15px rgba(0,0,0,0.5);
+            transition: all 0.8s ease;
+        }
+
+        .atlet-Jurus-nama {
+            font-size: 3.5rem; font-weight: 900; color: var(--sudut-warna);
+            text-shadow: 2px 2px 10px var(--sudut-glow); letter-spacing: 3px; margin-right: -3px;
+            text-transform: uppercase; line-height: 1.1; transition: color 0.8s ease, text-shadow 0.8s ease;
+        }
+        .atlet-Jurus-asal { font-size: 1.4rem; color: #ddd; letter-spacing: 5px; margin-right: -5px; margin-top: 5px; text-transform: uppercase; font-weight: bold; }
+
+        .box-jam-Jurus {
+            background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px);
+            border: 3px solid #ffc107; border-radius: 15px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: inset 0 0 30px rgba(255, 193, 7, 0.1), 0 5px 15px rgba(0,0,0,0.5);
+        }
+        .angka-jam-Jurus { 
+            font-size: 7.5rem; font-weight: 900; color: #ffc107; font-family: monospace; 
+            letter-spacing: 6px; margin-right: -6px; line-height: 1; 
+        }
+
+        /* KOTAK JURI (SMART GRID) */
+        #wadahJuriTV { display: flex; flex-wrap: wrap; align-content: flex-start; gap: 12px; }
+
+        .card-juri-Jurus {
+            background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px);
+            border: 2px solid #333; border-radius: 15px; overflow: hidden;
+            display: flex; flex-direction: column; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .cjs-header {
+            background: var(--juri-header-bg); color: white; font-weight: 900; font-size: 1.3rem;
+            padding: 8px 0; border-bottom: 3px solid var(--juri-header-border); text-align: center;
+            letter-spacing: 3px; margin-right: -3px; transition: background 0.8s ease, border-color 0.8s ease;
+        }
+
+        .cjs-score {
+            flex-grow: 1; display: flex; align-items: center; justify-content: center;
+            font-size: var(--skala-skor-juri); font-weight: bold; font-family: monospace;
+            color: #fff; padding: 15px 0; text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+            letter-spacing: 2px; margin-right: -2px; transition: font-size 0.2s ease-out;
+        }
+
+        /* PANEL INFORMASI BAWAH */
+        .panel-info-bawah { display: flex; gap: 12px; margin-top: auto; }
+
+        .wadah-hukuman-fixed { flex: 1; display: flex; gap: 8px; }
+
+        .box-hukuman-item {
+            flex: 1; background: rgba(15, 15, 15, 0.6); backdrop-filter: blur(5px);
+            border: 2px solid #333; border-radius: 12px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 8px 4px; transition: all 0.4s ease; opacity: 0.35; 
+        }
+
+        .box-hukuman-item .hk-title { font-size: 0.95rem; font-weight: 900; color: #777; letter-spacing: 1px; margin-right: -1px; text-transform: uppercase; margin-bottom: 2px; }
+        .box-hukuman-item .hk-value { font-size: 1.8rem; font-weight: 900; font-family: monospace; color: #555; line-height: 1; }
+
+        .box-hukuman-item.active {
+            opacity: 1 !important;
+            background: linear-gradient(180deg, #dc3545 0%, #700000 100%) !important;
+            border-color: #ff4d4d !important;
+            box-shadow: 0 0 20px rgba(220, 53, 69, 0.9) !important;
+            transform: scale(1.03);
+        }
+        .box-hukuman-item.active .hk-title { color: #ffffff !important; text-shadow: 0 0 8px rgba(255, 255, 255, 0.9) !important; }
+        .box-hukuman-item.active .hk-value { color: #ffffff !important; text-shadow: 0 0 12px #ffffff !important; }
+
+        .info-card-side {
+            flex: 0.28; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px);
+            border: 2px solid #333; border-radius: 12px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8); padding: 5px;
+        }
+
+        .info-title-side { font-size: 1rem; font-weight: bold; letter-spacing: 2px; margin-right: -2px; text-transform: uppercase; }
+        .info-value-side { font-size: 2.5rem; font-weight: 900; font-family: monospace; line-height: 1; margin-top: 4px; }
+
+        .val-hukuman { color: #ff4444; text-shadow: 0 0 15px rgba(255, 68, 68, 0.5); }
+        .val-sd { color: #ffc107; text-shadow: 0 0 15px rgba(255, 193, 7, 0.5); }
+
+        /* SKOR FINAL BOX */
+        .box-skor-final-Jurus {
+            background: var(--sudut-bg); backdrop-filter: blur(8px);
+            border: 3px solid var(--sudut-border); border-radius: 15px;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            padding: 20px; text-align: center; box-shadow: inset 0 0 30px var(--sudut-glow), 0 5px 15px rgba(0,0,0,0.5);
+            transition: all 0.8s ease;
+        }
+
+        .teks-label-hijau { 
+            font-size: 1.8rem; font-weight: 900; color: var(--sudut-warna); 
+            letter-spacing: 5px; margin-right: -5px; margin-bottom: 10px; transition: color 0.8s ease; 
+        }
+        .angka-final-Jurus { 
+            font-size: var(--skala-skor-akhir); font-weight: 900; color: var(--sudut-warna); 
+            font-family: monospace; line-height: 0.9; text-shadow: 0 0 40px var(--sudut-glow); 
+            letter-spacing: 2px; margin-right: -2px; transition: font-size 0.2s ease-out, color 0.8s ease; 
+        }
+
+        /* SCREENSAVER & MODAL */
+        .modal-content.dark-theme { background-color: #111; border: 1px solid #555; color: white; }
+        #screensaverOverlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #000; z-index: 9999; justify-content: center; align-items: center; }
+        #screensaverImg { width: 100%; height: 100%; object-fit: contain; transition: opacity 0.8s ease-in-out; opacity: 0; }
+    </style>
+</head>
+
+<body>
+
+    <div id="screensaverOverlay"><img id="screensaverImg" src=""></div>
+
+    <div class="modal fade" id="modalSetupLayar" data-bs-backdrop="static" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content dark-theme p-4 position-relative border-success">
+                <a href="index.html" class="position-absolute text-secondary fs-4 text-decoration-none" style="top:10px; left:15px;">❮</a>
+                <h4 class="text-success text-center mb-4 fw-bold">PORTAL LAYAR JURUS</h4>
+                <select id="lGelanggangLayar" class="form-select mb-4 bg-dark text-white border-secondary">
+                    <option value="" disabled selected>-- Pilih Gelanggang --</option>
+                    <option value="g1">Gelanggang 1</option>
+                    <option value="g2">Gelanggang 2</option>
+                    <option value="g3">Gelanggang 3</option>
+                </select>
+                <button class="btn btn-success text-dark w-100 fw-bold mt-2 py-3" onclick="mulaiLayarJurus()">TAYANGKAN KATEGORI jurus</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTAINER UTAMA TV -->
+    <div id="mainAppUI">
+        
+        <!-- 🔥 HEADER KOP BARU (BOX FLEKSIBEL DI TENGAH, LOGO BEBAS DI SAMPING) 🔥 -->
+        <div class="header-wrapper">
+            <div class="sponsor-container" id="wadahKiri"></div>
+            <div class="championship-title-box">
+                <div class="championship-title-text" id="judulKejuaraan">KEJUARAAN PENCAK SILAT</div>
+            </div>
+            <div class="sponsor-container" id="wadahKanan"></div>
+        </div>
+
+        <!-- 🔥 WADAH STANDBY KETIKA KATEGORI TANDING BERJALAN 🔥 -->
+        <div id="wrapperStandbyTanding" style="display: none; flex: 1; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+            <div style="background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); padding: 40px 60px; border-radius: 20px; border: 2px dashed #4dabf7; box-shadow: 0 0 30px rgba(77, 171, 247, 0.2);">
+                <h1 style="color: #4dabf7; font-size: 4rem; font-weight: 900; text-shadow: 0 0 20px rgba(77, 171, 247, 0.5); letter-spacing: 5px;">KATEGORI TANDING</h1>
+                <h3 class="text-secondary mt-3" style="letter-spacing: 3px;">SEDANG BERLANGSUNG DI GELANGGANG INI</h3>
+                <p class="text-secondary mt-3 mb-0" style="font-size: 1.2rem;">Layar jurus / Jurus Masuk Mode Standby.</p>
+            </div>
+        </div>
+
+        <!-- 🔥 WADAH UTAMA KETIKA KATEGORI JURUS BERJALAN 🔥 -->
+        <div id="wrapperAppjurus" style="display: flex; flex-direction: column; flex: 1; gap: 1rem;">
+            <div style="display: flex; gap: 1rem; height: 22%;">
+                <div class="box-atlet-Jurus" style="flex: 0 0 calc(68% - 0.5rem);">
+                    <div class="atlet-Jurus-nama" id="s_nama_atlet" style="color: white;">NAMA PESILAT</div>
+<div class="atlet-Jurus-asal" id="s_kon_atlet" style="color: white;">KONTINGEN DAERAH</div>
+                </div>
+                <div class="box-jam-Jurus" style="flex: 0 0 calc(32% - 0.5rem);">
+                    <div class="angka-jam-Jurus" id="s_timer">00:00</div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 1rem; flex: 1;">
+                <div style="flex: 0 0 calc(68% - 0.5rem); display: flex; flex-direction: column;">
+                    
+                    <div id="wadahJuriTV"></div>
+
+                    <div class="panel-info-bawah">
+                        <div class="wadah-hukuman-fixed">
+                            <div class="box-hukuman-item" id="hk_waktu">
+                                <div class="hk-title">WAKTU</div>
+                                <div class="hk-value">-0.50</div>
+                            </div>
+                            <div class="box-hukuman-item" id="hk_garis">
+                                <div class="hk-title">GARIS</div>
+                                <div class="hk-value">-0.50</div>
+                            </div>
+                            <div class="box-hukuman-item" id="hk_gerak">
+                                <div class="hk-title">GERAK</div>
+                                <div class="hk-value">-0.50</div>
+                            </div>
+                            <div class="box-hukuman-item" id="hk_senjata">
+                                <div class="hk-title">SENJATA</div>
+                                <div class="hk-value">-0.50</div>
+                            </div>
+                            <div class="box-hukuman-item" id="hk_pakaian">
+                                <div class="hk-title">PAKAIAN</div>
+                                <div class="hk-value">-0.50</div>
+                            </div>
+                        </div>
+
+                        <div class="info-card-side border-warning text-warning">
+                            <div class="info-title-side">NILAI S.D</div>
+                            <div class="info-value-side val-sd" id="s_sd">0.00000</div>
+                        </div>
+                        <div class="info-card-side border-danger text-danger">
+                            <div class="info-title-side">TOTAL CUT</div>
+                            <div class="info-value-side val-hukuman" id="s_hukuman">-0.00</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="box-skor-final-Jurus" style="flex: 0 0 calc(32% - 0.5rem);">
+                    <div class="teks-label-hijau">SKOR AKHIR FINAL</div>
+                    <div class="angka-final-Jurus" id="s_skor_akhir">0.000</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+   
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="faceoff.js"></script>
+    <script src="animasi_pemenang_jurus.js"></script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js";
+        
+        const ruangAktif = localStorage.getItem('kode_voucer_aktif');
+        if (!ruangAktif) { window.location.href = 'index.html'; }
+        
+        const firebaseConfig = { apiKey: "AIzaSyCNsOk8MsIhBoZ44Nd9WGGl6eBJOEKu3nI", authDomain: "tesapksilat99.firebaseapp.com", databaseURL: "https://tesapksilat99-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "tesapksilat99" };
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        let GELANGGANG = ""; 
+        let baseRefGelanggang = ""; 
+        let baseRefKamar = ""; 
+        
+        // Modal popup telah dihapus total
+        let arrScreensavers = []; let ssDelay = 60000; let idleTimer = null; let slideInterval = null; let currentSlide = 0; let isScreensaverAktifManual = false;
+        
+        let sudutAktifGlobal = "biru";
+        let dataSetupGlobalTV = {};
+
+        function resetIdleTimer() { clearTimeout(idleTimer); if (isScreensaverAktifManual) { tampilkanScreensaver(); return; } sembunyikanScreensaver(); if (arrScreensavers.length > 0) idleTimer = setTimeout(tampilkanScreensaver, ssDelay); }
+        function tampilkanScreensaver() { if (arrScreensavers.length === 0) return; document.getElementById('screensaverOverlay').style.display = 'flex'; currentSlide = 0; gantiSlide(); clearInterval(slideInterval); slideInterval = setInterval(gantiSlide, 5000); }
+        function sembunyikanScreensaver() { document.getElementById('screensaverOverlay').style.display = 'none'; document.getElementById('screensaverImg').style.opacity = 0; clearInterval(slideInterval); }
+        function gantiSlide() { if (arrScreensavers.length === 0) return; let imgEl = document.getElementById('screensaverImg'); imgEl.style.opacity = 0; setTimeout(() => { imgEl.src = arrScreensavers[currentSlide]; imgEl.style.opacity = 1; currentSlide = (currentSlide + 1) % arrScreensavers.length; }, 800); }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('gelanggang')) {
+                document.getElementById('lGelanggangLayar').value = urlParams.get('gelanggang');
+                setTimeout(() => { window.mulaiLayarJurus(); }, 300);
+            } else { new bootstrap.Modal(document.getElementById('modalSetupLayar')).show(); }
+        });
+
+        window.mulaiLayarJurus = function () {
+            let gel = document.getElementById('lGelanggangLayar').value;
+            if (!gel) return;
+            GELANGGANG = gel; 
+            
+            baseRefGelanggang = `${ruangAktif}/pertandingan/${GELANGGANG}`;
+            baseRefKamar = `${baseRefGelanggang}/kamar_jurus`;
+
+            let modalSetup = bootstrap.Modal.getInstance(document.getElementById('modalSetupLayar'));
+            if (modalSetup) modalSetup.hide();
+            document.getElementById('mainAppUI').style.display = 'flex';
+            jalankanMesinFirebaseJurus();
+        }
+
+        function jalankanMesinFirebaseJurus() {
+            onValue(ref(database, `${ruangAktif}/pengaturan`), (snap) => {
+                let data = snap.val() || {};
+                window.saklarFotoGlobal = data.status_foto || "sembunyi";
+                if (data.nama_kejuaraan) document.getElementById('judulKejuaraan').innerText = data.nama_kejuaraan.toUpperCase();
+                if (data.logos) {
+                    let htmlKiri = ""; let htmlKanan = "";
+                    for (let i = 1; i <= 4; i++) {
+                        if (data.logos[`kiri${i}`]) htmlKiri += `<img src="${data.logos[`kiri${i}`]}" class="sponsor-logo">`;
+                        if (data.logos[`kanan${i}`]) htmlKanan += `<img src="${data.logos[`kanan${i}`]}" class="sponsor-logo">`;
+                    }
+                    document.getElementById('wadahKiri').innerHTML = htmlKiri; document.getElementById('wadahKanan').innerHTML = htmlKanan;
+                }
+                if (data.waktu_screensaver) ssDelay = parseInt(data.waktu_screensaver) * 1000;
+                if (data.screensavers) arrScreensavers = Object.values(data.screensavers).filter(img => img !== "");
+            });
+
+            onValue(ref(database, `${baseRefKamar}/skala_jurus`), (snap) => {
+                let s = snap.val();
+                if (s) {
+                    const r = document.documentElement.style;
+                    if (s.global !== undefined) r.setProperty('--skala-global', `${s.global}px`);
+                    if (s.skor_juri !== undefined) r.setProperty('--skala-skor-juri', `${s.skor_juri}rem`);
+                    if (s.skor_akhir !== undefined) r.setProperty('--skala-skor-akhir', `${s.skor_akhir}rem`);
+                }
+            });
+
+            onValue(ref(database, `${baseRefKamar}/live_state/sudut_aktif`), (snap) => {
+                sudutAktifGlobal = (snap.val() || "").toLowerCase();
+                let root = document.documentElement;
+                if (sudutAktifGlobal === 'merah') {
+                    root.style.setProperty('--sudut-warna', '#ff4d4d'); root.style.setProperty('--sudut-bg', 'rgba(42, 8, 8, 0.6)'); root.style.setProperty('--sudut-border', '#dc3545'); root.style.setProperty('--sudut-glow', 'rgba(220, 53, 69, 0.7)'); root.style.setProperty('--juri-header-bg', 'linear-gradient(180deg, #dc3545 0%, #8b0000 100%)'); root.style.setProperty('--juri-header-border', '#ff4d4d'); document.body.style.background = "linear-gradient(180deg, #220000 0%, #800000 50%, #220000 100%)";
+                } else if (sudutAktifGlobal === 'biru') {
+                    root.style.setProperty('--sudut-warna', '#4dabf7'); root.style.setProperty('--sudut-bg', 'rgba(8, 20, 42, 0.6)'); root.style.setProperty('--sudut-border', '#0d6efd'); root.style.setProperty('--sudut-glow', 'rgba(13, 110, 253, 0.7)'); root.style.setProperty('--juri-header-bg', 'linear-gradient(180deg, #0d6efd 0%, #002266 100%)'); root.style.setProperty('--juri-header-border', '#4dabf7'); document.body.style.background = "linear-gradient(180deg, #001122 0%, #004080 50%, #001122 100%)";
+                } else {
+                    root.style.setProperty('--sudut-warna', '#20c997'); root.style.setProperty('--sudut-bg', 'rgba(5, 27, 17, 0.6)'); root.style.setProperty('--sudut-border', '#198754'); root.style.setProperty('--sudut-glow', 'rgba(32, 201, 151, 0.5)'); root.style.setProperty('--juri-header-bg', 'linear-gradient(180deg, #2a2a2a 0%, #111 100%)'); root.style.setProperty('--juri-header-border', '#555'); document.body.style.background = "#080808";
+                }
+                updateIdentitasTV();
+            });
+
+            // 🔥 FILTER SILUMAN & LAYAR GANDA 🔥
+            let modeAktifGlobal = "jurus";
+            
+            onValue(ref(database, `${baseRefGelanggang}/kontrol_layar/mode_aktif`), (snap) => {
+                modeAktifGlobal = snap.val() || "jurus";
+                applyModeSiluman();
+            });
+
+            onValue(ref(database, `${baseRefKamar}/info_laga`), (snap) => {
+                dataSetupGlobalTV = snap.val() || {};
+                window.dataSetupGlobalTV = dataSetupGlobalTV; // <-- Baris spesial Jurus tetap aman!
+                
+                window.fotoBiruGlobal = dataSetupGlobalTV.foto_biru || "";
+                window.fotoMerahGlobal = dataSetupGlobalTV.foto_merah || "";
+                
+                // 🔥 MESIN PENYEDOT SILUMAN & SATPAM FACE-OFF 🔥
+                if (window.saklarFotoGlobal === 'tampil') {
+                    let sulapLink = (url) => { let m = (url||"").match(/\/d\/([a-zA-Z0-9-_]+)/); return (m && m[1]) ? "https://lh3.googleusercontent.com/d/" + m[1] : url; };
+                    if (window.fotoBiruGlobal) new Image().src = sulapLink(window.fotoBiruGlobal);
+                    if (window.fotoMerahGlobal) new Image().src = sulapLink(window.fotoMerahGlobal);
+
+                    // Logika Satpam Face-Off
+                    let cekNama = (dataSetupGlobalTV.nama_biru || "").toUpperCase();
+                    let cekPartai = dataSetupGlobalTV.partai || "-";
+                    let lagaUnikID = cekPartai + "_" + cekNama;
+
+                    if (cekPartai !== "-" && cekNama !== "-" && cekNama !== "BIRU") {
+                        if (window.lastFaceOffID !== lagaUnikID) {
+                            if (window.mainkanFaceOff) window.mainkanFaceOff(dataSetupGlobalTV);
+                            window.lastFaceOffID = lagaUnikID;
+                        }
+                    } else {
+                        // Jika klik Batalkan Siaran
+                        window.lastFaceOffID = ""; 
+                        let foOverlay = document.getElementById('faceoff-overlay');
+                        if (foOverlay) foOverlay.classList.remove('show');
+                    }
+                }
+
+                applyModeSiluman();
+            });
+
+            function applyModeSiluman() {
+                if (modeAktifGlobal === 'tanding') {
+                    document.getElementById('s_nama_atlet').innerText = "NAMA PESILAT";
+                    document.getElementById('s_kon_atlet').innerText = "KONTINGEN DAERAH";
+                    document.documentElement.style.setProperty('--sudut-warna', '#20c997'); document.documentElement.style.setProperty('--sudut-bg', 'rgba(5, 27, 17, 0.6)'); document.documentElement.style.setProperty('--sudut-border', '#198754'); document.body.style.background = "#080808";
+                    return; 
+                }
+                
+                updateIdentitasTV();
+
+                if (dataSetupGlobalTV.jumlah_juri !== undefined) {
+                    let maxJuriServer = parseInt(dataSetupGlobalTV.jumlah_juri);
+                    if (window.jumlahJuriTerpilih !== maxJuriServer) { window.jumlahJuriTerpilih = maxJuriServer; renderGridJuriTV(); }
+                } else if (!window.jumlahJuriTerpilih) { window.jumlahJuriTerpilih = 10; renderGridJuriTV(); }
+            }
+
+            function updateIdentitasTV() {
+                let d = dataSetupGlobalTV;
+                if (!d || modeAktifGlobal === 'tanding') return;
+
+                let n = (sudutAktifGlobal === 'merah') ? d.nama_merah : d.nama_biru;
+                let k = (sudutAktifGlobal === 'merah') ? d.kontingen_merah : d.kontingen_biru;
+
+                n = (n && n !== "-" && n !== "SUDUT MERAH" && n !== "SUDUT BIRU") ? n : "NAMA PESILAT";
+                k = (k && k !== "-") ? k : "KONTINGEN DAERAH";
+
+                document.getElementById('s_nama_atlet').innerText = n;
+                document.getElementById('s_kon_atlet').innerText = k;
+            }
+
+            window.renderGridJuriTV = function () {
+                let wadah = document.getElementById('wadahJuriTV');
+                if (!wadah) return; wadah.innerHTML = ""; let n = window.jumlahJuriTerpilih || 10;
+                let flexBasis = "calc(20% - 10px)"; 
+                if (n <= 8) flexBasis = "calc(25% - 9px)"; 
+                if (n <= 6) flexBasis = "calc(33.333% - 8px)"; 
+                if (n <= 4) flexBasis = "calc(25% - 9px)"; // 🔥 Diubah agar 4 Juri berjajar lurus elegan
+                let baseScore = (dataSetupGlobalTV.jenis_jurus === 'Ganda' || dataSetupGlobalTV.jenis_jurus === 'Solo Kreatif') ? "9.10" : "9.90";
+
+                for (let i = 1; i <= n; i++) {
+                    wadah.innerHTML += `<div style="flex: 0 0 ${flexBasis};" class="card-juri-Jurus"><div class="cjs-header">JURI ${i}</div><div class="cjs-score" id="s_j${i}">${baseScore}</div></div>`;
+                }
+            }
+
+            onValue(ref(database, `${baseRefKamar}/skor_juri`), (snap) => {
+                let s = snap.val() || {}; let maxJuri = window.jumlahJuriTerpilih || 10;
+                let baseScore = (dataSetupGlobalTV.jenis_jurus === 'Ganda' || dataSetupGlobalTV.jenis_jurus === 'Solo Kreatif') ? "9.10" : "9.90";
+                for (let i = 1; i <= maxJuri; i++) { let el = document.getElementById(`s_j${i}`); if (el) { el.innerText = s[`j${i}`] !== undefined ? parseFloat(s[`j${i}`]).toFixed(2) : baseScore; } }
+            });
+
+            onValue(ref(database, `${baseRefKamar}/hukuman_list`), (snap) => {
+                let list = snap.val() || [];
+                let countWaktu = list.filter(h => String(h).includes("Waktu")).length; let countGaris = list.filter(h => String(h).includes("Garis") || String(h).includes("Gelanggang")).length; let countGerak = list.filter(h => String(h).includes("Gerak") || String(h).includes("Menahan")).length; let countSenjata = list.filter(h => String(h).includes("Senjata")).length; let countPakaian = list.filter(h => String(h).includes("Pakaian") || String(h).includes("Aturan")).length;
+                updateStatusBox("hk_waktu", countWaktu); updateStatusBox("hk_garis", countGaris); updateStatusBox("hk_gerak", countGerak); updateStatusBox("hk_senjata", countSenjata); updateStatusBox("hk_pakaian", countPakaian);
+            });
+
+            function updateStatusBox(idBox, count) {
+                let el = document.getElementById(idBox); if (!el) return; let valEl = el.querySelector('.hk-value');
+                if (count > 0) { el.classList.add('active'); if (valEl) valEl.innerText = `-${(count * 0.50).toFixed(2)}`; } else { el.classList.remove('active'); if (valEl) valEl.innerText = "-0.50"; }
+            }
+
+            onValue(ref(database, `${baseRefKamar}/hukuman`), (snap) => { document.getElementById('s_hukuman').innerText = "-" + parseFloat(snap.val() || 0).toFixed(2); });
+            onValue(ref(database, `${baseRefKamar}/sd`), (snap) => { document.getElementById('s_sd').innerText = parseFloat(snap.val() || 0).toFixed(5); });
+            
+            onValue(ref(database, `${baseRefKamar}/hasil_akhir`), (snap) => {
+                let fa = snap.val() || 0; 
+                document.getElementById('s_skor_akhir').innerText = parseFloat(fa).toFixed(3); 
+            });
+            
+            onValue(ref(database, `${baseRefKamar}/live_state/timer`), (snap) => { document.getElementById('s_timer').innerText = snap.val() || "00:00"; resetIdleTimer(); });
+            onValue(ref(database, `${baseRefGelanggang}/last_activity`), () => { resetIdleTimer(); });
+
+            // 🔥 RADAR PENANGKAP SINYAL ANIMASI JURUS DARI PANITIA 🔥
+            onValue(ref(database, `${baseRefKamar}/live_state/trigger_animasi_jurus`), (snap) => {
+                let data = snap.val();
+                if (data) {
+                    // Jika ada sinyal, ledakkan animasinya!
+                    if (typeof window.mainkanEfekPemenangJurus === "function") {
+                        window.mainkanEfekPemenangJurus(
+                            data.sudut_menang, 
+                            data.nama_atlet, 
+                            data.alasan, 
+                            data.data_biru, 
+                            data.data_merah
+                        );
+                    }
+                } else {
+                    // Jika sinyal ditarik/dihapus (saat Panitia menekan Reset/Lanjut Partai), bersihkan layar!
+                    if (typeof window.tutupEfekPemenangJurus === "function") {
+                        window.tutupEfekPemenangJurus();
+                    }
+                }
+            });
+
+        }
+    </script>
+</body>
+</html>

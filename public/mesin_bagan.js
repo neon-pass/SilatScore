@@ -194,8 +194,15 @@ window.prosesDataMentahVIP = function (actionType) {
         let gender = isPutri ? "Putri" : "Putra";
         let finalKat = tingkatRaw !== '' ? `[${tingkatRaw}]` : "[Kategori Kosong]";
 
-        let atlet = { Nama: namaOlahan, Kontingen: kontingen, Gender: gender, Kategori: finalKat, Kelas: kelasRaw, weight: getWeight(finalKat), sifat: sifatPertandingan, jenis: jenisPertandingan };
-
+        // 🔥 Memasukkan link foto dan berkas ke dalam ransel profil atlet
+        let atlet = { 
+            Nama: namaOlahan, Kontingen: kontingen, Gender: gender, Kategori: finalKat, Kelas: kelasRaw, weight: getWeight(finalKat), sifat: sifatPertandingan, jenis: jenisPertandingan,
+            Foto: nRow['LINK FOTO'] || "",
+            Berkas1: nRow['LINK BERKAS S1'] || nRow['LINK BERKA S1'] || nRow['LINK BERKAS 1'] || "",
+            Berkas2: nRow['LINK BERKAS S2'] || nRow['LINK BERKA S2'] || nRow['LINK BERKAS 2'] || "",
+            Berkas3: nRow['LINK BERKAS S3'] || nRow['LINK BERKA S3'] || nRow['LINK BERKAS 3'] || ""
+        };
+        
         if (jenisPertandingan === "Jurus") {
             if (sifatPertandingan === "Pemasalan") tgrPemasalan.push(atlet);
             else tgrPrestasi.push(atlet);
@@ -340,10 +347,17 @@ window.prosesDataMentahVIP = function (actionType) {
         let namaBiru = p1Safe.refMatch ? `PEMENANG PARTAI ${p1Safe.refMatch.partyNo}` : (p1Safe.Nama || "-");
         let namaMerah = p2Safe.refMatch ? `PEMENANG PARTAI ${p2Safe.refMatch.partyNo}` : (p2Safe.Nama || "-");
 
+        // 🔥 Mengekstrak isi ransel ke masing-masing sudut
         let obj = {
             mapped_partai: m.partyNo, mapped_gelanggang: m.gelanggang, mapped_pool: m.pool,
             mapped_kategori: m.kategoriJenis, mapped_level: m.levelSifat, mapped_tingkat: m.tingkat, mapped_kelas: m.kelasLengkap, mapped_babak: m.type,
-            mapped_biru: namaBiru, mapped_kont_biru: p1Safe.Kontingen || "-", mapped_merah: namaMerah, mapped_kont_merah: p2Safe.Kontingen || "-",
+            
+            mapped_biru: namaBiru, mapped_kont_biru: p1Safe.Kontingen || "-", 
+            mapped_foto_biru: p1Safe.Foto || "", mapped_berkas1_biru: p1Safe.Berkas1 || "", mapped_berkas2_biru: p1Safe.Berkas2 || "", mapped_berkas3_biru: p1Safe.Berkas3 || "",
+            
+            mapped_merah: namaMerah, mapped_kont_merah: p2Safe.Kontingen || "-",
+            mapped_foto_merah: p2Safe.Foto || "", mapped_berkas1_merah: p2Safe.Berkas1 || "", mapped_berkas2_merah: p2Safe.Berkas2 || "", mapped_berkas3_merah: p2Safe.Berkas3 || "",
+            
             _refOriginal: m
         };
 
@@ -393,8 +407,12 @@ window.eksekusiBuatJadwalMatang = function (isSilent = false) {
         validMatches.forEach(row => {
             let m = row._refOriginal;
             let resolvedP1 = lacakPemenangDinamic(m.refP1); let resolvedP2 = lacakPemenangDinamic(m.refP2);
+            
             row.mapped_biru = resolvedP1.Nama; row.mapped_kont_biru = resolvedP1.Kontingen;
+            row.mapped_foto_biru = resolvedP1.Foto || ""; row.mapped_berkas1_biru = resolvedP1.Berkas1 || ""; row.mapped_berkas2_biru = resolvedP1.Berkas2 || ""; row.mapped_berkas3_biru = resolvedP1.Berkas3 || "";
+            
             row.mapped_merah = resolvedP2.Nama; row.mapped_kont_merah = resolvedP2.Kontingen;
+            row.mapped_foto_merah = resolvedP2.Foto || ""; row.mapped_berkas1_merah = resolvedP2.Berkas1 || ""; row.mapped_berkas2_merah = resolvedP2.Berkas2 || ""; row.mapped_berkas3_merah = resolvedP2.Berkas3 || "";
         });
 
         validMatches.forEach(row => { delete row._refOriginal; jadwalMatang.push(row); });

@@ -304,24 +304,16 @@
     import { getDatabase, ref, set, onValue, get, onDisconnect, update } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js";
 
     const ruangAktif = localStorage.getItem('kode_voucer_aktif');
-if (!ruangAktif) {
-    window.location.href = 'index.html'; 
-}
+    if (!ruangAktif) { window.location.href = 'index.html'; }
 
-
-    const firebaseConfig = {
-        apiKey: "AIzaSyCNsOk8MsIhBoZ44Nd9WGGl6eBJOEKu3nI",
-        authDomain: "tesapksilat99.firebaseapp.com",
-        databaseURL: "https://tesapksilat99-default-rtdb.asia-southeast1.firebasedatabase.app",
-        projectId: "tesapksilat99",
-        storageBucket: "tesapksilat99.firebasestorage.app",
-        messagingSenderId: "747533449255",
-        appId: "1:747533449255:web:358edf3c6032c22cdbb602"
-    };
-
+    const firebaseConfig = { apiKey: "AIzaSyCNsOk8MsIhBoZ44Nd9WGGl6eBJOEKu3nI", authDomain: "tesapksilat99.firebaseapp.com", databaseURL: "https://tesapksilat99-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "tesapksilat99", storageBucket: "tesapksilat99.firebasestorage.app", messagingSenderId: "747533449255", appId: "1:747533449255:web:358edf3c6032c22cdbb602" };
     const app = initializeApp(firebaseConfig);
     const database = getDatabase(app);
+    
     let session = {};
+    let baseRefGelanggang = "";
+    let baseRefKamar = "";
+
     let rondeAktif = 1; 
     let skorBiru = { 1: 0, 2: 0, 3: 0 }; 
     let skorMerah = { 1: 0, 2: 0, 3: 0 };
@@ -331,75 +323,50 @@ if (!ruangAktif) {
     document.addEventListener("DOMContentLoaded", () => {
         const urlParams = new URLSearchParams(window.location.search);
         const gelDariURL = urlParams.get('gel');
+        if (gelDariURL) { initAppKetua(gelDariURL); } else { window.location.href = 'layar-juri.html'; }
 
-        if (gelDariURL) {
-            initAppKetua(gelDariURL);
-        } else {
-            window.location.href = 'layar-juri.html';
-        }
-
-        // 🔥 MESIN PENGIKAT 7 BARIS SINKRON SECARA SERENTAK 🔥
         aktifkanSinkronisasiScroll(['j1-biru', 'j2-biru', 'j3-biru', 'score-biru', 'jatuhan-biru', 'hukuman-biru', 'binaan-biru']);
         aktifkanSinkronisasiScroll(['j1-merah', 'j2-merah', 'j3-merah', 'score-merah', 'jatuhan-merah', 'hukuman-merah', 'binaan-merah']);
     });
 
-    // FUNGSI INTI SINKRONISASI 7 JALUR
     function aktifkanSinkronisasiScroll(kelompokIds) {
         let sedangSinkron = false;
         kelompokIds.forEach(id => {
-            let el = document.getElementById(`timeline-${id}`);
-            if(!el) return;
+            let el = document.getElementById(`timeline-${id}`); if(!el) return;
             el.addEventListener('scroll', (e) => {
-                if(sedangSinkron) return; 
-                sedangSinkron = true;
-                let posisiKiri = e.target.scrollLeft;
-
+                if(sedangSinkron) return; sedangSinkron = true; let posisiKiri = e.target.scrollLeft;
                 kelompokIds.forEach(saudara => {
                     if(saudara !== id) {
                         let target = document.getElementById(`timeline-${saudara}`);
-                        if(target && target.scrollLeft !== posisiKiri) {
-                            target.scrollLeft = posisiKiri;
-                        }
+                        if(target && target.scrollLeft !== posisiKiri) { target.scrollLeft = posisiKiri; }
                     }
-                });
-                requestAnimationFrame(() => { sedangSinkron = false; });
+                }); requestAnimationFrame(() => { sedangSinkron = false; });
             }, { passive: true });
         });
     }
 
     window.initAppKetua = async function(gel) {
-        let lockRef = ref(database, `${ruangAktif}/pertandingan/${gel}/locks/ketua`);
+        let lockRef = ref(database, `${ruangAktif}/pertandingan/${gel}/kontrol_layar/locks/ketua`);
         let snap = await get(lockRef);
 
-        if(snap.exists() && snap.val() === true) {
-            alert(`❌ Sesi Ketua di arena ${gel.toUpperCase()} sedang terbuka di perangkat lain!`);
-            window.location.href = 'layar-juri.html';
-            return;
-        }
-
-        await set(lockRef, true);
-        onDisconnect(lockRef).remove();
+        if(snap.exists() && snap.val() === true) { alert(`❌ Sesi Ketua di arena ${gel.toUpperCase()} sedang terbuka di perangkat lain!`); window.location.href = 'layar-juri.html'; return; }
+        await set(lockRef, true); onDisconnect(lockRef).remove();
 
         session.gel = gel;
+        baseRefGelanggang = `${ruangAktif}/pertandingan/${session.gel}`;
+        baseRefKamar = `${baseRefGelanggang}/kamar_tanding`;
+
         document.getElementById('sessionInfo').innerText = `MONITOR UTAMA KETUA | ${session.gel.toUpperCase()}`;
         document.getElementById('mainApp').style.display = 'flex';
-
         pasangMasterMonitor();
     };
 
     function pasangMasterMonitor() {
-        let baseRef = `${ruangAktif}/pertandingan/${session.gel}`;
-
-        // 🔥 1. AMBIL NAMA KEJUARAAN LANGSUNG DARI PANEL PENGATURAN GLOBAL
         onValue(ref(database, `${ruangAktif}/pengaturan`), (snap) => {
-            let pengaturan = snap.val();
-            if (pengaturan && pengaturan.nama_kejuaraan) {
-                document.getElementById('liveEventName').innerText = pengaturan.nama_kejuaraan;
-            }
+            let pengaturan = snap.val(); if (pengaturan && pengaturan.nama_kejuaraan) { document.getElementById('liveEventName').innerText = pengaturan.nama_kejuaraan; }
         });
 
-        // 2. AMBIL DETAIL PERTANDINGAN (Kelas, Partai, Nama Pesilat, Kontingen)
-        onValue(ref(database, `${baseRef}/setup`), (snap) => {
+        onValue(ref(database, `${baseRefKamar}/info_laga`), (snap) => {
             let data = snap.val();
             if(data) {
                 document.getElementById('liveMatchInfo').innerText = `${data.kelas || "-"} - Partai ${data.partai || "-"}`;
@@ -410,179 +377,85 @@ if (!ruangAktif) {
             }
         });
 
-        onValue(ref(database, `${baseRef}/status`), (snap) => {
+        onValue(ref(database, `${baseRefKamar}/live_state/status`), (snap) => {
             let st = snap.val() || "READY";
             document.getElementById('liveStatus').innerText = st;
             document.getElementById('liveStatus').className = st === "PLAY" ? "badge bg-success mt-1 px-2 py-1" : "badge bg-danger mt-1 px-2 py-1";
         });
         
-        onValue(ref(database, `${baseRef}/timer`), (snap) => { document.getElementById('liveTimer').innerText = snap.val() || "00:00"; });
-        
-        onValue(ref(database, `${baseRef}/ronde_aktif`), (snap) => { 
-            rondeAktif = snap.val() || 1; 
-            document.getElementById('liveBabak').innerText = rondeAktif;
-        });
+        onValue(ref(database, `${baseRefKamar}/live_state/timer`), (snap) => { document.getElementById('liveTimer').innerText = snap.val() || "00:00"; });
+        onValue(ref(database, `${baseRefKamar}/live_state/ronde_aktif`), (snap) => { rondeAktif = snap.val() || 1; document.getElementById('liveBabak').innerText = rondeAktif; });
 
         [1, 2, 3].forEach(r => {
-            onValue(ref(database, `${baseRef}/biru/r${r}_log`), (snap) => { riwayatBiru[r] = snap.val() || []; skorBiru[r] = riwayatBiru[r].reduce((a,b) => a+b, 0); updateSkorLayarMata(); });
-            onValue(ref(database, `${baseRef}/merah/r${r}_log`), (snap) => { riwayatMerah[r] = snap.val() || []; skorMerah[r] = riwayatMerah[r].reduce((a,b) => a+b, 0); updateSkorLayarMata(); });
+            onValue(ref(database, `${baseRefKamar}/sudut_biru/r${r}_log`), (snap) => { riwayatBiru[r] = snap.val() || []; skorBiru[r] = riwayatBiru[r].reduce((a,b) => a+b, 0); updateSkorLayarMata(); });
+            onValue(ref(database, `${baseRefKamar}/sudut_merah/r${r}_log`), (snap) => { riwayatMerah[r] = snap.val() || []; skorMerah[r] = riwayatMerah[r].reduce((a,b) => a+b, 0); updateSkorLayarMata(); });
         });
 
         let timeoutRender = null;
-        onValue(ref(database, `${baseRef}/logs`), (snap) => {
+        onValue(ref(database, `${baseRefKamar}/logs`), (snap) => {
             if (timeoutRender) clearTimeout(timeoutRender);
-            timeoutRender = setTimeout(() => {
-                renderPoinDetail(snap.val());
-            }, 60); 
+            timeoutRender = setTimeout(() => { renderPoinDetail(snap.val()); }, 60); 
         });
     }
 
     function updateSkorLayarMata() {
-        let sP_B = riwayatBiru[1].concat(riwayatBiru[2], riwayatBiru[3]);
-        let sP_M = riwayatMerah[1].concat(riwayatMerah[2], riwayatMerah[3]);
+        let sP_B = riwayatBiru[1].concat(riwayatBiru[2], riwayatBiru[3]); let sP_M = riwayatMerah[1].concat(riwayatMerah[2], riwayatMerah[3]);
+        let totalPukulanBiru = sP_B.filter(v => v > 0 && v !== 3).reduce((a,b) => a+b, 0); let totalPukulanMerah = sP_M.filter(v => v > 0 && v !== 3).reduce((a,b) => a+b, 0);
+        document.getElementById('mTotalBiru').innerText = totalPukulanBiru; document.getElementById('mTotalMerah').innerText = totalPukulanMerah;
 
-        // 1. KOTAK "TOT" DI SAMPING JURI (Murni hanya dari Baris Score / Pukulan positif)
-        let totalPukulanBiru = sP_B.filter(v => v > 0 && v !== 3).reduce((a,b) => a+b, 0);
-        let totalPukulanMerah = sP_M.filter(v => v > 0 && v !== 3).reduce((a,b) => a+b, 0);
+        let jatuhanBiruVal = sP_B.filter(v => v === 3).length * 3; let jatuhanMerahVal = sP_M.filter(v => v === 3).length * 3;
+        let hukumanBiruVal = sP_B.filter(v => v < 0 && v !== -99).reduce((a,b)=>a+b, 0); let hukumanMerahVal = sP_M.filter(v => v < 0 && v !== -99).reduce((a,b)=>a+b, 0);
+        let binaanBiruVal = sP_B.filter(v => v === 0).length; let binaanMerahVal = sP_M.filter(v => v === 0).length;
 
-        document.getElementById('mTotalBiru').innerText = totalPukulanBiru;
-        document.getElementById('mTotalMerah').innerText = totalPukulanMerah;
+        document.getElementById('totJatuhanBiru').innerText = jatuhanBiruVal; document.getElementById('totJatuhanMerah').innerText = jatuhanMerahVal;
+        document.getElementById('totHukumanBiru').innerText = hukumanBiruVal; document.getElementById('totHukumanMerah').innerText = hukumanMerahVal;
+        document.getElementById('totBinaanBiru').innerText = binaanBiruVal; document.getElementById('totBinaanMerah').innerText = binaanMerahVal;
 
-        // 2. KOMPONEN BAWAH (Jatuhan, Hukuman, Binaan)
-        let jatuhanBiruVal = sP_B.filter(v => v === 3).length * 3;
-        let jatuhanMerahVal = sP_M.filter(v => v === 3).length * 3;
-
-        let hukumanBiruVal = sP_B.filter(v => v < 0 && v !== -99).reduce((a,b)=>a+b, 0);
-        let hukumanMerahVal = sP_M.filter(v => v < 0 && v !== -99).reduce((a,b)=>a+b, 0);
-
-        let binaanBiruVal = sP_B.filter(v => v === 0).length;
-        let binaanMerahVal = sP_M.filter(v => v === 0).length;
-
-        document.getElementById('totJatuhanBiru').innerText = jatuhanBiruVal;
-        document.getElementById('totJatuhanMerah').innerText = jatuhanMerahVal;
-        
-        document.getElementById('totHukumanBiru').innerText = hukumanBiruVal;
-        document.getElementById('totHukumanMerah').innerText = hukumanMerahVal;
-
-        document.getElementById('totBinaanBiru').innerText = binaanBiruVal;
-        document.getElementById('totBinaanMerah').innerText = binaanMerahVal;
-
-        // 3. SKOR UTAMA DI ATAS (Grand Total: Pukulan + Jatuhan + Hukuman)
-        // Catatan: Hukuman bernilai negatif (misal -6), jadi jika dijumlahkan otomatis mengurangi total poin.
-        let grandTotalBiru = totalPukulanBiru + jatuhanBiruVal + hukumanBiruVal;
-        let grandTotalMerah = totalPukulanMerah + jatuhanMerahVal + hukumanMerahVal;
-
-        document.getElementById('liveSkorBiru').innerText = grandTotalBiru;
-        document.getElementById('liveSkorMerah').innerText = grandTotalMerah;
+        let grandTotalBiru = totalPukulanBiru + jatuhanBiruVal + hukumanBiruVal; let grandTotalMerah = totalPukulanMerah + jatuhanMerahVal + hukumanMerahVal;
+        document.getElementById('liveSkorBiru').innerText = grandTotalBiru; document.getElementById('liveSkorMerah').innerText = grandTotalMerah;
     }
 
-    // 🔥 MESIN PENCETAK SINKRON BIRU-MERAH 🔥
     function renderPoinDetail(logsData) {
-        const targetIds = [
-            'j1-biru', 'j2-biru', 'j3-biru', 'score-biru', 'jatuhan-biru', 'hukuman-biru', 'binaan-biru',
-            'j1-merah', 'j2-merah', 'j3-merah', 'score-merah', 'jatuhan-merah', 'hukuman-merah', 'binaan-merah'
-        ];
-        
-        let htmlArrays = {};
-        targetIds.forEach(id => htmlArrays[id] = []);
+        const targetIds = ['j1-biru', 'j2-biru', 'j3-biru', 'score-biru', 'jatuhan-biru', 'hukuman-biru', 'binaan-biru', 'j1-merah', 'j2-merah', 'j3-merah', 'score-merah', 'jatuhan-merah', 'hukuman-merah', 'binaan-merah'];
+        let htmlArrays = {}; targetIds.forEach(id => htmlArrays[id] = []);
 
-        if (!logsData) {
-            targetIds.forEach(id => { document.getElementById(`timeline-${id}`).innerHTML = ''; });
-            return;
-        }
+        if (!logsData) { targetIds.forEach(id => { document.getElementById(`timeline-${id}`).innerHTML = ''; }); return; }
 
         let logArray = Object.keys(logsData).map(key => ({ id: key, ...logsData[key] }));
         logArray.sort((a, b) => a.time_millis - b.time_millis);
-
-        let suppressedLogs = new Set();
-        let sahLogs = logArray.filter(l => l.type === 'juri_hit_sah');
+        let suppressedLogs = new Set(); let sahLogs = logArray.filter(l => l.type === 'juri_hit_sah');
         
-        sahLogs.forEach(sah => {
-            let hits = sah.juri_hits || [];
-            logArray.forEach(mentah => {
-                if (mentah.type === 'juri_hit_mentah' && mentah.sudut === sah.sudut && mentah.poin === sah.poin) {
-                    if (hits.includes(mentah.juri)) {
-                        let diff = sah.time_millis - mentah.time_millis;
-                        if (diff >= -500 && diff <= 4000) { suppressedLogs.add(mentah.id); }
-                    }
-                }
-            });
-        });
+        sahLogs.forEach(sah => { let hits = sah.juri_hits || []; logArray.forEach(mentah => { if (mentah.type === 'juri_hit_mentah' && mentah.sudut === sah.sudut && mentah.poin === sah.poin) { if (hits.includes(mentah.juri)) { let diff = sah.time_millis - mentah.time_millis; if (diff >= -500 && diff <= 4000) { suppressedLogs.add(mentah.id); } } } }); });
 
-        function pushHTML(id, className, text) {
-            htmlArrays[id].push(`<span class="log-cell ${className}">${text}</span>`);
-        }
+        function pushHTML(id, className, text) { htmlArrays[id].push(`<span class="log-cell ${className}">${text}</span>`); }
 
         logArray.forEach(log => {
             if (suppressedLogs.has(log.id)) return; 
-
-            let sdt = log.sudut; 
-            let jenis = log.type;
-
+            let sdt = log.sudut; let jenis = log.type;
             if (jenis === 'juri_hit_sah') {
                 let poin = log.poin; let hits = log.juri_hits || [];
-                ['j1', 'j2', 'j3'].forEach(j => {
-                    if (hits.includes(j)) pushHTML(`${j}-${sdt}`, 'tx-putih', poin);
-                    else pushHTML(`${j}-${sdt}`, 'tx-abu', '/');
-                });
-                pushHTML(`score-${sdt}`, (sdt === 'biru' ? 'tx-biru' : 'tx-merah'), poin);
-                ['jatuhan', 'hukuman', 'binaan'].forEach(kat => pushHTML(`${kat}-${sdt}`, 'tx-abu', '/'));
+                ['j1', 'j2', 'j3'].forEach(j => { if (hits.includes(j)) pushHTML(`${j}-${sdt}`, 'tx-putih', poin); else pushHTML(`${j}-${sdt}`, 'tx-abu', '/'); }); pushHTML(`score-${sdt}`, (sdt === 'biru' ? 'tx-biru' : 'tx-merah'), poin); ['jatuhan', 'hukuman', 'binaan'].forEach(kat => pushHTML(`${kat}-${sdt}`, 'tx-abu', '/'));
             } 
             else if (jenis === 'juri_hit_mentah') {
                 let jNum = log.juri; let poin = log.poin;
-                ['j1', 'j2', 'j3'].forEach(j => {
-                    if (j === jNum) pushHTML(`${j}-${sdt}`, 'tx-putih', poin);
-                    else pushHTML(`${j}-${sdt}`, 'tx-abu', '/');
-                });
-                pushHTML(`score-${sdt}`, 'tx-abu', '/');
-                ['jatuhan', 'hukuman', 'binaan'].forEach(kat => pushHTML(`${kat}-${sdt}`, 'tx-abu', '/'));
+                ['j1', 'j2', 'j3'].forEach(j => { if (j === jNum) pushHTML(`${j}-${sdt}`, 'tx-putih', poin); else pushHTML(`${j}-${sdt}`, 'tx-abu', '/'); }); pushHTML(`score-${sdt}`, 'tx-abu', '/'); ['jatuhan', 'hukuman', 'binaan'].forEach(kat => pushHTML(`${kat}-${sdt}`, 'tx-abu', '/'));
             }
             else {
                 ['j1', 'j2', 'j3', 'score'].forEach(j => pushHTML(`${j}-${sdt}`, 'tx-abu', '/'));
                 ['jatuhan', 'hukuman', 'binaan'].forEach(kat => {
-                    if (kat === jenis) {
-                        let txt = (jenis === 'jatuhan' ? '+3' : (jenis === 'hukuman' ? log.poin : 'B'));
-                        let warna = (jenis === 'jatuhan') ? 'tx-kuning' : (jenis === 'hukuman' ? 'tx-merah' : 'tx-putih');
-                        pushHTML(`${kat}-${sdt}`, warna, txt);
-                    } else { pushHTML(`${kat}-${sdt}`, 'tx-abu', '/'); }
+                    if (kat === jenis) { let txt = (jenis === 'jatuhan' ? '+3' : (jenis === 'hukuman' ? log.poin : 'B')); let warna = (jenis === 'jatuhan') ? 'tx-kuning' : (jenis === 'hukuman' ? 'tx-merah' : 'tx-putih'); pushHTML(`${kat}-${sdt}`, warna, txt); } else { pushHTML(`${kat}-${sdt}`, 'tx-abu', '/'); }
                 });
             }
         });
 
-        // 🔥 KEAJAIBAN CERMIN SIMETRIS 🔥
         targetIds.forEach(id => {
-            let isBlue = id.includes('biru');
-            let finalHtml = "";
-            
-            if (isBlue) {
-                // Kubu Biru dibalik urutannya agar tumbuh ke kiri
-                let reversed = htmlArrays[id].slice().reverse();
-                // Dan elemen poin terbarunya didorong menempel ke garis tengah Kategori
-                if(reversed.length > 0) {
-                    reversed[0] = reversed[0].replace('class="log-cell', 'class="log-cell ms-auto"');
-                }
-                finalHtml = reversed.join('');
-            } else {
-                // Kubu Merah dibiarkan alami (tumbuh ke kanan)
-                finalHtml = htmlArrays[id].join('');
-            }
-
-            let el = document.getElementById(`timeline-${id}`);
-            if(el && el.innerHTML !== finalHtml) { 
-                el.innerHTML = finalHtml; 
-            }
+            let isBlue = id.includes('biru'); let finalHtml = "";
+            if (isBlue) { let reversed = htmlArrays[id].slice().reverse(); if(reversed.length > 0) { reversed[0] = reversed[0].replace('class="log-cell', 'class="log-cell ms-auto"'); } finalHtml = reversed.join(''); } else { finalHtml = htmlArrays[id].join(''); }
+            let el = document.getElementById(`timeline-${id}`); if(el && el.innerHTML !== finalHtml) { el.innerHTML = finalHtml; }
         });
 
-        // 🔥 SCROLL OTOMATIS MENYESUAIKAN ARAH MASING-MASING 🔥
-        ['score-merah'].forEach(id => {
-            let el = document.getElementById(`timeline-${id}`);
-            if(el) el.scrollLeft = el.scrollWidth; // Merah mentok kanan
-        });
-        
-        ['score-biru'].forEach(id => {
-            let el = document.getElementById(`timeline-${id}`);
-            if(el) el.scrollLeft = 0; // Biru mentok kiri (karena elemen terbarunya ada di indeks 0)
-        });
+        ['score-merah'].forEach(id => { let el = document.getElementById(`timeline-${id}`); if(el) el.scrollLeft = el.scrollWidth; });
+        ['score-biru'].forEach(id => { let el = document.getElementById(`timeline-${id}`); if(el) el.scrollLeft = 0; });
     }
 
     window.kirimSetupPertandingan = function() {
@@ -596,33 +469,29 @@ if (!ruangAktif) {
             nama_merah: document.getElementById('inNamaMerah').value,
             kontingen_merah: document.getElementById('inKontingenMerah').value
         };
-        set(ref(database, `${ruangAktif}/pertandingan/${session.gel}/setup`), payload).then(() => {
-            set(ref(database, `${ruangAktif}/pertandingan/${session.gel}/ronde_aktif`), parseInt(payload.babak));
+        set(ref(database, `${baseRefKamar}/info_laga`), payload).then(() => {
+            set(ref(database, `${baseRefKamar}/live_state/ronde_aktif`), parseInt(payload.babak));
             bootstrap.Modal.getInstance(document.getElementById('modalSetupPertandingan')).hide();
         });
     };
 
     window.tampilkanKonfirmasiReset = function() {
-        let setupModal = bootstrap.Modal.getInstance(document.getElementById('modalSetupPertandingan'));
-        if(setupModal) setupModal.hide();
-        let resetModalEl = document.getElementById('modalKonfirmasiResetKetua');
-        let resetModal = bootstrap.Modal.getInstance(resetModalEl) || new bootstrap.Modal(resetModalEl);
-        resetModal.show();
+        let setupModal = bootstrap.Modal.getInstance(document.getElementById('modalSetupPertandingan')); if(setupModal) setupModal.hide();
+        let resetModalEl = document.getElementById('modalKonfirmasiResetKetua'); let resetModal = bootstrap.Modal.getInstance(resetModalEl) || new bootstrap.Modal(resetModalEl); resetModal.show();
     };
 
     window.eksekusiResetTotal = function() {
-        let baseRef = `${ruangAktif}/pertandingan/${session.gel}`;
         let updates = {};
-        updates[`${baseRef}/logs`] = null;
-        updates[`${baseRef}/biru`] = { r1: 0, r2: 0, r3: 0, r1_log: [], r2_log: [], r3_log: [] };
-        updates[`${baseRef}/merah`] = { r1: 0, r2: 0, r3: 0, r1_log: [], r2_log: [], r3_log: [] };
-        updates[`${baseRef}/timer`] = "02:00";
-        updates[`${baseRef}/status`] = "READY";
+        updates[`${baseRefKamar}/logs`] = null;
+        updates[`${baseRefKamar}/sudut_biru`] = { r1: 0, r2: 0, r3: 0, r1_log: [], r2_log: [], r3_log: [] };
+        updates[`${baseRefKamar}/sudut_merah`] = { r1: 0, r2: 0, r3: 0, r1_log: [], r2_log: [], r3_log: [] };
+        updates[`${baseRefKamar}/live_state/timer`] = "02:00";
+        updates[`${baseRefKamar}/live_state/status`] = "READY";
         update(ref(database), updates).then(() => {});
     };
 
     window.eksekusiLogout = function() {
-        if(session.gel) set(ref(database, `${ruangAktif}/pertandingan/${session.gel}/locks/ketua`), null);
+        if(session.gel) set(ref(database, `${ruangAktif}/pertandingan/${session.gel}/kontrol_layar/locks/ketua`), null);
         setTimeout(() => { window.location.href = 'layar-juri.html'; }, 200);
     };
 </script>

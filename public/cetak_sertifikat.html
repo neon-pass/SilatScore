@@ -13,14 +13,14 @@
   <style>
     :root {
       --nama-size: 18px;
-      --nama-top: 325px;
-      --nama-left: -60px;
+      --nama-top: 305px;
+      --nama-left: 0px;
       --kontingen-size: 18px;
-      --kontingen-top: 30px;
-      --kontingen-left: -60px;
+      --kontingen-top: 350px;
+      --kontingen-left: 0px;
       --keterangan-size: 18px;
-      --keterangan-top: 30px;
-      --keterangan-left: -60px;
+      --keterangan-top: 400px;
+      --keterangan-left: 0px;
       --blangko-brightness: 100%;
       --blangko-contrast: 100%;
       --blangko-opacity: 70%;
@@ -532,7 +532,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
-    import { getDatabase, ref, onValue, get } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCNsOk8MsIhBoZ44Nd9WGGl6eBJOEKu3nI",
@@ -546,8 +546,7 @@
 
     const app = initializeApp(firebaseConfig);
     const database = getDatabase(app);
-    window.globalSheetId = null;
-    const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxPahwtXYz_ITepb8D_3HLmZGQq978yLz-GXE5_0j12mOlGr1152wxd74xnHmWVOrHeHw/exec";
+    
     const Utils = {
       debounce(func, wait) {
         let timeout;
@@ -562,11 +561,11 @@
     };
 
     const StorageManager = {
-      APP_VERSION: "4.1",
+      APP_VERSION: "5.0", // Naik versi karena perubahan arsitektur besar
       defaults: {
-        'nama-size': 18, 'nama-top': 325, 'nama-left': -60,
-        'kontingen-size': 18, 'kontingen-top': 30, 'kontingen-left': -60,
-        'keterangan-size': 18, 'keterangan-top': 30, 'keterangan-left': -60,
+        'nama-size': 18, 'nama-top': 305, 'nama-left': 0,
+        'kontingen-size': 18, 'kontingen-top': 350, 'kontingen-left': 0,
+        'keterangan-size': 18, 'keterangan-top': 400, 'keterangan-left': 0,
         'brightness': '100', 'opacity': '70', 'zoom': '0.55', 'blangko': 'true'
       },
       init() {
@@ -622,12 +621,13 @@
       },
       bindEvents() {
         this.els.kategoriSelect.addEventListener('change', () => {
-          this.els.txtNama.innerText = "-"; this.els.txtKontingen.innerText = "-"; this.els.txtKeterangan.innerText = "MENARIK DATA...";
-          DataManager.activeRowId = 2;
-          DataManager.fetchData(true);
+          this.els.txtNama.innerText = "-"; this.els.txtKontingen.innerText = "-"; this.els.txtKeterangan.innerText = "MENYUSUN DATA...";
+          DataManager.activeRowId = 1;
+          DataManager.processAndRender();
+          
           let url = new URL(window.location.href);
           url.searchParams.set('sheet', this.els.kategoriSelect.value);
-          url.searchParams.set('row', 2);
+          url.searchParams.set('row', 1);
           window.history.pushState({}, '', url);
         });
 
@@ -681,7 +681,7 @@
       renderTable(dataArray) {
         this.els.tbody.innerHTML = '';
         if (dataArray.length === 0) {
-          this.els.tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 35px 10px; color: #bf953f; font-weight: bold; font-size: 11px;">⚠️ BELUM ADA PESERTA YANG TANDING DI KATEGORI INI</td></tr>`;
+          this.els.tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 35px 10px; color: #bf953f; font-weight: bold; font-size: 11px;">⚠️ BELUM ADA PESERTA YANG SELESAI DI KATEGORI INI</td></tr>`;
           return;
         }
 
@@ -696,10 +696,15 @@
             tr.classList.add('row-active');
           }
 
+          // Tanda visual untuk membedakan juara 1, 2, dan 3 di tabel
+          let iconJuara = "🥇";
+          if(item.peringkat === "2") iconJuara = "🥈";
+          if(item.peringkat === "3") iconJuara = "🥉";
+
           tr.innerHTML = `
             <td width="15%" style="text-align: center; font-size: 12px; font-weight: bold;">${item.partai || "-"}</td>
             <td width="35%"><strong>${item.kelas || "-"}</strong></td>
-            <td>${item.nama || "-"}</td>
+            <td>${iconJuara} ${item.nama || "-"}</td>
           `;
           fragment.appendChild(tr);
         });
@@ -718,6 +723,7 @@
 
         const data = DataManager.peserta.find(d => Number(d.rowAktif) === Number(rowId));
         if (!data) return;
+        
         let teksPeringkat = (data.peringkat === "-") ? "PESERTA" : `JUARA ${data.peringkat}`;
         const ketLengkap = `${teksPeringkat} ${data.jenisLomba || ""} ${data.kelas || ""} ${data.gender || ""} ${data.tingkat || ""} ${data.statusLevel || ""}`;
 
@@ -731,153 +737,164 @@
 
         let namaBersih = Utils.sanitizeFilename(data.nama || "PESERTA").replace(/ /g, "-");
         document.title = `${data.partai || "0"}_${namaBersih}_${data.statusLevel || "SERTIFIKAT"}`;
-      },
-      showErrorHtml(title, message) {
-        this.els.tbody.innerHTML = `<tr><td colspan="3" class="error-badge"><br><span style="font-size: 14px;">❌ ${title}</span><br><br><span style="color:#aaa; font-weight:normal;">${message}</span><br><br></td></tr>`;
-        this.els.txtNama.innerText = "-"; this.els.txtKontingen.innerText = "-"; this.els.txtKeterangan.innerText = "GAGAL MENGAMBIL DATA";
-        document.title = "Sistem Error";
       }
     };
 
     const DataManager = {
+      rawRiwayatCache: { g1: [], g2: [], g3: [], g4: [], g5: [], g6: [], g7: [] },
       peserta: [],
-      activeRowId: 2,
-      isLoading: false,
-      fetchController: null,
+      activeRowId: 1,
 
-      async fetchData(showLoadingUI = false) {
-        if (this.isLoading) return;
-        this.isLoading = true;
-
+      // 🔥 MESIN FILTER REAL-TIME BYPASS GOOGLE SHEETS 🔥
+      processAndRender() {
+        let mergedData = [];
+        let rowIdCounter = 1;
         const sheetName = UIManager.els.kategoriSelect.value;
-        if (showLoadingUI) UIManager.showLoading(true, "Menarik data dari Google Sheets...");
 
-        if (this.fetchController) this.fetchController.abort();
-        this.fetchController = new AbortController();
+        // Kumpulkan data dari seluruh gelanggang (g1 sampai g7)
+        Object.values(this.rawRiwayatCache).forEach(gelData => {
+            gelData.forEach(match => {
+                let jenis = String(match.mapped_kategori || match.KATEGORI || "").toUpperCase().replace(/LAGA\s*\(TANDING\)/gi, 'TANDING');
+                let level = String(match.mapped_level || match.LEVEL || "PRESTASI").toUpperCase();
+                
+                // FILTER KATEGORI BERDASARKAN DROPDOWN TAB
+                let isSesuai = false;
+                if (sheetName === "Sertifikat Jurus") {
+                    isSesuai = jenis.includes("JURUS") || jenis.includes("SENI") || jenis.includes("TGR") || level.includes("JURUS") || level.includes("SENI");
+                } else if (sheetName === "Sertifikat Tanding Prestasi") {
+                    isSesuai = (jenis.includes("TANDING") || jenis.includes("LAGA")) && (level.includes("PRESTASI") || (!level.includes("PEMASALAN") && !level.includes("PEMULA")));
+                } else if (sheetName === "Sertifikat Tanding Pemasalan") {
+                    isSesuai = (jenis.includes("TANDING") || jenis.includes("LAGA")) && level.includes("PEMASALAN");
+                }
 
-        const targetAPI = `${APP_SCRIPT_URL}?sheetId=${window.globalSheetId}&sheet=${encodeURIComponent(sheetName)}&mode=json_all`;
+                if (!isSesuai) return; // Lewati jika tidak cocok dengan tab yang dibuka
 
-        try {
-          if (!navigator.onLine) throw new Error("OFFLINE");
+                // RAPIHKAN FORMAT TEKS
+                let kelasFilter = String(match.mapped_kelas || match.KELAS || "").toUpperCase().replace(/\sPUTRA/gi, "").replace(/\sPUTRI/gi, "").trim();
+                let genderFilter = String(match.mapped_kelas || match.KELAS || "").toUpperCase().includes("PUTRI") ? "PUTRI" : "PUTRA";
+                let isTanding = jenis.includes("TANDING") || jenis.includes("LAGA");
 
-          const res = await fetch(targetAPI, { signal: this.fetchController.signal });
+                // 1. DAFTARKAN SANG PEMENANG
+                let namaMenang = match['NAMA ATLET'];
+                if (namaMenang && namaMenang !== "-" && !String(namaMenang).toUpperCase().includes("DAMI")) {
+                    mergedData.push({
+                        rowAktif: rowIdCounter++,
+                        partai: match.mapped_partai || match.PARTAI || "-",
+                        kelas: kelasFilter,
+                        nama: namaMenang,
+                        kontingen: match.KONTINGEN || "-",
+                        jenisLomba: jenis,
+                        gender: genderFilter,
+                        tingkat: match.mapped_tingkat || match.TINGKAT || "",
+                        statusLevel: level,
+                        peringkat: "1", // Pemenang otomatis Juara 1
+                        timestamp: match.time_millis || 0
+                    });
+                }
 
-          if (!res.ok) {
-            if (res.status === 404) throw new Error("404");
-            if (res.status >= 500) throw new Error("500");
-            throw new Error(`HTTP ${res.status}`);
-          }
+                // 2. DAFTARKAN YANG KALAH (HANYA JIKA KATEGORI TANDING)
+                if (isTanding) {
+                    let sudutKalah = match.SUDUT_MENANG === 'biru' ? 'merah' : 'biru';
+                    let namaKalah = sudutKalah === 'merah' ? match.mapped_merah : match.mapped_biru;
+                    let konKalah = sudutKalah === 'merah' ? match.mapped_kont_merah : match.mapped_kont_biru;
 
-          const data = await res.json();
-          if (!Array.isArray(data) || (data.length > 0 && (data[0].error || data[0].pesan))) throw new Error("JSON_ERROR");
+                    if(namaKalah && namaKalah !== "-" && !String(namaKalah).toUpperCase().includes("DAMI")) {
+                        let peringkatKalah = "3";
+                        
+                        // Jika kalah di Final -> Juara 2
+                        if (String(match.mapped_babak || match.BABAK).toUpperCase() === "FINAL") peringkatKalah = "2";
+                        // Pemasalan kalah selalu dapat Juara 2
+                        if (level.includes("PEMASALAN")) peringkatKalah = "2"; 
 
-          let dataTerbaru = [];
+                        mergedData.push({
+                            rowAktif: rowIdCounter++,
+                            partai: match.mapped_partai || match.PARTAI || "-",
+                            kelas: kelasFilter,
+                            nama: namaKalah,
+                            kontingen: konKalah,
+                            jenisLomba: jenis,
+                            gender: genderFilter,
+                            tingkat: match.mapped_tingkat || match.TINGKAT || "",
+                            statusLevel: level,
+                            peringkat: peringkatKalah,
+                            timestamp: (match.time_millis || 0) - 1 // Dikurangi 1 agar posisinya tepat di bawah pemenangnya
+                        });
+                    }
+                }
+            });
+        });
 
-          for (let i = 0; i < data.length; i++) {
-            let item = data[i];
-            let jenis = String(item.jenisLomba || "").toUpperCase();
-            let level = String(item.statusLevel || "").toUpperCase();
-            let isSesuai = false;
+        // 🔥 SORTIR BERDASARKAN TIMESTAMP (YANG BARU SELESAI TANDING ADA DI PALING ATAS!)
+        mergedData.sort((a, b) => b.timestamp - a.timestamp);
 
-            if (sheetName === "Sertifikat Jurus") {
-              isSesuai = jenis.includes("JURUS") || jenis.includes("SENI") || jenis.includes("TGR") || level.includes("JURUS") || level.includes("SENI");
-            } else if (sheetName === "Sertifikat Tanding Prestasi") {
-              isSesuai = (jenis.includes("TANDING") || jenis.includes("LAGA")) && (level.includes("PRESTASI") || (!level.includes("PEMASALAN") && !level.includes("PEMULA")));
-            } else if (sheetName === "Sertifikat Tanding Pemasalan") {
-              isSesuai = (jenis.includes("TANDING") || jenis.includes("LAGA")) && level.includes("PEMASALAN");
-            }
+        this.peserta = mergedData;
+        UIManager.renderTable(this.peserta);
 
-            if (isSesuai) {
-              item.kelas = String(item.kelas || "").replace(/\sPUTRA/gi, '').replace(/\sPUTRI/gi, '');
-              item.jenisLomba = String(item.jenisLomba || "").replace(/LAGA\s*\(TANDING\)/gi, 'TANDING');
-              dataTerbaru.push(item);
-            }
-          }
-
-          this.peserta = dataTerbaru;
-          UIManager.renderTable(this.peserta);
-
-          if (this.peserta.length > 0) {
+        // Pilih otomatis baris yang sesuai
+        if (this.peserta.length > 0) {
             let targetAda = this.peserta.find(d => Number(d.rowAktif) === Number(this.activeRowId));
             let pilihBaris = targetAda ? this.activeRowId : this.peserta[0].rowAktif;
             UIManager.selectParticipant(pilihBaris, false);
-          } else {
-            UIManager.els.txtNama.innerText = "-"; UIManager.els.txtKontingen.innerText = "-"; UIManager.els.txtKeterangan.innerText = "BELUM ADA PESERTA YANG TANDING";
+        } else {
+            UIManager.els.txtNama.innerText = "-"; 
+            UIManager.els.txtKontingen.innerText = "-"; 
+            UIManager.els.txtKeterangan.innerText = "BELUM ADA PESERTA YANG SELESAI";
             document.title = "Sertifikat Kosong";
-          }
-
-        } catch (err) {
-          if (err.name === 'AbortError') return;
-
-          this.peserta = [];
-
-          if (err.message === "OFFLINE") UIManager.showErrorHtml("INTERNET TERPUTUS", "Periksa koneksi Wi-Fi atau LAN komputer Anda.");
-          else if (err.message === "404") UIManager.showErrorHtml("DATA TIDAK DITEMUKAN", "Link Spreadsheet mungkin salah atau tab telah dihapus.");
-          else if (err.message === "500") UIManager.showErrorHtml("SERVER SIBUK", "Google Apps Script sedang kelebihan beban. Tunggu sesaat.");
-          else if (err.message === "JSON_ERROR") UIManager.showErrorHtml("FORMAT DATA RUSAK", "Kolom di dalam Excel tidak sesuai format standar sistem.");
-          else UIManager.showErrorHtml("GAGAL MENGAMBIL DATA", "Terjadi kesalahan sistem: " + err.message);
-
-        } finally {
-          this.isLoading = false;
-          if (showLoadingUI) UIManager.showLoading(false);
         }
       }
     };
 
     const FirebaseManager = {
       ruangAktif: localStorage.getItem('kode_voucer_aktif'),
+      
       init() {
+        if (!this.ruangAktif) {
+            UIManager.els.txtKeterangan.innerText = "AKSES DITOLAK: VOUCER TIDAK DITEMUKAN";
+            UIManager.showLoading(false); 
+            return;
+        }
+
         const urlParams = new URLSearchParams(window.location.search);
-        let sheetIdDariURL = urlParams.get('sheetId');
         let paramSheet = urlParams.get('sheet') || "Sertifikat Tanding Prestasi";
-        DataManager.activeRowId = parseInt(urlParams.get('row')) || 2;
+        DataManager.activeRowId = parseInt(urlParams.get('row')) || 1;
 
         let adaOpsi = Array.from(UIManager.els.kategoriSelect.options).some(opt => opt.value === paramSheet);
         if (!adaOpsi) UIManager.els.kategoriSelect.add(new Option(paramSheet, paramSheet));
         UIManager.els.kategoriSelect.value = paramSheet;
 
-        if (sheetIdDariURL) {
-          window.globalSheetId = sheetIdDariURL;
-          this.startSystem();
-        } else {
-          if (!this.ruangAktif) {
-            UIManager.els.txtKeterangan.innerText = "AKSES DITOLAK: VOUCER TIDAK DITEMUKAN";
-            UIManager.showLoading(false); return;
-          }
-
-          get(ref(database, `${this.ruangAktif}/pengaturan/silat_sheet_url`)).then((snap) => {
-            let urlSpreadsheet = snap.val();
-            if (urlSpreadsheet) {
-              let match = urlSpreadsheet.match(/\/d\/([a-zA-Z0-9-_]+)/);
-              if (match && match[1]) {
-                window.globalSheetId = match[1];
-                this.startSystem();
-              } else {
-                UIManager.els.txtKeterangan.innerText = "LINK SPREADSHEET DI FIREBASE TIDAK VALID";
-                UIManager.showLoading(false);
-              }
-            } else {
-              UIManager.els.txtKeterangan.innerText = "SILAKAN ISI LINK SPREADSHEET DI PENGATURAN";
-              UIManager.showLoading(false);
-            }
-          }).catch(err => {
-            UIManager.els.txtKeterangan.innerText = "GAGAL TERHUBUNG KE FIREBASE";
-            UIManager.showLoading(false);
-          });
-        }
+        this.startSystem();
       },
 
       startSystem() {
-        DataManager.fetchData(true);
+        UIManager.showLoading(true, "Menarik data riwayat pertandingan...");
+        let loadedCount = 0;
 
-        const pertandinganRef = ref(database, `${this.ruangAktif}/pertandingan`);
-        const onFirebaseDataChanged = Utils.debounce(() => {
-          DataManager.fetchData(false);
-        }, 4000);
-
-        onValue(pertandinganRef, () => {
-          onFirebaseDataChanged();
-        });
+        // 🔥 MEMBACA LANGSUNG DARI 7 GELANGGANG SECARA BERSAMAAN 🔥
+        for (let i = 1; i <= 7; i++) {
+            onValue(ref(database, `${this.ruangAktif}/pertandingan/g${i}/riwayat_pemenang`), (snap) => {
+                let data = snap.val();
+                let arr = [];
+                
+                if (data) {
+                    Object.keys(data).forEach(key => {
+                        let obj = data[key];
+                        // Jadikan ID Timestamp Firebase sebagai bahan untuk menyortir urutan daftar
+                        obj.time_millis = parseInt(key); 
+                        arr.push(obj);
+                    });
+                }
+                
+                DataManager.rawRiwayatCache[`g${i}`] = arr;
+                loadedCount++;
+                
+                if (loadedCount >= 7) {
+                    UIManager.showLoading(false);
+                }
+                
+                // Setiap kali ada yang selesai di gelanggang manapun, render ulang!
+                DataManager.processAndRender();
+            });
+        }
       }
     };
 

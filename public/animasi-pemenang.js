@@ -5,15 +5,12 @@ stylePemenang.innerHTML = `
         background: radial-gradient(circle at center, rgba(30,30,35,0.95) 0%, rgba(5,5,5,1) 100%);
         z-index: 10000; display: flex; flex-direction: column; justify-content: center; align-items: center;
         opacity: 0; pointer-events: none; transition: background 0.8s, opacity 0.8s ease-in-out;
-        font-family: 'Arial', sans-serif;
-        box-sizing: border-box;
-        overflow: hidden; 
+        font-family: 'Arial', sans-serif; box-sizing: border-box; overflow: hidden; 
     }
     #winnerOverlay.show { opacity: 1; pointer-events: all; }
 
     #winnerOverlay.theme-biru { background: radial-gradient(circle at center, rgba(11, 30, 80, 0.98) 0%, rgba(2, 6, 15, 1) 100%); }
     #winnerOverlay.theme-biru .sudut-teks { color: #0b5ed7; text-shadow: 0px 4px 2vh rgba(11, 94, 215, 0.6); }
-    
     #winnerOverlay.theme-merah { background: radial-gradient(circle at center, rgba(80, 11, 20, 0.98) 0%, rgba(15, 2, 4, 1) 100%); }
     #winnerOverlay.theme-merah .sudut-teks { color: #dc3545; text-shadow: 0px 4px 2vh rgba(220, 53, 69, 0.6); }
 
@@ -22,6 +19,16 @@ stylePemenang.innerHTML = `
 
     .winner-content { z-index: 3; text-align: center; position: relative; padding: 4vh 0; transition: opacity 0.5s; width: 100%; }
     .rekap-view { z-index: 4; width: 100vw; height: 100vh; display: none; flex-direction: column; justify-content: center; opacity: 0; transition: opacity 0.8s ease-in-out; padding: 2vh 4vw; box-sizing: border-box; }
+
+    /* 🔥 CSS TAMBAHAN FOTO EKSKLUSIF 🔥 */
+    .foto-pemenang-utama { width: 24vh; height: 32vh; object-fit: cover; object-position: top center; border-radius: 1vh; border: 0.6vh solid #ffc107; box-shadow: 0 0 6vh rgba(255,193,7,0.8); margin-bottom: 2vh; transform: scale(0); opacity: 0; transition: all 1s cubic-bezier(0.175, 0.885, 0.32, 1.275); background: #111; }
+    #winnerOverlay.show .foto-pemenang-utama.tampil { transform: scale(1); opacity: 1; animation: floatFoto 3s infinite ease-in-out; }
+    @keyframes floatFoto { 0%, 100% { transform: scale(1) translateY(0); } 50% { transform: scale(1) translateY(-1.5vh); box-shadow: 0 1.5vh 6vh rgba(255,193,7,1); } }
+    
+    .foto-rekap-kecil { width: 9vh; height: 12vh; object-fit: cover; object-position: top center; border-radius: 0.5vh; border: 0.3vh solid #fff; box-shadow: 0 1vh 2vh rgba(0,0,0,0.8); opacity: 0; transform: scale(0.5); transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 10; position: relative; background: #111; margin: 0; }
+    .foto-rekap-kecil.tampil { opacity: 1; transform: scale(1); }
+    .rkp-bg-biru .foto-rekap-kecil.menang, .rkp-bg-merah .foto-rekap-kecil.menang { border-color: #ffc107; box-shadow: 0 0 3vh rgba(255,193,7,0.8); }
+    /* ============================== */
 
     .center-line { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 0%; height: 2px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent); box-shadow: 0 0 1.5vh rgba(255,255,255,0.5); z-index: -1; }
     #winnerOverlay.show .center-line { animation: drawLine 1s cubic-bezier(0.86, 0, 0.07, 1) forwards; }
@@ -40,13 +47,14 @@ stylePemenang.innerHTML = `
     .rkp-title { font-size: 3vh; font-weight: 900; letter-spacing: 0.2vw; text-transform: uppercase; text-shadow: 0.2vh 0.2vh 0.5vh rgba(0,0,0,0.8); position: absolute; left: 50%; transform: translateX(-50%); background: linear-gradient(180deg, rgba(51, 51, 51, 0.5) 0%, rgba(17, 17, 17, 0.5) 100%); backdrop-filter: blur(5px); border: 0.2vh solid rgba(85, 85, 85, 0.5); border-radius: 1vh; padding: 1vh 3vw; box-shadow: 0 0.4vh 1vh rgba(0,0,0,0.3); white-space: nowrap; color: white; }
     
     .rkp-bar { display: flex; gap: 1vw; margin-bottom: 1vh; }
-    .rkp-box { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; border-radius: 1vh; border: 0.2vh solid rgba(255,255,255,0.1); box-shadow: 0 0.4vh 0.8vh rgba(0,0,0,0.4); padding: 1vh; background: rgba(0,0,0,0.4); color: white;}
+    .rkp-box { flex: 1; display: flex; align-items: center; border-radius: 1vh; border: 0.2vh solid rgba(255,255,255,0.1); box-shadow: 0 0.4vh 0.8vh rgba(0,0,0,0.4); padding: 2px; background: rgba(0,0,0,0.4); color: white;}
     .rkp-box-info { flex: 1; background: linear-gradient(180deg, #444 0%, #222 100%); font-size: 2.2vh; font-weight: bold; border-radius: 1vh; border: 0.2vh solid #555; text-transform: uppercase; box-shadow: 0 0.4vh 0.6vh rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; padding: 1vh 0; color: white; }
     
-    .rkp-bg-biru { border-bottom: 0.6vh solid #0d6efd; }
-    .rkp-bg-merah { border-bottom: 0.6vh solid #dc3545; }
-    .rkp-nama { font-size: 3.5vh; font-weight: bold; text-transform: uppercase; margin-bottom: 0; line-height: 1.2; }
-    .rkp-negara { font-size: 2vh; color: #ccc; text-transform: uppercase; }
+    .rkp-bg-biru { border-bottom: 0.6vh solid #0d6efd; flex-direction: row; justify-content: flex-start; text-align: left; }
+    .rkp-bg-merah { border-bottom: 0.6vh solid #dc3545; flex-direction: row; justify-content: flex-end; text-align: right; }
+    .rkp-teks-wadah { padding: 0 1vw; display: flex; flex-direction: column; justify-content: center; }
+    .rkp-nama { font-size: 3.2vh; font-weight: bold; text-transform: uppercase; margin-bottom: 0; line-height: 1.1; }
+    .rkp-negara { font-size: 1.8vh; color: #ccc; text-transform: uppercase; margin-top: 0.5vh; }
 
     .rkp-container { background: rgba(0,0,0,0.6); border: 0.1vh solid rgba(255,255,255,0.1); border-radius: 1.5vh; max-width: 90vw; margin: 0 auto; width: 100%; padding: 2vh 4vw; box-shadow: 0 1vh 3vh rgba(0,0,0,0.8); }
     .rkp-row { display: flex; align-items: center; text-align: center; border-bottom: 0.1vh solid rgba(255,255,255,0.15); padding: 0.8vh 0; }
@@ -60,10 +68,7 @@ stylePemenang.innerHTML = `
     .teks-warning { color: #ffc107 !important; }
     .rkp-skor-akhir { font-family: 'Roboto', 'Arial', sans-serif; font-size: 8vh; font-weight: 900; color: #ffffff; text-shadow: 0 0.4vh 1.5vh rgba(0,0,0,0.8); line-height: 1; display: inline-block; }
 
-    .skor-menang { 
-        color: #ffc107 !important; 
-        animation: pulseGlowScore 1.5s infinite;
-    }
+    .skor-menang { color: #ffc107 !important; animation: pulseGlowScore 1.5s infinite; }
     
     @keyframes pulseGlowScore {
         0% { text-shadow: 0 0 2vh rgba(255,193,7,0.8), 0 0 3vh rgba(255,193,7,0.4); transform: scale(1.02); }
@@ -88,6 +93,7 @@ overlayPemenang.innerHTML = `
         <div class="reveal-box">
             <div class="reveal-content">
                 <h2 id="winReason" class="alasan-menang">ALASAN</h2>
+                <img id="winFoto" class="foto-pemenang-utama" src="" style="display:none;" onerror="this.style.display='none'">
                 <h1 class="title-menang">
                     <span id="winSudut" class="sudut-teks">SUDUT X</span>
                     <span class="menang-teks">MENANG</span>
@@ -108,12 +114,18 @@ overlayPemenang.innerHTML = `
 
         <div class="rkp-bar">
             <div class="rkp-box rkp-bg-biru">
-                <div class="rkp-nama" id="rkpNamaBiru">SUDUT BIRU</div>
-                <div class="rkp-negara" id="rkpKonBiru">-</div>
+                <img id="rkpFotoBiru" class="foto-rekap-kecil" src="" style="display:none;" onerror="this.style.display='none'">
+                <div class="rkp-teks-wadah">
+                    <div class="rkp-nama" id="rkpNamaBiru">SUDUT BIRU</div>
+                    <div class="rkp-negara" id="rkpKonBiru">-</div>
+                </div>
             </div>
             <div class="rkp-box rkp-bg-merah">
-                <div class="rkp-nama" id="rkpNamaMerah">SUDUT MERAH</div>
-                <div class="rkp-negara" id="rkpKonMerah">-</div>
+                <div class="rkp-teks-wadah">
+                    <div class="rkp-nama" id="rkpNamaMerah">SUDUT MERAH</div>
+                    <div class="rkp-negara" id="rkpKonMerah">-</div>
+                </div>
+                <img id="rkpFotoMerah" class="foto-rekap-kecil" src="" style="display:none;" onerror="this.style.display='none'">
             </div>
         </div>
 
@@ -161,7 +173,6 @@ overlayPemenang.innerHTML = `
                 <div class="rkp-col rkp-skor" id="rkpPerMerah">0</div>
             </div>
 
-            <!-- 🔥 GABUNGAN: SKOR AKHIR DAN ALASAN MENANG 🔥 -->
             <div class="rkp-row" style="margin-top: 1.5vh; border-top: 0.3vh dashed rgba(255, 193, 7, 0.5); padding-top: 1.5vh;">
                 <div class="rkp-col rkp-skor-akhir" id="rkpTotalBiru">0</div>
                 <div class="rkp-col rkp-label" style="font-size: 3vh; color: #ffffff; text-shadow: 0 0 1vh rgba(255,255,255,0.5);">SKOR AKHIR</div>
@@ -185,16 +196,11 @@ let rekapTimeout2;
 function hitungRekap(riwayat) {
     let r = { pukulan: 0, tendangan: 0, jatuhan: 0, binaan: 0, teguran: 0, per: 0 };
     if (!riwayat) return r;
-
     for (let i = 1; i <= 3; i++) {
         if (riwayat[i]) {
             riwayat[i].forEach(poin => {
-                if (poin === 1) r.pukulan++;
-                else if (poin === 2) r.tendangan++;
-                else if (poin === 3) r.jatuhan++;
-                else if (poin === 0) r.binaan++;
-                else if (poin === -1 || poin === -2) r.teguran++;
-                else if (poin === -5 || poin === -10) r.per++;
+                if (poin === 1) r.pukulan++; else if (poin === 2) r.tendangan++; else if (poin === 3) r.jatuhan++;
+                else if (poin === 0) r.binaan++; else if (poin === -1 || poin === -2) r.teguran++; else if (poin === -5 || poin === -10) r.per++;
             });
         }
     }
@@ -211,6 +217,34 @@ window.mainkanEfekPemenang = function (sudut, namaAtlet, alasan) {
     document.getElementById('winnerContentPanel').style.opacity = '1';
     document.getElementById('rekapViewPanel').style.display = 'none';
     document.getElementById('rekapViewPanel').style.opacity = '0';
+
+    // 🔥 FUNGSI SULAP LINK GOOGLE DRIVE MENJADI GAMBAR LANGSUNG (SERVER LH3) 🔥
+    function ubahKeLinkGambar(url) {
+        if (!url) return "";
+        // Tangkap ID unik foto dari link Drive Anda
+        let match = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
+        if (match && match[1]) {
+            // Gunakan server gambar khusus Google (100% Anti-Blokir)
+            return "https://lh3.googleusercontent.com/d/" + match[1];
+        }
+        return url;
+    }
+
+    // 🔥 LOGIKA FOTO (MENANGKAP DARI JEMBATAN HTML) 🔥
+    let urlBiru = ubahKeLinkGambar(window.fotoBiruGlobal || "");
+    let urlMerah = ubahKeLinkGambar(window.fotoMerahGlobal || "");
+    
+    let saklar = window.saklarFotoGlobal || "sembunyi";
+    let urlPemenang = (sudut.toLowerCase() === 'biru') ? urlBiru : urlMerah;
+    
+    let elWinFoto = document.getElementById('winFoto');
+    if (saklar === 'tampil' && urlPemenang && sudut !== 'seri') {
+        elWinFoto.src = urlPemenang;
+        elWinFoto.style.display = 'inline-block';
+        setTimeout(() => elWinFoto.classList.add('tampil'), 100);
+    } else {
+        elWinFoto.style.display = 'none'; elWinFoto.classList.remove('tampil');
+    }
 
     document.getElementById('winReason').innerText = alasan;
     document.getElementById('winSudut').innerText = "SUDUT " + sudut;
@@ -247,6 +281,16 @@ window.mainkanEfekPemenang = function (sudut, namaAtlet, alasan) {
             let rekapView = document.getElementById('rekapViewPanel');
             rekapView.style.display = 'flex';
 
+            // 🔥 LOGIKA FOTO DI TABEL REKAP 🔥
+            let elRkpFotoBiru = document.getElementById('rkpFotoBiru');
+            let elRkpFotoMerah = document.getElementById('rkpFotoMerah');
+            elRkpFotoBiru.classList.remove('menang', 'tampil'); elRkpFotoMerah.classList.remove('menang', 'tampil');
+            
+            if (saklar === 'tampil') {
+                if (urlBiru) { elRkpFotoBiru.src = urlBiru; elRkpFotoBiru.style.display = 'inline-block'; setTimeout(() => elRkpFotoBiru.classList.add('tampil'), 100); if (sudut.toLowerCase() === 'biru') elRkpFotoBiru.classList.add('menang'); } else { elRkpFotoBiru.style.display = 'none'; }
+                if (urlMerah) { elRkpFotoMerah.src = urlMerah; elRkpFotoMerah.style.display = 'inline-block'; setTimeout(() => elRkpFotoMerah.classList.add('tampil'), 100); if (sudut.toLowerCase() === 'merah') elRkpFotoMerah.classList.add('menang'); } else { elRkpFotoMerah.style.display = 'none'; }
+            } else { elRkpFotoBiru.style.display = 'none'; elRkpFotoMerah.style.display = 'none'; }
+
             if (document.getElementById('wadahKiri')) document.getElementById('rkpSponsorKiri').innerHTML = document.getElementById('wadahKiri').innerHTML;
             if (document.getElementById('wadahKanan')) document.getElementById('rkpSponsorKanan').innerHTML = document.getElementById('wadahKanan').innerHTML;
             if (document.getElementById('judulKejuaraan')) document.getElementById('rkpKejuaraan').innerText = document.getElementById('judulKejuaraan').innerText;
@@ -261,47 +305,29 @@ window.mainkanEfekPemenang = function (sudut, namaAtlet, alasan) {
             if (document.getElementById('l_partai')) document.getElementById('rkpPartai').innerText = document.getElementById('l_partai').innerText;
             if (document.getElementById('l_babak')) document.getElementById('rkpBabak').innerText = document.getElementById('l_babak').innerText;
 
-            let dataBiru = hitungRekap(window.riwayatBiru);
-            let dataMerah = hitungRekap(window.riwayatMerah);
+            let dataBiru = hitungRekap(window.riwayatBiru); let dataMerah = hitungRekap(window.riwayatMerah);
 
-            document.getElementById('rkpPukulanBiru').innerText = dataBiru.pukulan;
-            document.getElementById('rkpPukulanMerah').innerText = dataMerah.pukulan;
-            document.getElementById('rkpTendanganBiru').innerText = dataBiru.tendangan;
-            document.getElementById('rkpTendanganMerah').innerText = dataMerah.tendangan;
-            document.getElementById('rkpJatuhanBiru').innerText = dataBiru.jatuhan;
-            document.getElementById('rkpJatuhanMerah').innerText = dataMerah.jatuhan;
-
-            document.getElementById('rkpBinaanBiru').innerText = dataBiru.binaan;
-            document.getElementById('rkpBinaanMerah').innerText = dataMerah.binaan;
-            document.getElementById('rkpTegBiru').innerText = dataBiru.teguran;
-            document.getElementById('rkpTegMerah').innerText = dataMerah.teguran;
-            document.getElementById('rkpPerBiru').innerText = dataBiru.per;
-            document.getElementById('rkpPerMerah').innerText = dataMerah.per;
+            document.getElementById('rkpPukulanBiru').innerText = dataBiru.pukulan; document.getElementById('rkpPukulanMerah').innerText = dataMerah.pukulan;
+            document.getElementById('rkpTendanganBiru').innerText = dataBiru.tendangan; document.getElementById('rkpTendanganMerah').innerText = dataMerah.tendangan;
+            document.getElementById('rkpJatuhanBiru').innerText = dataBiru.jatuhan; document.getElementById('rkpJatuhanMerah').innerText = dataMerah.jatuhan;
+            document.getElementById('rkpBinaanBiru').innerText = dataBiru.binaan; document.getElementById('rkpBinaanMerah').innerText = dataMerah.binaan;
+            document.getElementById('rkpTegBiru').innerText = dataBiru.teguran; document.getElementById('rkpTegMerah').innerText = dataMerah.teguran;
+            document.getElementById('rkpPerBiru').innerText = dataBiru.per; document.getElementById('rkpPerMerah').innerText = dataMerah.per;
 
             let logB = [...(window.riwayatBiru[1] || []), ...(window.riwayatBiru[2] || []), ...(window.riwayatBiru[3] || [])];
             let logM = [...(window.riwayatMerah[1] || []), ...(window.riwayatMerah[2] || []), ...(window.riwayatMerah[3] || [])];
 
-            let totalB = logB.reduce((a, b) => a + b, 0);
-            let totalM = logM.reduce((a, b) => a + b, 0);
+            let totalB = logB.reduce((a, b) => a + b, 0); let totalM = logM.reduce((a, b) => a + b, 0);
+            let elTotalBiru = document.getElementById('rkpTotalBiru'); let elTotalMerah = document.getElementById('rkpTotalMerah');
 
-            let elTotalBiru = document.getElementById('rkpTotalBiru');
-            let elTotalMerah = document.getElementById('rkpTotalMerah');
+            elTotalBiru.innerText = totalB; elTotalMerah.innerText = totalM;
+            elTotalBiru.classList.remove('skor-menang'); elTotalMerah.classList.remove('skor-menang');
 
-            elTotalBiru.innerText = totalB;
-            elTotalMerah.innerText = totalM;
-            elTotalBiru.classList.remove('skor-menang');
-            elTotalMerah.classList.remove('skor-menang');
-
-            if (sudut.toLowerCase() === 'biru') {
-                elTotalBiru.classList.add('skor-menang');
-            } else if (sudut.toLowerCase() === 'merah') {
-                elTotalMerah.classList.add('skor-menang');
-            }
+            if (sudut.toLowerCase() === 'biru') elTotalBiru.classList.add('skor-menang');
+            else if (sudut.toLowerCase() === 'merah') elTotalMerah.classList.add('skor-menang');
 
             document.getElementById('rkpAlasanMenangBawah').innerText = alasan;
-
-            void rekapView.offsetWidth;
-            rekapView.style.opacity = '1';
+            void rekapView.offsetWidth; rekapView.style.opacity = '1';
         }, 500);
     }, 2500);
 };
@@ -309,9 +335,11 @@ window.mainkanEfekPemenang = function (sudut, namaAtlet, alasan) {
 window.tutupEfekPemenang = function () {
     let overlay = document.getElementById('winnerOverlay');
     if (overlay) overlay.classList.remove('show');
-    clearInterval(bokehInterval);
-    clearTimeout(rekapTimeout1);
-    clearTimeout(rekapTimeout2);
-    let container = document.getElementById('particleContainerPemenang');
-    if (container) container.innerHTML = '';
+    clearInterval(bokehInterval); clearTimeout(rekapTimeout1); clearTimeout(rekapTimeout2);
+    let container = document.getElementById('particleContainerPemenang'); if (container) container.innerHTML = '';
+    
+    // Matikan foto
+    if(document.getElementById('winFoto')) document.getElementById('winFoto').classList.remove('tampil');
+    if(document.getElementById('rkpFotoBiru')) document.getElementById('rkpFotoBiru').classList.remove('tampil');
+    if(document.getElementById('rkpFotoMerah')) document.getElementById('rkpFotoMerah').classList.remove('tampil');
 };

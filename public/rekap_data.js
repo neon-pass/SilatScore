@@ -70,7 +70,7 @@ window.unduhRekapLengkap = function(dataRiwayatFirebase, namaGelanggang, jadwalT
     let exportJejak = [];
 
     arr.forEach(item => {
-        let isTanding = (item.mapped_kategori !== "Jurus" && item.KATEGORI !== "Jurus");
+        let isTanding = (item.mapped_kategori !== "Jurus" && item.KATEGORI !== "Jurus" && item.kategori !== "jurus");
         let partaiNo = item.mapped_partai || item.PARTAI || item.partai || "-";
 
         let rawNB = item.mapped_biru || item['SUDUT BIRU'] || item.nama_biru || "-";
@@ -103,12 +103,13 @@ window.unduhRekapLengkap = function(dataRiwayatFirebase, namaGelanggang, jadwalT
         let mPenyisihan = "-", mSemi = "-", mFinal = "-";
         let jTiga = "-", jDua = "-", jSatu = "-";
 
+        // 🔥 LOGIKA BAGAN IDENTIK DENGAN MESIN SHEET 🔥
         if (isTanding && pemenangArah !== "seri" && pemenangArah !== "-") {
             let pemenangFull = pemenangArah === "biru" ? nB_resolved : nM_resolved;
             if (babakStr.includes("SEMI")) {
                 mSemi = pemenangFull;
                 jTiga = namaKalah;
-            } else if (babakStr.includes("FINAL") && !babakStr.includes("PEREMPAT") && !babakStr.includes("DELAPAN")) {
+            } else if (babakStr.includes("FINAL") && !babakStr.includes("PEREMPAT") && !babakStr.includes("DELAPAN") && !babakStr.includes("1/")) {
                 mFinal = pemenangFull;
                 jSatu = pemenangFull;
                 jDua = namaKalah;
@@ -122,7 +123,12 @@ window.unduhRekapLengkap = function(dataRiwayatFirebase, namaGelanggang, jadwalT
         let skorMerah = item.skor_merah !== undefined ? item.skor_merah : (item['SKOR MERAH'] !== undefined ? item['SKOR MERAH'] : 0);
         let kelasLengkap = item['KELAS LENGKAP'] || `${item.mapped_tingkat || item.TINGKAT || "-"} ${item.mapped_kelas || item.KELAS || ""}`;
 
-        // Mapped kolom persis sama dengan urutan Google Sheet Anda
+        // 🔥 ALIGNMENT APARATUR TANDING VS JURUS 🔥
+        let p_wasit = item.wasit || item.WASIT || "-";
+        let p_ap2 = isTanding ? (item.j1 || item['JURI 1'] || "-") : (item.dewan || item.DEWAN || "-");
+        let p_ap3 = isTanding ? (item.j2 || item['JURI 2'] || "-") : (item.j1 || item['JURI 1'] || "-");
+        let p_ap4 = isTanding ? (item.j3 || item['JURI 3'] || "-") : (item.j2 || item['JURI 2'] || "-");
+
         exportJejak.push({
             "WAKTU": wkt,
             "GELANGGANG": (namaGelanggang || "Gelanggang 1").toUpperCase(),
@@ -142,10 +148,10 @@ window.unduhRekapLengkap = function(dataRiwayatFirebase, namaGelanggang, jadwalT
             "JUARA 3 BERSAMA": jTiga,
             "JUARA 2": jDua,
             "JUARA 1": jSatu,
-            "WASIT": item.wasit || item.WASIT || "-",
-            "JURI 1": item.j1 || item['JURI 1'] || "-",
-            "JURI 2": item.j2 || item['JURI 2'] || "-",
-            "JURI 3": item.j3 || item['JURI 3'] || "-"
+            "WASIT / K.P": p_wasit,
+            "JURI 1 / DEWAN": p_ap2,
+            "JURI 2 / JURI 1": p_ap3,
+            "JURI 3 / JURI 2": p_ap4
         });
     });
 

@@ -702,6 +702,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="faceoff.js"></script>
     
     <script src="animasi-ronde.js"></script>
     <script src="animasi-pemenang.js"></script>
@@ -711,10 +712,9 @@
         import { getDatabase, ref, set, get, onValue, onDisconnect } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js";
 
         const ruangAktif = localStorage.getItem('kode_voucer_aktif');
-if (!ruangAktif) {
-    window.location.href = 'index.html'; 
-}
-        
+        if (!ruangAktif) {
+            window.location.href = 'index.html'; 
+        }
 
         const elTimer = document.getElementById('t_timer');
         const elTeksRonde = document.getElementById('teksRonde');
@@ -750,7 +750,10 @@ if (!ruangAktif) {
         const database = getDatabase(app);
 
         let GELANGGANG = ""; 
-        let baseRefPath = ""; 
+        // 🔥 NAVIGASI FOLDER BARU 🔥
+        let baseRefGelanggang = ""; 
+        let baseRefKamar = ""; 
+
         let rondeRef = null; 
         let rondeAktif = 1;
         let riwayatBiru = { 1: [], 2: [], 3: [] }; let riwayatMerah = { 1: [], 2: [], 3: [] };
@@ -774,7 +777,7 @@ if (!ruangAktif) {
             for(let i=1; i<=7; i++) {
                 let optEl = document.getElementById(`opt_g${i}`);
                 if(optEl) {
-                    onValue(ref(database, `${ruangAktif}/pertandingan/g${i}/locks/layar_utama`), (snap) => {
+                    onValue(ref(database, `${ruangAktif}/pertandingan/g${i}/kontrol_layar/locks/layar_utama`), (snap) => {
                         if(snap.exists() && snap.val() === true) {
                             optEl.innerText = `Gelanggang ${i} (Sedang Dipakai)`;
                             optEl.disabled = true;
@@ -823,7 +826,7 @@ if (!ruangAktif) {
 
             btnLogin.innerText = "MEMBUKA SOKET..."; btnLogin.disabled = true;
 
-            let lockRef = ref(database, `${ruangAktif}/pertandingan/${gel}/locks/layar_utama`);
+            let lockRef = ref(database, `${ruangAktif}/pertandingan/${gel}/kontrol_layar/locks/layar_utama`);
             let snap = await get(lockRef);
             if(snap.exists() && snap.val() === true && !window.isDiLayarTV) { 
                 errorEl.innerHTML = `❌ Layar TV Gelanggang ini sedang aktif!`; errorEl.style.display = "block"; btnLogin.innerText = "TAYANGKAN KE MONITOR"; btnLogin.disabled = false; return; 
@@ -832,11 +835,12 @@ if (!ruangAktif) {
             await set(lockRef, true); onDisconnect(lockRef).remove();
 
             GELANGGANG = gel; 
-            baseRefPath = `${ruangAktif}/pertandingan/${GELANGGANG}`; 
+            baseRefGelanggang = `${ruangAktif}/pertandingan/${GELANGGANG}`;
+            baseRefKamar = `${baseRefGelanggang}/kamar_tanding`;
 
             document.getElementById('kamarTanding').style.display = "flex";
             document.getElementById('labelGelanggangBar').innerText = GELANGGANG.toUpperCase();
-            rondeRef = ref(database, `${baseRefPath}/ronde_aktif`);
+            rondeRef = ref(database, `${baseRefKamar}/live_state/ronde_aktif`);
 
             let modalSetup = bootstrap.Modal.getInstance(document.getElementById('modalSetupLayar'));
             if (modalSetup) modalSetup.hide();
@@ -846,9 +850,9 @@ if (!ruangAktif) {
         }
 
         function jalankanMesinFirebase() {
-            // Tambahkan ${ruangAktif}/ agar TV mencari di laci data yang benar
             onValue(ref(database, `${ruangAktif}/pengaturan`), (snap) => {
                 let data = snap.val() || {};
+                window.saklarFotoGlobal = data.status_foto || "sembunyi";
                 if(data.nama_kejuaraan) elJudulKejuaraan.innerText = data.nama_kejuaraan.toUpperCase();
                 if(data.logos) {
                     let htmlKiri = ""; let htmlKanan = "";
@@ -861,8 +865,7 @@ if (!ruangAktif) {
                 if (data.waktu_screensaver) ssDelay = parseInt(data.waktu_screensaver) * 1000;
                 if (data.screensavers) arrScreensavers = Object.values(data.screensavers).filter(img => img !== "");
                 
-                // SENSOR SKALA TANDING
-                onValue(ref(database, `${baseRefPath}/skala`), (snap) => {
+                onValue(ref(database, `${baseRefKamar}/skala`), (snap) => {
                     let skalaData = snap.val();
                     if (skalaData) {
                         const r = document.documentElement.style;
@@ -878,18 +881,16 @@ if (!ruangAktif) {
             // ===================================================
             // 🔥 SENSOR VAR TELEVISI: EFEK MEWAH & PARTIKEL 🔥
             // ===================================================
-            let varBokehInterval; // Penampung mesin efek partikel
+            let varBokehInterval; 
 
-            onValue(ref(database, `${baseRefPath}/verifikasi`), (snap) => {
+            onValue(ref(database, `${baseRefKamar}/live_state/verifikasi`), (snap) => {
                 let data = snap.val();
                 let overlay = document.getElementById('tvVerifikasiOverlay');
                 
                 if (data && data.aktif) {
-                    // Munculkan layar hitam overlay (yang di dalamnya SUDAH otomatis ada kotak juri)
                     overlay.style.display = 'flex';
                     overlay.style.background = 'radial-gradient(circle at center, rgba(50, 50, 50, 0.6) 0%, rgba(0,0,0,0.8) 100%)';
 
-                    // 1. EFEK PARTIKEL BOKEH
                     let pContainer = document.getElementById('varParticles');
                     if(pContainer.innerHTML === '') {
                         clearInterval(varBokehInterval);
@@ -907,7 +908,6 @@ if (!ruangAktif) {
                         }, 250);
                     }
 
-                    // 2. SET TEKS JUDUL
                     let tipeTeks = data.tipe === 'jatuhan' ? 'JATUHAN' : 'PELANGGARAN';
                     document.getElementById('tvVerifTipe').innerText = tipeTeks;
                     
@@ -916,7 +916,6 @@ if (!ruangAktif) {
                     let elSudut = document.getElementById('tvVerifSudut');
                     let elLoader = document.getElementById('tvVerifLoader');
                     
-                    // 3. RENDER KOTAK JURI (Real-time tanpa error crash)
                     let terjemahkanVote = (v) => {
                         if (v === 'biru') return '<span style="color: #0b5ed7;">BIRU</span>';
                         if (v === 'merah') return '<span style="color: #dc3545;">MERAH</span>';
@@ -924,7 +923,6 @@ if (!ruangAktif) {
                         return '<span style="color: #ffc107; font-size: 14px; letter-spacing: 0.1vw;">Voting</span>';
                     };
                     
-                    // Pengaman jika `data.votes` telat masuk dari database agar tidak blank
                     let vJ1 = (data.votes && data.votes.j1) ? data.votes.j1 : "";
                     let vJ2 = (data.votes && data.votes.j2) ? data.votes.j2 : "";
                     let vJ3 = (data.votes && data.votes.j3) ? data.votes.j3 : "";
@@ -933,9 +931,7 @@ if (!ruangAktif) {
                     document.getElementById('tvResJ2').innerHTML = terjemahkanVote(vJ2);
                     document.getElementById('tvResJ3').innerHTML = terjemahkanVote(vJ3);
                     
-                    // 4. KONDISI TAMPILAN (LOADING vs HASIL KELUAR)
                     if (data.hasil && data.hasil !== "") {
-                        // HASIL SUDAH DITEKAN DEWAN JURI
                         elLoader.style.display = 'none';
                         elHasilContainer.style.display = 'flex'; 
                         
@@ -963,112 +959,151 @@ if (!ruangAktif) {
                         
                         setTimeout(() => elHasil.classList.add('show-result'), 50); 
                     } else {
-                        // SEDANG LOADING & JURI MASIH MEMILIH (KOTAK JURI TETAP TAMPIL)
                         elLoader.style.display = 'block';
                         elHasilContainer.style.display = 'none';
                         elHasil.classList.remove('show-result');
                     }
                 } else {
-                    // TUTUP LAYAR VERIFIKASI (KEMBALI KE PERTANDINGAN NORMAL)
                     overlay.style.display = 'none';
                     clearInterval(varBokehInterval);
                     document.getElementById('varParticles').innerHTML = '';
                     document.getElementById('tvVerifHasil').classList.remove('show-result');
-                    // Tidak perlu menghidden kotak juri satu-satu karena parent-nya (overlay) sudah disembunyikan
                 }
             });
 
-            onValue(ref(database, `${baseRefPath}/last_activity`), () => { resetIdleTimer(); });
-            onValue(ref(database, `${baseRefPath}/status_screensaver`), (snap) => {
+            onValue(ref(database, `${baseRefGelanggang}/last_activity`), () => { resetIdleTimer(); });
+            onValue(ref(database, `${baseRefGelanggang}/kontrol_layar/status_screensaver`), (snap) => {
                 isScreensaverAktifManual = snap.val() || false;
                 if(isScreensaverAktifManual) tampilkanScreensaver(); else { sembunyikanScreensaver(); resetIdleTimer(); }
             });
 
-           // ========================================================
-        // 🔥 MESIN TIMER TIMESTAMP (LAYAR TV UTAMA) 🔥
-        // ========================================================
-        let intervalTimerLayar = null;
-        let lastServerStart = 0;
-        let localStartRef = 0;
-        
-        function formatMenitDetik(totalDetik) {
-            let m = Math.floor(totalDetik / 60).toString().padStart(2, '0');
-            let s = (totalDetik % 60).toString().padStart(2, '0');
-            return `${m}:${s}`;
-        }
+            // ========================================================
+            // 🔥 MESIN TIMER TIMESTAMP (LAYAR TV UTAMA) 🔥
+            // ========================================================
+            let intervalTimerLayar = null;
+            let lastServerStart = 0;
+            let localStartRef = 0;
+            
+            function formatMenitDetik(totalDetik) {
+                let m = Math.floor(totalDetik / 60).toString().padStart(2, '0');
+                let s = (totalDetik % 60).toString().padStart(2, '0');
+                return `${m}:${s}`;
+            }
 
-        onValue(ref(database, `${baseRefPath}/timer_sync`), (snap) => {
-            let data = snap.val();
-            if(!data) return;
+            onValue(ref(database, `${baseRefKamar}/live_state/timer_sync`), (snap) => {
+                let data = snap.val();
+                if(!data) return;
 
-            clearInterval(intervalTimerLayar);
+                clearInterval(intervalTimerLayar);
 
-            if(data.status === "running") {
-                // 🔥 MATIKAN TIMER SCREENSAVER 1 KALI SAJA DI SINI 
-                if (typeof idleTimer !== 'undefined') clearTimeout(idleTimer);
-                if (typeof sembunyikanScreensaver === 'function' && !isScreensaverAktifManual) {
-                    sembunyikanScreensaver();
+                if(data.status === "running") {
+                    if (typeof idleTimer !== 'undefined') clearTimeout(idleTimer);
+                    if (typeof sembunyikanScreensaver === 'function' && !isScreensaverAktifManual) {
+                        sembunyikanScreensaver();
+                    }
+
+                    if (lastServerStart !== data.startTimestamp) {
+                        lastServerStart = data.startTimestamp;
+                        let bedaWaktu = Math.abs(Date.now() - data.startTimestamp);
+                        if (bedaWaktu < 2500) {
+                            localStartRef = Date.now(); 
+                        } else {
+                            localStartRef = data.startTimestamp; 
+                        }
+                    }
+
+                    intervalTimerLayar = setInterval(() => {
+                        let elapsed = Math.max(0, Math.floor((Date.now() - localStartRef) / 1000));
+                        let currentSec = 0;
+                        
+                        if (data.mode === 'tanding') currentSec = Math.max(0, data.durasiAwal - elapsed);
+                        else currentSec = data.durasiAwal + elapsed; 
+                        
+                        if (elTimer) elTimer.innerText = formatMenitDetik(currentSec);
+                    }, 250); 
+                } 
+                else if (data.status === "pause" || data.status === "reset" || data.status === "ready") {
+                    if (elTimer) elTimer.innerText = formatMenitDetik(data.remaining || 0);
+                    if (typeof resetIdleTimer === 'function') resetIdleTimer();
                 }
+            });
+   
+            // 🔥 FILTER SILUMAN & LAYAR GANDA 🔥
+            let modeAktifGlobal = "tanding";
+            let dataSetupGlobalTV = {};
 
-                // 🔥 LOGIKA AUTO-KALIBRASI WAKTU (Mencegah Angka 10 Terlalu Lama) 🔥
-                if (lastServerStart !== data.startTimestamp) {
-                    lastServerStart = data.startTimestamp;
-                    // Deteksi selisih jam laptop panitia dan jam layar TV ini
-                    let bedaWaktu = Math.abs(Date.now() - data.startTimestamp);
-                    // Jika baru saja di-play oleh panitia (selisih di bawah 2.5 detik)
-                    if (bedaWaktu < 2500) {
-                        localStartRef = Date.now(); // Kunci pakai jam lokal TV agar turunnya pas 1 detik
+            onValue(ref(database, `${baseRefGelanggang}/kontrol_layar/mode_aktif`), (snap) => {
+                modeAktifGlobal = snap.val() || "tanding";
+                applyModeSiluman();
+            });
+
+            onValue(ref(database, `${baseRefKamar}/info_laga`), (snap) => {
+                dataSetupGlobalTV = snap.val() || {};
+                
+                window.fotoBiruGlobal = dataSetupGlobalTV.foto_biru || "";
+                window.fotoMerahGlobal = dataSetupGlobalTV.foto_merah || "";
+                
+                // 🔥 MESIN PENYEDOT SILUMAN & SATPAM FACE-OFF 🔥
+                if (window.saklarFotoGlobal === 'tampil') {
+                    let sulapLink = (url) => { let m = (url||"").match(/\/d\/([a-zA-Z0-9-_]+)/); return (m && m[1]) ? "https://lh3.googleusercontent.com/d/" + m[1] : url; };
+                    if (window.fotoBiruGlobal) new Image().src = sulapLink(window.fotoBiruGlobal);
+                    if (window.fotoMerahGlobal) new Image().src = sulapLink(window.fotoMerahGlobal);
+
+                    // Logika Satpam Face-Off
+                    let cekNama = (dataSetupGlobalTV.nama_biru || "").toUpperCase();
+                    let cekPartai = dataSetupGlobalTV.partai || "-";
+                    let lagaUnikID = cekPartai + "_" + cekNama;
+
+                    if (cekPartai !== "-" && cekNama !== "-" && cekNama !== "BIRU") {
+                        if (window.lastFaceOffID !== lagaUnikID) {
+                            if (window.mainkanFaceOff) window.mainkanFaceOff(dataSetupGlobalTV);
+                            window.lastFaceOffID = lagaUnikID;
+                        }
                     } else {
-                        localStartRef = data.startTimestamp; // Jika layar baru di-refresh di tengah jalan, ikuti panitia
+                        // Jika klik Batalkan Siaran
+                        window.lastFaceOffID = ""; 
+                        let foOverlay = document.getElementById('faceoff-overlay');
+                        if (foOverlay) foOverlay.classList.remove('show');
                     }
                 }
 
-                // TV menghitung sendiri dengan presisi tinggi
-                intervalTimerLayar = setInterval(() => {
-                    // Tidak ada lagi nilai minus
-                    let elapsed = Math.max(0, Math.floor((Date.now() - localStartRef) / 1000));
-                    let currentSec = 0;
-                    
-                    if (data.mode === 'tanding') currentSec = Math.max(0, data.durasiAwal - elapsed);
-                    else currentSec = data.durasiAwal + elapsed; 
-                    
-                    if (elTimer) elTimer.innerText = formatMenitDetik(currentSec);
-                }, 250); 
-            } 
-            else if (data.status === "pause" || data.status === "reset" || data.status === "ready") {
-                if (elTimer) elTimer.innerText = formatMenitDetik(data.remaining || 0);
-                if (typeof resetIdleTimer === 'function') resetIdleTimer();
-            }
-        });
-   
-            
-            onValue(ref(database, `${baseRefPath}/setup`), (snap) => {
-                let data = snap.val();
+                applyModeSiluman();
+            });
+
+            function applyModeSiluman() {
+                if (modeAktifGlobal === 'jurus') {
+                    document.getElementById('kamarTanding').style.display = 'none';
+                    return; 
+                } else {
+                    document.getElementById('kamarTanding').style.display = 'flex';
+                }
+
+                let data = dataSetupGlobalTV;
                 if(data) {
                     elNamaBiru.innerText = data.nama_biru || "SUDUT BIRU"; 
                     elKonBiru.innerText = data.kontingen_biru || "-";
                     elNamaMerah.innerText = data.nama_merah || "SUDUT MERAH"; 
                     elKonMerah.innerText = data.kontingen_merah || "-";
                     elPartai.innerText = data.partai ? `PARTAI ${data.partai}` : "-"; 
-                    elBabak.innerText = data.babak || "-";let teksKelas = data.kelas ? data.kelas.toUpperCase() : "-";
+                    elBabak.innerText = data.babak || "-";
+                    
+                    let teksKelas = data.kelas ? data.kelas.toUpperCase() : "-";
                     teksKelas = teksKelas.replace(/(PUTRA|PUTRI)\s+([A-Z])/g, "$2 $1");
                     elKelas.innerText = teksKelas;
+                    
                     elNamaBiruTV.innerText = data.nama_biru || "SUDUT BIRU";
                     elNamaMerahTV.innerText = data.nama_merah || "SUDUT MERAH";
                 }
-            });
+            }
 
-            // 🔥 SENSOR ANIMASI DARI TOMBOL PLAY PANITIA (ANTI-GAGAL)
             let isLayarBaruDibuka = true; 
-            onValue(ref(database, `${baseRefPath}/trigger_animasi`), (snap) => {
-                // Abaikan penembakan animasi saat layar TV pertama kali direfresh / baru dibuka
+            onValue(ref(database, `${baseRefKamar}/live_state/trigger_animasi`), (snap) => {
                 if (isLayarBaruDibuka) {
                     isLayarBaruDibuka = false;
                     return;
                 }
                 
                 let data = snap.val();
-                // Jika panitia mengirim token baru, langsung mainkan!
                 if (data && data.token) {
                     if (window.mainkanEfekTransisiRonde) {
                         window.mainkanEfekTransisiRonde(data.ronde);
@@ -1078,7 +1113,6 @@ if (!ruangAktif) {
                 }
             });
 
-            // FUNGSI RONDE DIKEMBALIKAN KE VERSI NORMAL
             onValue(rondeRef, (snap) => { 
                 rondeAktif = snap.val() || 1; 
                 elTeksRonde.innerText = "RONDE " + rondeAktif; 
@@ -1086,17 +1120,15 @@ if (!ruangAktif) {
             });
 
             [1, 2, 3].forEach(r => {
-                onValue(ref(database, `${baseRefPath}/biru/r${r}_log`), (snap) => { riwayatBiru[r] = snap.val() ? Object.values(snap.val()) : []; updateLayarTanding(); });
-                onValue(ref(database, `${baseRefPath}/merah/r${r}_log`), (snap) => { riwayatMerah[r] = snap.val() ? Object.values(snap.val()) : []; updateLayarTanding(); });
+                onValue(ref(database, `${baseRefKamar}/sudut_biru/r${r}_log`), (snap) => { riwayatBiru[r] = snap.val() ? Object.values(snap.val()) : []; updateLayarTanding(); });
+                onValue(ref(database, `${baseRefKamar}/sudut_merah/r${r}_log`), (snap) => { riwayatMerah[r] = snap.val() ? Object.values(snap.val()) : []; updateLayarTanding(); });
             });
 
-            // MEMORI ANTI-GHOSTING UNTUK LAYAR TV
             let memoriSinyalTV = {};
 
-            onValue(ref(database, `${baseRefPath}/sinyal`), (snap) => {
+            onValue(ref(database, `${baseRefKamar}/live_state/sinyal`), (snap) => {
                 let dataSinyal = snap.val(); 
                 
-                // Jika sinyal kosong (dibersihkan dari server), bersihkan juga memori TV agar tidak menumpuk
                 if(!dataSinyal) { memoriSinyalTV = {}; return; } 
                 
                 resetIdleTimer();
@@ -1108,14 +1140,13 @@ if (!ruangAktif) {
                         let timestampSinyal = aktif[jId];
                         let kunciUnik = jId + "_" + timestampSinyal;
 
-                        // CEK MEMORI: Jika sinyal ini belum pernah dinyalakan, baru nyalakan lampunya!
                         if (!memoriSinyalTV[kunciUnik]) {
-                            memoriSinyalTV[kunciUnik] = true; // Catat ke memori agar tidak dinyalakan 2x
+                            memoriSinyalTV[kunciUnik] = true; 
                             
                             let tL = document.getElementById(`${sudut==='biru'?'b':'m'}_${jId}_${nilai===2?'bot':'top'}`);
                             if(tL) { 
                                 tL.classList.add('active'); 
-                                setTimeout(() => tL.classList.remove('active'), 500); // Menyala 0.5 detik
+                                setTimeout(() => tL.classList.remove('active'), 500); 
                             }
                         }
                     }
@@ -1123,29 +1154,30 @@ if (!ruangAktif) {
             });
 
             // SENSOR PENENTUAN PEMENANG AKHIR
-            onValue(ref(database, baseRefPath), (snap) => {
-                let d = snap.val();
+            let pemenangMutlak = null;
+            let alasanPemenang = "";
+
+            onValue(ref(database, `${baseRefKamar}/pemenang_keputusan`), snap => pemenangMutlak = snap.val());
+            onValue(ref(database, `${baseRefKamar}/alasan_menang`), snap => alasanPemenang = snap.val());
+
+            onValue(ref(database, `${baseRefKamar}/live_state/izin_simpan`), (snap) => {
+                let izin = snap.val();
                 
-                // ⚠️ Pastikan izin_simpan adalah pemicu yang benar di sistem Anda
-                if (d && d.izin_simpan === true) {
+                if (izin === true) {
                     let sudutPemenang = "";
                     let alasanMenang = "MENANG POIN"; 
                     let namaAtlet = "";
 
-                    // Logika Panitia Menentukan Alasan & Pemenang
-                    if (d.pemenang_keputusan) {
-                        sudutPemenang = d.pemenang_keputusan;
-                        alasanMenang = d.alasan_menang || "KEPUTUSAN DEWAN"; 
-                        // 🔥 HAPUS HARDCODE "W.M.P" LAMA AGAR BISA MENERIMA TEKS DARI DEWAN 🔥
+                    if (pemenangMutlak) {
+                        sudutPemenang = pemenangMutlak;
+                        alasanMenang = alasanPemenang || "KEPUTUSAN DEWAN"; 
                     } else {
-                        // AMAN DARI ERROR: Ambil angka langsung dari teks raksasa di layar TV
                         let skorBiru = elSkorBiru ? parseInt(elSkorBiru.innerText) : 0;
                         let skorMerah = elSkorMerah ? parseInt(elSkorMerah.innerText) : 0;
 
                         if (skorBiru > skorMerah) sudutPemenang = "biru";
                         else if (skorMerah > skorBiru) sudutPemenang = "merah";
                         else {
-                            // 🔥 JIKA SKOR SERI, TV HARUS IKUT MENGHITUNG TIE-BREAKER 🔥
                             let logB = [ ...(window.riwayatBiru[1]||[]), ...(window.riwayatBiru[2]||[]), ...(window.riwayatBiru[3]||[]) ];
                             let logM = [ ...(window.riwayatMerah[1]||[]), ...(window.riwayatMerah[2]||[]), ...(window.riwayatMerah[3]||[]) ];
                             let getK = (arr, c) => arr.filter(c).length;
@@ -1178,14 +1210,12 @@ if (!ruangAktif) {
                         }
                     }
 
-                    // Menarik Nama Atlet dari Layar
                     if (sudutPemenang === "biru") {
                         namaAtlet = elNamaBiru ? elNamaBiru.innerText : "SUDUT BIRU";
                     } else if (sudutPemenang === "merah") {
                         namaAtlet = elNamaMerah ? elNamaMerah.innerText : "SUDUT MERAH";
                     }
 
-                    // 💥 PICU PLUGIN ANIMASI MEWAH!
                     if (sudutPemenang !== "") {
                         if (window.mainkanEfekPemenang) {
                             window.mainkanEfekPemenang(sudutPemenang, namaAtlet, alasanMenang);
@@ -1194,13 +1224,11 @@ if (!ruangAktif) {
                         }
                     }
                     
-                    // Sembunyikan modal Bootstrap jadul tanpa menyebabkan error
                     if (typeof modalHasilTVInstance !== 'undefined' && modalHasilTVInstance) {
                         modalHasilTVInstance.hide();
                     }
                     
                 } else { 
-                    // Jika pertandingan di-reset/dibatalkan, tutup layarnya
                     if (typeof modalHasilTVInstance !== 'undefined' && modalHasilTVInstance) {
                         modalHasilTVInstance.hide(); 
                     }
@@ -1218,20 +1246,16 @@ if (!ruangAktif) {
             }
             finalSkorBiru = tB; finalSkorMerah = tM;
 
-            // Cek apakah skor biru berubah
             if (parseInt(elSkorBiru.innerText) !== tB) {
-                elSkorBiru.innerText = tB; // Update angka
-                mainkanEfekSkor(elSkorBiru); // Mainkan efek
+                elSkorBiru.innerText = tB; 
+                mainkanEfekSkor(elSkorBiru); 
             }
 
-            // Cek apakah skor merah berubah
             if (parseInt(elSkorMerah.innerText) !== tM) {
-                elSkorMerah.innerText = tM; // Update angka
-                mainkanEfekSkor(elSkorMerah); // Mainkan efek
+                elSkorMerah.innerText = tM; 
+                mainkanEfekSkor(elSkorMerah); 
             }
 
-            // 🔥 LOGIKA WARNA PANEL (DENGAN SENSOR TIE-BREAKER REAL-TIME) 🔥
-            // Kumpulkan seluruh log untuk dianalisis
             let logB = [ ...(riwayatBiru[1]||[]), ...(riwayatBiru[2]||[]), ...(riwayatBiru[3]||[]) ];
             let logM = [ ...(riwayatMerah[1]||[]), ...(riwayatMerah[2]||[]), ...(riwayatMerah[3]||[]) ];
             let getK = (arr, c) => arr.filter(c).length;
@@ -1239,38 +1263,34 @@ if (!ruangAktif) {
 
             let lead = "";
             
-            // 1. Cek Skor Angka Terlebih Dahulu
             if (tB > tM) lead = "biru";
             else if (tM > tB) lead = "merah";
             else {
-                // 2. JIKA SKOR SERI, MASUK KE MESIN AUDITOR PELANGGARAN!
-                let hkB = getK(logB, x => x < 0); let hkM = getK(logM, x => x < 0); // Teguran & Peringatan
+                let hkB = getK(logB, x => x < 0); let hkM = getK(logM, x => x < 0); 
                 if (hkB < hkM) lead = "biru";
                 else if (hkM < hkB) lead = "merah";
                 else {
-                    let binB = getVal(logB, 0); let binM = getVal(logM, 0); // Binaan
+                    let binB = getVal(logB, 0); let binM = getVal(logM, 0); 
                     if (binB < binM) lead = "biru";
                     else if (binM < binB) lead = "merah";
                     else {
-                        let jB = getVal(logB, 3); let jM = getVal(logM, 3); // Jatuhan
+                        let jB = getVal(logB, 3); let jM = getVal(logM, 3); 
                         if (jB > jM) lead = "biru";
                         else if (jM > jB) lead = "merah";
                         else {
-                            let tB_c = getVal(logB, 2); let tM_c = getVal(logM, 2); // Tendangan
+                            let tB_c = getVal(logB, 2); let tM_c = getVal(logM, 2); 
                             if (tB_c > tM_c) lead = "biru";
                             else if (tM_c > tB_c) lead = "merah";
                             else {
-                                let pB_c = getVal(logB, 1); let pM_c = getVal(logM, 1); // Pukulan
+                                let pB_c = getVal(logB, 1); let pM_c = getVal(logM, 1); 
                                 if (pB_c > pM_c) lead = "biru";
                                 else if (pM_c > pB_c) lead = "merah";
-                                // Jika masih identik, background seimbang (tidak ada yang putih)
                             }
                         }
                     }
                 }
             }
 
-            // Eksekusi Pergantian Background
             if (lead === "biru") { 
                 panelSkorBiru.classList.remove('kalah'); panelSkorMerah.classList.add('kalah'); document.body.className = "lead-biru"; 
             } else if (lead === "merah") { 
@@ -1279,7 +1299,6 @@ if (!ruangAktif) {
                 panelSkorBiru.classList.remove('kalah'); panelSkorMerah.classList.remove('kalah'); document.body.className = ""; 
             }
 
-            // KAMUS ATURAN TINGKATAN (Lengkap dengan nama file abu-abu dan kuning)
             const iconRules = {
                 '0_1':  { val: '0',  threshold: 1, off: 'binaan_1.png',     on: 'binaan_12.png' },
                 '0_2':  { val: '0',  threshold: 2, off: 'binaan_2.png',     on: 'binaan_22.png' },
@@ -1289,28 +1308,20 @@ if (!ruangAktif) {
                 '-5_2': { val: '-5', threshold: 2, off: 'peringatan_2.png', on: 'peringatan_22.png' }
             };
 
-            // MENGUBAH NAMA FILE GAMBAR DAN MENYALAKAN KOTAK
             Object.keys(iconRules).forEach(key => {
                 let rule = iconRules[key];
-                
-                // SUDUT BIRU
                 let imgBiru = document.getElementById(`b_img_${key}`);
                 if (imgBiru) {
                     let aktif = hB[rule.val] >= rule.threshold;
-                    // Ganti src gambar dari abu-abu ke kuning atau sebaliknya
                     imgBiru.src = `assets/icons/${aktif ? rule.on : rule.off}`;
-                    
                     if (aktif) imgBiru.parentElement.classList.add('menyala');
                     else imgBiru.parentElement.classList.remove('menyala');
                 }
 
-                // SUDUT MERAH
                 let imgMerah = document.getElementById(`m_img_${key}`);
                 if (imgMerah) {
                     let aktif = hM[rule.val] >= rule.threshold;
-                    // Ganti src gambar dari abu-abu ke kuning atau sebaliknya
                     imgMerah.src = `assets/icons/${aktif ? rule.on : rule.off}`;
-                    
                     if (aktif) imgMerah.parentElement.classList.add('menyala');
                     else imgMerah.parentElement.classList.remove('menyala');
                 }
@@ -1318,13 +1329,8 @@ if (!ruangAktif) {
         }
 
         function mainkanEfekSkor(elemen) {
-            // Hapus class jika animasi sedang berjalan
             elemen.classList.remove('skor-berubah');
-            
-            // Trik "Reflow" agar animasi bisa diputar ulang jika skor berubah sangat cepat
             void elemen.offsetWidth; 
-            
-            // Tambahkan kembali class animasinya
             elemen.classList.add('skor-berubah');
         }
     </script>

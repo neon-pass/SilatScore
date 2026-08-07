@@ -840,16 +840,22 @@
 
                 ['g1', 'g2', 'g3', 'g4', 'g5', 'g6'].forEach(gel => {
                     let d = pData[gel] || {};
-                    StateData.livePanitia[gel] = d.setup || {};
+                    
+                    // 🔥 MENGAMBIL DATA DARI KAMAR MASING-MASING 🔥
+                    let infoTanding = (d.kamar_tanding && d.kamar_tanding.info_laga) ? d.kamar_tanding.info_laga : {};
+                    let infoJurus = (d.kamar_jurus && d.kamar_jurus.info_laga) ? d.kamar_jurus.info_laga : {};
+                    
+                    StateData.livePanitia[gel] = (KATEGORI_TAMPILAN === 'tanding') ? infoTanding : infoJurus;
                     StateData.memoriSelesai.tanding[gel] = d.partai_selesai_tanding || [];
                     StateData.memoriSelesai.jurus[gel] = d.partai_selesai_jurus || [];
                 });
 
+                // 🔥 AMBIL DATA SKALA DARI FOLDER kontrol_layar 🔥
                 let s = null;
                 if (GELANGGANG === 'semua') {
-                    s = (pData['semua'] || {}).skala_jadwal_semua;
+                    s = (pData['semua'] && pData['semua'].kontrol_layar) ? pData['semua'].kontrol_layar.skala_jadwal_semua : null;
                 } else {
-                    s = (pData[GELANGGANG] || {}).skala_jadwal;
+                    s = (pData[GELANGGANG] && pData[GELANGGANG].kontrol_layar) ? pData[GELANGGANG].kontrol_layar.skala_jadwal : null;
                 }
 
                 if (s) {
