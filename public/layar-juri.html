@@ -1283,8 +1283,18 @@
             onValue(rondeRef, (snap) => { rondeAktif = snap.val() || 1; document.querySelectorAll('.btn-round').forEach((b, i) => b.classList.toggle('active', (i + 1) === rondeAktif)); updateTampilan(); });
 
             [1, 2, 3].forEach(r => {
-                onValue(ref(database, `${baseRefKamar}/sudut_biru/r${r}_log`), (snap) => { riwayatBiru[r] = snap.val() || []; skorBiru[r] = riwayatBiru[r].reduce((a, b) => a + b, 0); updateTampilan(); });
-                onValue(ref(database, `${baseRefKamar}/sudut_merah/r${r}_log`), (snap) => { riwayatMerah[r] = snap.val() || []; skorMerah[r] = riwayatMerah[r].reduce((a, b) => a + b, 0); updateTampilan(); });
+                onValue(ref(database, `${baseRefKamar}/sudut_biru/r${r}_log`), (snap) => { 
+                    let val = snap.val();
+                    riwayatBiru[r] = Array.isArray(val) ? val : (val ? Object.values(val) : []);
+                    skorBiru[r] = riwayatBiru[r].reduce((a, b) => Number(a) + Number(b), 0); 
+                    updateTampilan(); 
+                });
+                onValue(ref(database, `${baseRefKamar}/sudut_merah/r${r}_log`), (snap) => { 
+                    let val = snap.val();
+                    riwayatMerah[r] = Array.isArray(val) ? val : (val ? Object.values(val) : []);
+                    skorMerah[r] = riwayatMerah[r].reduce((a, b) => Number(a) + Number(b), 0); 
+                    updateTampilan(); 
+                });
             });
 
             onValue(ref(database, `${baseRefKamar}/live_state/sinyal`), (snap) => {
@@ -1306,42 +1316,146 @@
 
             let statusTerakhirJuri = "";
             onValue(ref(database, `${baseRefKamar}/live_state/status`), (snap) => {
-                let status = snap.val() || ""; if (status === statusTerakhirJuri) return; statusTerakhirJuri = status;
-                let isTerkunci = false; const statusUmum = ["ISTIRAHAT", "SELESAI", "PERTANDINGAN SELESAI", "PAUSE", "JEDA KOTOR"];
-                if (statusUmum.includes(status)) { isTerkunci = true; } else if (status.includes("SIAP RONDE")) { isTerkunci = false; }
-                if (isTerkunci) {
-                    if (penundaKunciOtomatis) clearTimeout(penundaKunciOtomatis); let waktuTunggu = (status === "SELESAI" || status === "PERTANDINGAN SELESAI") ? 0 : 1000;
-                    penundaKunciOtomatis = setTimeout(() => {
-                        kunciSeluruhTombol(true, status);
-                        if (status === "SELESAI" || status === "PERTANDINGAN SELESAI") { if (session.pos === 'dewan') { if (!sudahDisahkan) tampilkanPopupPemenang(); } else { elTeksRondeSelesaiJudul.innerText = "PERTANDINGAN SELESAI"; elTeksRondeSelesaiSub.innerText = "Pertandingan Telah Berakhir!"; modalRondeSelesaiInstance.show(); } }
-                        else if (status === "ISTIRAHAT") { elTeksRondeSelesaiJudul.innerText = "WAKTU ISTIRAHAT"; elTeksRondeSelesaiSub.innerText = "Matras Disterilkan!"; modalRondeSelesaiInstance.show(); }
-                        else if (status.includes("SIAP RONDE")) { if (modalRondeSelesaiInstance) modalRondeSelesaiInstance.hide(); document.querySelectorAll('.modal-backdrop').forEach(el => el.remove()); document.body.classList.remove('modal-open'); document.body.style.overflow = ''; document.body.style.paddingRight = ''; }
-                    }, waktuTunggu);
-                }
-                else {
-                    if (penundaKunciOtomatis) clearTimeout(penundaKunciOtomatis); kunciSeluruhTombol(false);
-                    if (modalRondeSelesaiInstance) modalRondeSelesaiInstance.hide(); if (modalVerifikasiJuriInstance) modalVerifikasiJuriInstance.hide(); if (modalVerifikasiDewanInstance) modalVerifikasiDewanInstance.hide(); if (modalPengesahanInstance) modalPengesahanInstance.hide();
-                    elBtnPanggilModalSelesaiAtas.style.display = 'none';
-                    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove()); document.body.classList.remove('modal-open'); document.body.style.overflow = ''; document.body.style.paddingRight = '';
-                }
+            let status = snap.val() || ""; if (status === statusTerakhirJuri) return; statusTerakhirJuri = status;
+            
+            // PERBAIKAN: Masukkan PERSIAPAN ke status umum dan paksa kunci saat SIAP RONDE
+            let isTerkunci = false; 
+            const statusUmum = ["PERSIAPAN", "ISTIRAHAT", "SELESAI", "PERTANDINGAN SELESAI", "PAUSE", "JEDA KOTOR"];
+            
+            if (statusUmum.includes(status) || status.includes("SIAP RONDE")) { 
+                isTerkunci = true; 
+            }
+            
+            if (isTerkunci) {
+                if (penundaKunciOtomatis) clearTimeout(penundaKunciOtomatis); 
+                // Waktu tunggu diset 0 untuk PERSIAPAN & SIAP RONDE agar tombol seketika terkunci
+                let waktuTunggu = (status === "SELESAI" || status === "PERTANDINGAN SELESAI" || status === "PERSIAPAN" || status.includes("SIAP RONDE")) ? 0 : 1000;
+                
+                penundaKunciOtomatis = setTimeout(() => {
+                    kunciSeluruhTombol(true, status);
+                    
+                    if (status === "SELESAI" || status === "PERTANDINGAN SELESAI") { 
+                        if (session.pos === 'dewan') { if (!sudahDisahkan) tampilkanPopupPemenang(); } 
+                        else { elTeksRondeSelesaiJudul.innerText = "PERTANDINGAN SELESAI"; elTeksRondeSelesaiSub.innerText = "Pertandingan Telah Berakhir!"; modalRondeSelesaiInstance.show(); } 
+                    }
+                    else if (status === "ISTIRAHAT") { 
+                        elTeksRondeSelesaiJudul.innerText = "WAKTU ISTIRAHAT"; elTeksRondeSelesaiSub.innerText = "Matras Disterilkan!"; modalRondeSelesaiInstance.show(); 
+                    }
+                    else if (status.includes("SIAP RONDE") || status === "PERSIAPAN") { 
+                        // Menutup modal yang tidak perlu tanpa mengganggu state UI Juri
+                        if (modalRondeSelesaiInstance) modalRondeSelesaiInstance.hide(); 
+                        document.querySelectorAll('.modal-backdrop').forEach(el => el.remove()); 
+                        document.body.classList.remove('modal-open'); document.body.style.overflow = ''; document.body.style.paddingRight = ''; 
+                    }
+                }, waktuTunggu);
+            }
+            else {
+                // Hanya akan tereksekusi (membuka kunci tombol) ketika status == "RONDE"
+                if (penundaKunciOtomatis) clearTimeout(penundaKunciOtomatis); kunciSeluruhTombol(false);
+                if (modalRondeSelesaiInstance) modalRondeSelesaiInstance.hide(); if (modalVerifikasiJuriInstance) modalVerifikasiJuriInstance.hide(); if (modalVerifikasiDewanInstance) modalVerifikasiDewanInstance.hide(); if (modalPengesahanInstance) modalPengesahanInstance.hide();
+                elBtnPanggilModalSelesaiAtas.style.display = 'none';
+                document.querySelectorAll('.modal-backdrop').forEach(el => el.remove()); document.body.classList.remove('modal-open'); document.body.style.overflow = ''; document.body.style.paddingRight = '';
+            }
             });
         }
 
         function formatLogSkor(arr, sudut) {
-            if (!arr || arr.length === 0) return "";
-            let htmlLog = arr.map(poin => {
+            if (!arr) return "";
+            let arrSafe = Array.isArray(arr) ? arr : Object.values(arr);
+            if (arrSafe.length === 0) return "";
+            
+            let htmlLog = arrSafe.map(poin => {
                 let warna = "#fff"; if (poin === 3) warna = "#fff"; else if (poin < 0) warna = "#fff"; else if (poin === 0) warna = "#fff";
                 let teksPoin = poin === 3 ? "+3" : poin; return `<span style="color: ${warna}; font-size: 22px; font-weight: bold; margin: 0 6px;">${teksPoin}</span>`;
             }).join(""); return htmlLog;
         }
 
+        let memoriLayarBiru = { 1: 0, 2: 0, 3: 0 };
+        let memoriLayarMerah = { 1: 0, 2: 0, 3: 0 };
+        let peredamRender = null;
+        
+        function buatSatuHTMLPoin(poin) {
+            let warna = "#fff"; 
+            let teksPoin = poin === 3 ? "+3" : poin; 
+            return `<span style="color: ${warna}; font-size: 22px; font-weight: bold; margin: 0 6px;">${teksPoin}</span>`;
+        }
+
+        function renderPintar(elKotak, arrayData, memoriLayar, ronde) {
+            if (!elKotak) return;
+            let arrSafe = Array.isArray(arrayData) ? arrayData : (arrayData ? Object.values(arrayData) : []);
+            let jumlahDataServer = arrSafe.length;
+            let jumlahDiLayar = memoriLayar[ronde];
+
+            if (jumlahDataServer === 0) {
+                elKotak.innerHTML = ""; 
+            } 
+            else if (jumlahDataServer === jumlahDiLayar + 1) {
+                // Jika hanya nambah 1, sisipkan saja di ujung tanpa membongkar seluruh tabel
+                let poinBaru = arrSafe[jumlahDataServer - 1];
+                elKotak.insertAdjacentHTML('beforeend', buatSatuHTMLPoin(poinBaru));
+            } 
+            else if (jumlahDataServer === jumlahDiLayar - 1) {
+                // Jika undo, hapus elemen terakhir saja
+                if (elKotak.lastElementChild) {
+                    elKotak.removeChild(elKotak.lastElementChild);
+                }
+            } 
+            else if (jumlahDataServer !== jumlahDiLayar) {
+                // Jika selisih banyak, baru render ulang semua
+                elKotak.innerHTML = formatLogSkor(arrSafe, 'bebas'); 
+            }
+
+            memoriLayar[ronde] = jumlahDataServer;
+        }
+
         function updateTampilan() {
-            let gtBiru = skorBiru[1] + skorBiru[2] + skorBiru[3]; let gtMerah = skorMerah[1] + skorMerah[2] + skorMerah[3];
-            elTotalBiruAtas.innerText = gtBiru; elTotalMerahAtas.innerText = gtMerah;
-            elTotalBiruR1.innerText = skorBiru[1]; elTotalMerahR1.innerText = skorMerah[1]; elSkorBiruR1.innerHTML = (rondeAktif === 1) ? formatLogSkor(riwayatBiru[1], 'biru') : ""; elSkorMerahR1.innerHTML = (rondeAktif === 1) ? formatLogSkor(riwayatMerah[1], 'merah') : "";
-            if (rondeAktif >= 2) { elTotalBiruR2.innerText = skorBiru[2]; elTotalMerahR2.innerText = skorMerah[2]; elSkorBiruR2.innerHTML = (rondeAktif === 2) ? formatLogSkor(riwayatBiru[2], 'biru') : ""; elSkorMerahR2.innerHTML = (rondeAktif === 2) ? formatLogSkor(riwayatMerah[2], 'merah') : ""; } else { elTotalBiruR2.innerText = ""; elTotalMerahR2.innerText = ""; elSkorBiruR2.innerHTML = ""; elSkorMerahR2.innerHTML = ""; }
-            if (rondeAktif === 3) { elTotalBiruR3.innerText = skorBiru[3]; elTotalMerahR3.innerText = skorMerah[3]; elSkorBiruR3.innerHTML = formatLogSkor(riwayatBiru[3], 'biru'); elSkorMerahR3.innerHTML = formatLogSkor(riwayatMerah[3], 'merah'); } else { elTotalBiruR3.innerText = ""; elTotalMerahR3.innerText = ""; elSkorBiruR3.innerHTML = ""; elSkorMerahR3.innerHTML = ""; }
-            if (session.pos === 'dewan') { for (let r = 1; r <= 3; r++) { let undoBiru = document.getElementById('resetBiruR' + r); let undoMerah = document.getElementById('resetMerahR' + r); if (undoBiru) undoBiru.style.visibility = (r === rondeAktif) ? "visible" : "hidden"; if (undoMerah) undoMerah.style.visibility = (r === rondeAktif) ? "visible" : "hidden"; } }
+            // Peredam Kejut (Debounce): Tunggu 20ms sebelum menggambar, mencegah hang saat poin beruntun
+            if (peredamRender) clearTimeout(peredamRender);
+            
+            peredamRender = setTimeout(() => {
+                let gtBiru = skorBiru[1] + skorBiru[2] + skorBiru[3]; 
+                let gtMerah = skorMerah[1] + skorMerah[2] + skorMerah[3];
+                if (elTotalBiruAtas) elTotalBiruAtas.innerText = gtBiru; 
+                if (elTotalMerahAtas) elTotalMerahAtas.innerText = gtMerah;
+                
+                if (elTotalBiruR1) elTotalBiruR1.innerText = skorBiru[1]; 
+                if (elTotalMerahR1) elTotalMerahR1.innerText = skorMerah[1]; 
+                if (rondeAktif === 1) {
+                    renderPintar(elSkorBiruR1, riwayatBiru[1], memoriLayarBiru, 1);
+                    renderPintar(elSkorMerahR1, riwayatMerah[1], memoriLayarMerah, 1);
+                } else {
+                    if (elSkorBiruR1) elSkorBiruR1.innerHTML = ""; if (elSkorMerahR1) elSkorMerahR1.innerHTML = "";
+                    memoriLayarBiru[1] = 0; memoriLayarMerah[1] = 0;
+                }
+
+                if (rondeAktif >= 2) { 
+                    if (elTotalBiruR2) elTotalBiruR2.innerText = skorBiru[2]; 
+                    if (elTotalMerahR2) elTotalMerahR2.innerText = skorMerah[2]; 
+                    if (rondeAktif === 2) {
+                        renderPintar(elSkorBiruR2, riwayatBiru[2], memoriLayarBiru, 2);
+                        renderPintar(elSkorMerahR2, riwayatMerah[2], memoriLayarMerah, 2);
+                    } else {
+                        if (elSkorBiruR2) elSkorBiruR2.innerHTML = ""; if (elSkorMerahR2) elSkorMerahR2.innerHTML = "";
+                        memoriLayarBiru[2] = 0; memoriLayarMerah[2] = 0;
+                    }
+                }
+
+                if (rondeAktif === 3) { 
+                    if (elTotalBiruR3) elTotalBiruR3.innerText = skorBiru[3]; 
+                    if (elTotalMerahR3) elTotalMerahR3.innerText = skorMerah[3]; 
+                    renderPintar(elSkorBiruR3, riwayatBiru[3], memoriLayarBiru, 3);
+                    renderPintar(elSkorMerahR3, riwayatMerah[3], memoriLayarMerah, 3);
+                }
+
+                if (session.pos === 'dewan') { 
+                    for (let r = 1; r <= 3; r++) { 
+                        let undoBiru = document.getElementById('resetBiruR' + r); 
+                        let undoMerah = document.getElementById('resetMerahR' + r); 
+                        if (undoBiru) undoBiru.style.visibility = (r === rondeAktif) ? "visible" : "hidden"; 
+                        if (undoMerah) undoMerah.style.visibility = (r === rondeAktif) ? "visible" : "hidden"; 
+                    } 
+                }
+            }, 20);
         }
 
         window.catatPoin = function (sudut, nilai, isAutoSah = false) {

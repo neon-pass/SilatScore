@@ -1410,54 +1410,78 @@
         window.bukaKonfirmasiBye = function (index) { indexByeTerpilih = index; let elModal = document.getElementById('modalConfirmBye'); if (!modalConfirmByeInst) { modalConfirmByeInst = new bootstrap.Modal(elModal); } modalConfirmByeInst.show(); };
         document.getElementById('btnKonfirmasiByeLanjut').addEventListener('click', function () { if (indexByeTerpilih !== null) { modalConfirmByeInst.hide(); eksekusiByeManual(indexByeTerpilih); indexByeTerpilih = null; } });
 
+        let lastTickTime = 0;
+
         function jalankanHitungMundur() {
             clearInterval(intervalUtama);
+            lastTickTime = Date.now();
+            
             intervalUtama = setInterval(() => {
-                if (state === "RONDE") {
-                    if (modeKategoriAktif === "tanding") { if (sisaDetik > 0) sisaDetik--; } else { sisaDetik++; } updateLayarDanFirebase(konversiDetikKeMenit(sisaDetik));
-                } else if (state === "ISTIRAHAT") {
-                    if (sisaDetik > 0) {
-                        sisaDetik--; elLayarTimerLokal.innerText = konversiDetikKeMenit(sisaDetik);
-                        set(ref(database, `${baseRefKamar}/live_state/status`), elStatusTanding.innerText); set(ref(database, `${baseRefKamar}/live_state/timer_istirahat`), sisaDetik);
-                    }
-                }
+                let now = Date.now();
+                let delta = now - lastTickTime;
 
-                let selesai = false;
-                if (state === "RONDE" && modeKategoriAktif === 'tanding' && sisaDetik <= 0) selesai = true;
-                if (state === "ISTIRAHAT" && sisaDetik <= 0) selesai = true;
+                // Hitung mundur berdasarkan selisih waktu mutlak (Delta Time)
+                if (delta >= 1000) {
+                    let ticks = Math.floor(delta / 1000);
+                    lastTickTime += (ticks * 1000);
 
-                if (selesai) {
-                    clearInterval(intervalUtama); let totRonde = parseInt(elCfgRonde.value);
                     if (state === "RONDE") {
-                        mainkanGong();
-                        if (rondeSaatIni < totRonde) {
-                            state = "ISTIRAHAT"; sisaDetik = parseInt(elCfgIstirahat.value);
-                            setStatusTampilan("ISTIRAHAT", "bg-success"); setTemaTimer(true);
-                            elLayarTimerLokal.innerText = konversiDetikKeMenit(sisaDetik);
-                            set(ref(database, `${baseRefKamar}/live_state/timer`), "00:00");
-                            set(ref(database, `${baseRefKamar}/live_state/status`), elStatusTanding.innerText);
-                            set(ref(database, `${baseRefKamar}/live_state/timer_sync`), { status: "reset", remaining: 0, durasiAwal: durasiPertandingan, startTimestamp: 0, ronde: rondeSaatIni, mode: modeKategoriAktif });
-                            jalankanHitungMundur();
+                        if (modeKategoriAktif === "tanding") {
+                            sisaDetik -= ticks;
+                            if (sisaDetik < 0) sisaDetik = 0;
                         } else {
-                            state = "SELESAI"; setStatusTampilan("PERTANDINGAN SELESAI", "bg-danger"); setTemaTimer(false); elBtnPlay.disabled = true; elBtnPause.disabled = true; updateTombolHasil();
-                            elLayarTimerLokal.innerText = konversiDetikKeMenit(durasiPertandingan);
-                            set(ref(database, `${baseRefKamar}/live_state/timer`), "00:00");
-                            set(ref(database, `${baseRefKamar}/live_state/status`), elStatusTanding.innerText);
-                            set(ref(database, `${baseRefKamar}/live_state/timer_sync`), { status: "reset", remaining: 0, durasiAwal: durasiPertandingan, startTimestamp: 0, ronde: rondeSaatIni, mode: modeKategoriAktif });
+                            sisaDetik += ticks;
                         }
+                        updateLayarDanFirebase(konversiDetikKeMenit(sisaDetik));
                     } else if (state === "ISTIRAHAT") {
-                        state = "SIAP_RONDE"; rondeSaatIni++; sisaDetik = (modeKategoriAktif === 'tanding') ? durasiPertandingan : 0;
-                        setStatusTampilan(`SIAP RONDE ${rondeSaatIni}`, "bg-info text-dark"); setTemaTimer(false);
-                        elLayarTimerLokal.innerText = konversiDetikKeMenit(sisaDetik);
-                        set(ref(database, `${baseRefKamar}/live_state/timer`), konversiDetikKeMenit(sisaDetik));
-                        set(ref(database, `${baseRefKamar}/live_state/status`), elStatusTanding.innerText);
-                        set(ref(database, `${baseRefKamar}/live_state/izin_play`), true);
-                        set(ref(database, `${baseRefKamar}/live_state/ronde_aktif`), rondeSaatIni);
-                        elBtnPlay.disabled = false; elBtnPause.disabled = true;
-                        set(ref(database, `${baseRefKamar}/live_state/timer_sync`), { status: "pause", remaining: sisaDetik, durasiAwal: durasiPertandingan, startTimestamp: 0, ronde: rondeSaatIni, mode: modeKategoriAktif });
+                        if (sisaDetik > 0) {
+                            sisaDetik -= ticks;
+                            if (sisaDetik < 0) sisaDetik = 0;
+                            elLayarTimerLokal.innerText = konversiDetikKeMenit(sisaDetik);
+                            set(ref(database, `${baseRefKamar}/live_state/status`), elStatusTanding.innerText);
+                            set(ref(database, `${baseRefKamar}/live_state/timer_istirahat`), sisaDetik);
+                        }
+                    }
+
+                    let selesai = false;
+                    if (state === "RONDE" && modeKategoriAktif === 'tanding' && sisaDetik <= 0) selesai = true;
+                    if (state === "ISTIRAHAT" && sisaDetik <= 0) selesai = true;
+
+                    if (selesai) {
+                        clearInterval(intervalUtama); let totRonde = parseInt(elCfgRonde.value);
+                        if (state === "RONDE") {
+                            mainkanGong();
+                            if (rondeSaatIni < totRonde) {
+                                state = "ISTIRAHAT"; sisaDetik = parseInt(elCfgIstirahat.value);
+                                setStatusTampilan("ISTIRAHAT", "bg-success"); setTemaTimer(true);
+                                elLayarTimerLokal.innerText = konversiDetikKeMenit(sisaDetik);
+                                set(ref(database, `${baseRefKamar}/live_state/timer`), "00:00");
+                                set(ref(database, `${baseRefKamar}/live_state/status`), elStatusTanding.innerText);
+                                set(ref(database, `${baseRefKamar}/live_state/timer_sync`), { status: "reset", remaining: 0, durasiAwal: durasiPertandingan, startTimestamp: 0, ronde: rondeSaatIni, mode: modeKategoriAktif });
+                                jalankanHitungMundur();
+                            } else {
+                                state = "SELESAI"; setStatusTampilan("PERTANDINGAN SELESAI", "bg-danger"); setTemaTimer(false); elBtnPlay.disabled = true; elBtnPause.disabled = true; updateTombolHasil();
+                                elLayarTimerLokal.innerText = konversiDetikKeMenit(durasiPertandingan);
+                                set(ref(database, `${baseRefKamar}/live_state/timer`), "00:00");
+                                set(ref(database, `${baseRefKamar}/live_state/status`), elStatusTanding.innerText);
+                                set(ref(database, `${baseRefKamar}/live_state/timer_sync`), { status: "reset", remaining: 0, durasiAwal: durasiPertandingan, startTimestamp: 0, ronde: rondeSaatIni, mode: modeKategoriAktif });
+                            }
+                        } else if (state === "ISTIRAHAT") {
+                            state = "SIAP_RONDE"; rondeSaatIni++; sisaDetik = (modeKategoriAktif === 'tanding') ? durasiPertandingan : 0;
+                            setStatusTampilan(`SIAP RONDE ${rondeSaatIni}`, "bg-info text-dark"); setTemaTimer(false);
+                            elLayarTimerLokal.innerText = konversiDetikKeMenit(sisaDetik);
+                            set(ref(database, `${baseRefKamar}/live_state/timer`), konversiDetikKeMenit(sisaDetik));
+                            set(ref(database, `${baseRefKamar}/live_state/status`), elStatusTanding.innerText);
+                            set(ref(database, `${baseRefKamar}/live_state/izin_play`), true);
+                            set(ref(database, `${baseRefKamar}/live_state/ronde_aktif`), rondeSaatIni);
+                            elBtnPlay.disabled = false; elBtnPause.disabled = true;
+                            set(ref(database, `${baseRefKamar}/live_state/timer_sync`), { status: "pause", remaining: sisaDetik, durasiAwal: durasiPertandingan, startTimestamp: 0, ronde: rondeSaatIni, mode: modeKategoriAktif });
+                        }
                     }
                 }
-            }, 1000);
+            }, 100); 
+            // Loop berjalan lebih cepat (tiap 100ms) untuk mengukur delta dengan presisi tinggi, 
+            // tapi detik visual hanya turun jika delta sudah mencapai 1000ms.
         }
 
         window.mulaiTimer = function () {
